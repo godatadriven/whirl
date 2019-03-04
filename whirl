@@ -5,8 +5,8 @@ DAEMON=""
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 ENVIRONMENT_COMPOSE="default"
 
-detect_dag() {
-  test -f "$(pwd)/dag.py";
+detect_potential_dag() {
+  test -f $(pwd)/*.py || test -f $(pwd)/*.zip;
 }
 
 start() {
@@ -29,50 +29,8 @@ start() {
     fi
 }
 
-if detect_dag; then
-  echo "dag found!"
+if detect_potential_dag; then
   start;
 else
-  echo "Your current directory does not seem to contain an Airflow DAG"
+  echo "No .py or .zip files found that may contain an Apache Airflow DAG"
 fi
-
-
-  # if [ "$1" == "stop" ]; then
-  #   echo "Stopping airflow-local-run containers..."
-  #   docker-compose -f ${SCRIPT_DIR}/docker-compose.yml down --volumes
-  # elif [ "$1" == "cleanup" ]; then
-  #   echo "Cleaning all airflow-local-run containers and images"
-  #   docker-compose -f ${SCRIPT_DIR}/docker-compose.yml down --volumes --rmi all
-  # elif [ "$1" == "reset" ]; then
-  #   docker exec -ti  airflow-local-run_airflow_1 /prepare-airflow.sh
-  # else
-  #   export DAG_FOLDER=$(pwd)
-  #   export PROJECTNAME=$( basename ${DAG_FOLDER} )
-  #   export MOCK_DATA_DIR=${DAG_FOLDER}/mock-data
-  #   export DAG_UTILS_FOLDER=${DAG_FOLDER}/../airflow-dag-utils
-  #   export CEPH_ACCESS_KEY=accesskey
-  #   export CEPH_SECRET_KEY=secretkey
-
-  #   if [ "$1" == "start" ]; then
-  #     DAEMON="-d"
-  #   fi
-
-  #   if [ -f "${DAG_FOLDER}/.airflowlocalrun" ]; then
-  #     echo ".airflowlocalrun found. Starting configured services"
-  #     SERVICES=$(cat ${DAG_FOLDER}/.airflowlocalrun | tr "\n" " ")
-  #   else
-  #     echo "No .airflowlocalrun file found. Only starting core services"
-  #     SERVICES=airflow
-  #   fi
-
-  #   docker build -t docker-pyspark-airflow:local -f ${SCRIPT_DIR}/../docker-pyspark-airflow/Dockerfile.local ${SCRIPT_DIR}/../docker-pyspark-airflow
-  #   docker-compose -f ${SCRIPT_DIR}/docker-compose.yml up ${DAEMON} --build ${SERVICES}
-
-  #   if [ "${DAEMON}" == "-d" ]; then
-  #     while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:5000)" != "302" ]]; do
-  #       echo "Waiting for Airflow UI to come up..."
-  #       sleep 5;
-  #     done
-  #     open http://localhost:5000
-  #   fi
-  # fi
