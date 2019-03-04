@@ -10,12 +10,9 @@ detect_potential_dag() {
 }
 
 start() {
+    echo "Starting airflow local run for environment ${ENVIRONMENT_COMPOSE}"
     export DAG_FOLDER=$(pwd)
     export PROJECTNAME=$(basename ${DAG_FOLDER})
-
-    if [ "$1" == "start" ]; then
-      DAEMON="-d"
-    fi
 
     docker build -t docker-whirl-airflow:local "${SCRIPT_DIR}/docker/airflow"
     docker-compose -f "${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}/docker-compose.yml" up ${DAEMON} --build
@@ -29,8 +26,52 @@ start() {
     fi
 }
 
+stop() {
+  echo "Stopping airflow-localrun containers..."
+  docker-compose -f "${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}/docker-compose.yml" down --volumes
+}
+
+usage() {
+  echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop]"
+  echo "  -h|--help                          display usage"
+  echo "  -e|--environment environment       specify environment to use"
+  echo "  start|stop                         start or stop all"
+  exit 1
+}
+
+while [[ $# -gt 0 ]]
+do
+    key="${1}"
+    case ${key} in
+    -e|--environment)
+        ENVIRONMENT_COMPOSE="${2}"
+        shift # past argument
+        shift # past value
+        ;;
+    start)
+        DAEMON="-d"
+        shift # past argument
+        ;;
+    stop)
+        STOP=true
+        shift # past argument
+        ;;
+    -h|--help)
+        usage
+        ;;
+    *)  # unknown option
+        echo "WARNING: Skipping unknown commandline argument: '${key}'"
+        shift # past argument
+        ;;
+    esac
+done
+
 if detect_potential_dag; then
-  start;
+  if [ -z "${STOP}" ]; then
+    start
+  else
+    stop
+  fi
 else
   echo "No .py or .zip files found that may contain an Apache Airflow DAG"
 fi
