@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:local
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    environment:
+      - DAG_FOLDER
+    volumes:
+      - $DAG_FOLDER:/usr/local/airflow/dags/$PROJECTNAME
+      - ./preparations:/etc/airflow/preparations.d

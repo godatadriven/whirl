@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+AIRFLOW_UI_PORT=5000
+DAEMON=""
+SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
+ENVIRONMENT_COMPOSE="default"
+
+detect_dag() {
+  test -f "$(pwd)/dag.py";
+}
+
+start() {
+    export DAG_FOLDER=$(pwd)
+    export PROJECTNAME=$(basename ${DAG_FOLDER})
+
+    if [ "$1" == "start" ]; then
+      DAEMON="-d"
+    fi
+
+    docker build -t docker-whirl-airflow:local "${SCRIPT_DIR}/docker/airflow"
+    docker-compose -f "${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}/docker-compose.yml" up ${DAEMON} --build
+
+    if [ "${DAEMON}" == "-d" ]; then
+      while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
+        echo "Waiting for Airflow UI to come up..."
+        sleep 10;
+      done
+      open http://localhost:${AIRFLOW_UI_PORT}
+    fi
+}
+
+if detect_dag; then
+  echo "dag found!"
+  start;
+else
+  echo "Your current directory does not seem to contain an Airflow DAG"
+fi
+
+
+  # if [ "$1" == "stop" ]; then
+  #   echo "Stopping airflow-local-run containers..."
+  #   docker-compose -f ${SCRIPT_DIR}/docker-compose.yml down --volumes
+  # elif [ "$1" == "cleanup" ]; then
+  #   echo "Cleaning all airflow-local-run containers and images"
+  #   docker-compose -f ${SCRIPT_DIR}/docker-compose.yml down --volumes --rmi all
+  # elif [ "$1" == "reset" ]; then
+  #   docker exec -ti  airflow-local-run_airflow_1 /prepare-airflow.sh
+  # else
+  #   export DAG_FOLDER=$(pwd)
+  #   export PROJECTNAME=$( basename ${DAG_FOLDER} )
+  #   export MOCK_DATA_DIR=${DAG_FOLDER}/mock-data
+  #   export DAG_UTILS_FOLDER=${DAG_FOLDER}/../airflow-dag-utils
+  #   export CEPH_ACCESS_KEY=accesskey
+  #   export CEPH_SECRET_KEY=secretkey
+
+  #   if [ "$1" == "start" ]; then
+  #     DAEMON="-d"
+  #   fi
+
+  #   if [ -f "${DAG_FOLDER}/.airflowlocalrun" ]; then
+  #     echo ".airflowlocalrun found. Starting configured services"
+  #     SERVICES=$(cat ${DAG_FOLDER}/.airflowlocalrun | tr "\n" " ")
+  #   else
+  #     echo "No .airflowlocalrun file found. Only starting core services"
+  #     SERVICES=airflow
+  #   fi
+
+  #   docker build -t docker-pyspark-airflow:local -f ${SCRIPT_DIR}/../docker-pyspark-airflow/Dockerfile.local ${SCRIPT_DIR}/../docker-pyspark-airflow
+  #   docker-compose -f ${SCRIPT_DIR}/docker-compose.yml up ${DAEMON} --build ${SERVICES}
+
+  #   if [ "${DAEMON}" == "-d" ]; then
+  #     while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:5000)" != "302" ]]; do
+  #       echo "Waiting for Airflow UI to come up..."
+  #       sleep 5;
+  #     done
+  #     open http://localhost:5000
+  #   fi
+  # fi
