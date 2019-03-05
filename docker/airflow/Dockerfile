@@ -68,7 +68,8 @@ RUN pip install apache-airflow[all]==${AIRFLOW_VERSION} && \
 
 RUN sed -i -r "s/load_examples = True/load_examples = False/" /usr/local/airflow/airflow.cfg && \
     sed -i -r "s/logging_level = INFO/logging_level = ${AIRFLOW_LOG_LEVEL}/" /usr/local/airflow/airflow.cfg && \
-    mkdir -p AIRFLOW_PREP_FOLDER
+    mkdir -p ${AIRFLOW_PREP_FOLDER}/env.d && \
+    mkdir -p ${AIRFLOW_PREP_FOLDER}/dag.d
 
 EXPOSE 5000
 

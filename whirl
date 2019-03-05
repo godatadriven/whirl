@@ -11,11 +11,9 @@ detect_potential_dag() {
 
 start() {
     echo "Starting airflow local run for environment ${ENVIRONMENT_COMPOSE}"
-    export DAG_FOLDER=$(pwd)
-    export PROJECTNAME=$(basename ${DAG_FOLDER})
 
     docker build -t docker-whirl-airflow:local "${SCRIPT_DIR}/docker/airflow"
-    docker-compose -f "${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}/docker-compose.yml" up ${DAEMON} --build
+    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build
 
     if [ "${DAEMON}" == "-d" ]; then
       while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
@@ -65,6 +63,11 @@ do
         ;;
     esac
 done
+
+export DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
+export ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}
+export DAG_FOLDER=$(pwd)
+export PROJECTNAME=$(basename ${DAG_FOLDER})
 
 if detect_potential_dag; then
   if [ -z "${STOP}" ]; then

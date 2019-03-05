@@ -10,8 +10,17 @@ echo "y" | airflow resetdb
 echo "Removing airflows default connections"
 python /delete_all_airflow_connections.py
 
-for filename in ${AIRFLOW_PREP_FOLDER}/*.sh; do
-  echo "Executing prepare script: $filename"
+for filename in ${AIRFLOW_PREP_FOLDER}/env.d/*.sh; do
+  echo "Executing environment prepare script: $filename"
+  if [ -x "$filename" ]; then
+    "$filename"
+  else
+    . "$filename"
+  fi
+done
+
+for filename in ${AIRFLOW_PREP_FOLDER}/dag.d/*.sh; do
+  echo "Executing dag prepare script: $filename"
   if [ -x "$filename" ]; then
     "$filename"
   else
