@@ -18,14 +18,11 @@ services:
     env_file:
       - mysql.env
       - sftp.env
-    environment:
-      - DAG_FOLDER
-      - PROJECT_NAME
-      - MOCK_DATA_FOLDER
     volumes:
       - $DAG_FOLDER:/usr/local/airflow/dags/$PROJECTNAME
-      - $MOCK_DATA_FOLDER:/mock-data
-      - ./preparations:/etc/airflow/preparations.d/env.d
+      - ${ENVIRONMENT_FOLDER}/preparations:/etc/airflow/preparations.d/env.d/
+      - ${DAG_FOLDER}/preparations:/etc/airflow/preparations.d/dag.d/
+      - ${MOCK_DATA_FOLDER}:/mock-data
     depends_on:
       - ftp-server
       - mysql

@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
-source ${SCRIPT_DIR}/includes/date_replacement.sh
+source /etc/airflow/functions/date_replacement.sh
 
-echo "=========================================="
-echo "== Prepare mock data ====================="
-echo "=========================================="
+echo "======================="
+echo "== Prepare mock data =="
+echo "======================="
 
 MOCK_DATA_ORIGINAL_DIR=/mock-data       # mounted
 MOCK_DATA_WORKING_DIR=/working-dir
@@ -43,20 +42,10 @@ do
   done
 done
 
-echo "===================================================="
-echo "== Put mock-data on ftp server ====================="
-echo "===================================================="
+echo "================================="
+echo "== Put mock-data on ftp server =="
+echo "================================="
 
-airflow connections -a --conn_id ftp_server \
-                       --conn_type SSH \
-                       --conn_host ftp-server \
-                       --conn_login $SFTP_USER \
-                       --conn_port 22 \
-                       --conn_password $SFTP_PASS
-
-mkdir -p ~/.ssh && ssh-keyscan ftp-server >> ~/.ssh/known_hosts
-
-apt-get install -y sshpass
 export SSHPASS=$SFTP_PASS
 sshpass -e sftp -oBatchMode=no -b - $SFTP_USER@ftp-server <<EOF
 mput /working-dir/* $SFTP_ROOTDIR/
