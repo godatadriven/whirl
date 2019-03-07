@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+export AWS_ACCESS_KEY_ID=bar
+export AWS_SECRET_ACCESS_KEY=foo
+
 echo "============================="
 echo "== Configure S3 Connection =="
 echo "============================="
@@ -7,15 +10,12 @@ airflow connections -a \
           --conn_id local_s3 \
           --conn_type s3 \
           --conn_extra "{\"endpoint_url\": \"http://s3server:4563\",
-                         \"aws_secret_access_key\": \"foo\",
-                         \"aws_access_key_id\": \"bar\",
+                         \"aws_secret_access_key\": \"${AWS_SECRET_ACCESS_KEY}\",
+                         \"aws_access_key_id\": \"${AWS_ACCESS_KEY_ID}\",
                          \"host\": \"http://s3server:4563\"
                         }"
 
 pip install awscli awscli-plugin-endpoint
-
-export AWS_ACCESS_KEY_ID=bar
-export AWS_SECRET_ACCESS_KEY=foo
 
 echo -e "$AWS_ACCESS_KEY_ID\n$AWS_SECRET_ACCESS_KEY\n\n" | aws configure
 aws configure set plugins.endpoint awscli_plugin_endpoint

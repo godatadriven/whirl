@@ -12,6 +12,8 @@ airflow connections -a \
           --conn_password testapi
 
 
+# Creating a expectation for our mockserver to respond to a specific api rest call with a fixed set of JSON data
+# Fro docs on creating expectations see: http://www.mock-server.com/mock_server/creating_expectations.html
 curl -v -X PUT "http://mockserver:1080/mockserver/expectation" -d '{
   "httpRequest": {
     "path": "/testapi/",
