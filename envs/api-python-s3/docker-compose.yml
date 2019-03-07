@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:local
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    volumes:
+      - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/preparations:/etc/airflow/preparations.d/env.d/
+      - ${DAG_FOLDER}/preparations:/etc/airflow/preparations.d/dag.d/
+    depends_on:
+      - mockserver
+      - s3server
+    links:
+      - mockserver:mockserver
+      - s3server:s3server
+
+  mockserver:
+    image: jamesdbloom/mockserver:mockserver-5.5.1
+    ports:
+      - 1080:1080
+    environment:
+      - LOG_LEVEL=ERROR
+
+  s3server:
+    image: atlassianlabs/localstack:0.6.2
+    ports:
+      - "4563-4584:4563-4584"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=s3
+
