@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_pass
+      - MYSQL_DATABASE=my_database
+      - MYSQL_USER=mysql_user
+      - MYSQL_PASSWORD=mysql_pass
+  ftp-server:
+    image: atmoz/sftp
+    ports:
+        - 22:22
+    environment:
+      - SFTP_USERS=myftpuser:sftp_pass:::working-dir
+  airflow:
+    image: docker-whirl-airflow:local
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    environment:
+      - DAG_FOLDER
+      - PROJECT_NAME
+      - MOCK_DATA_FOLDER
+      - SFTP_USER=myftpuser
+      - SFTP_PASS=sftp_pass
+      - SFTP_ROOTDIR=working-dir
+      - MYSQL_DATABASE=my_database
+      - MYSQL_USER=mysql_user
+      - MYSQL_PASSWORD=mysql_pass
+    volumes:
+      - $DAG_FOLDER:/usr/local/airflow/dags/$PROJECTNAME
+      - $MOCK_DATA_FOLDER:/mock-data
+      - ./preparations:/etc/airflow/preparations.d/env.d
+    depends_on:
+      - ftp-server
+      - mysql
