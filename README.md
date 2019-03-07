@@ -43,14 +43,12 @@ The default action of the script is to start the `default` environment with the 
 Specifying the `start` commandline argument makes whirl start the docker containers in daemonized mode. 
 
 ```
-$ whirl
-$ whirl start
+$ whirl [start]
 ```
 If you want a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
 
 ```
-$ whirl -e <envronment>
-$ whirl start -e <envronment>
+$ whirl [start] -e <envronment>
 ```
 
 ### Stopping whirl
