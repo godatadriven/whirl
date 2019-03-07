@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-echo "========================================"
-echo "== Configure MySQL ====================="
-echo "========================================"
+echo "====================="
+echo "== Configure MySQL =="
+echo "====================="
 
 airflow connections -a --conn_id mysql_connection \
                        --conn_type mysql \

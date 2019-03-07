@@ -74,5 +74,6 @@ RUN sed -i -r "s/load_examples = True/load_examples = False/" /usr/local/airflow
 EXPOSE 5000
 
 ADD entrypoint.sh delete_all_airflow_connections.py /
+ADD includes /etc/airflow/functions
 
 ENTRYPOINT "/entrypoint.sh"
