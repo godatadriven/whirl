@@ -10,7 +10,7 @@ echo "y" | airflow resetdb
 echo "Removing airflows default connections"
 python /delete_all_airflow_connections.py
 
-for filename in ${AIRFLOW_PREP_FOLDER}/env.d/*.sh; do
+for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
   echo "Executing environment prepare script: $filename"
   if [ -x "$filename" ]; then
     "$filename"
@@ -19,7 +19,7 @@ for filename in ${AIRFLOW_PREP_FOLDER}/env.d/*.sh; do
   fi
 done
 
-for filename in ${AIRFLOW_PREP_FOLDER}/dag.d/*.sh; do
+for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
   echo "Executing dag prepare script: $filename"
   if [ -x "$filename" ]; then
     "$filename"

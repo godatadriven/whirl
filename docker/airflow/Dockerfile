@@ -15,7 +15,7 @@ ENV SPARK_HOME /usr/spark
 ENV SPARK_MAJOR_VERSION 2
 ENV SPARK_VERSION=2.4.0
 
-ENV AIRFLOW_PREP_FOLDER=/etc/airflow/preparations.d
+ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 ENV AIRFLOW_VERSION=1.10.2
 ENV AIRFLOW_LOG_LEVEL DEBUG
 ENV AIRFLOW_HOME /usr/local/airflow
@@ -68,8 +68,8 @@ RUN pip install apache-airflow[all]==${AIRFLOW_VERSION} && \
 
 RUN sed -i -r "s/load_examples = True/load_examples = False/" /usr/local/airflow/airflow.cfg && \
     sed -i -r "s/logging_level = INFO/logging_level = ${AIRFLOW_LOG_LEVEL}/" /usr/local/airflow/airflow.cfg && \
-    mkdir -p ${AIRFLOW_PREP_FOLDER}/env.d && \
-    mkdir -p ${AIRFLOW_PREP_FOLDER}/dag.d
+    mkdir -p ${WHIRL_SETUP_FOLDER}/env.d && \
+    mkdir -p ${WHIRL_SETUP_FOLDER}/dag.d
 
 EXPOSE 5000
 
