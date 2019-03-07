@@ -46,11 +46,6 @@ do
         shift # past argument
         shift # past value
         ;;
-    -md|--mock-data)
-        MOCK_DATA_FOLDER="${2}"
-        shift
-        shift
-        ;;
     start)
         DAEMON="-d"
         shift # past argument
@@ -73,7 +68,6 @@ export DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
 export ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}
 export DAG_FOLDER=$(pwd)
 export PROJECTNAME=$(basename ${DAG_FOLDER})
-export MOCK_DATA_FOLDER=${MOCK_DATA_FOLDER}
 
 if detect_potential_dag; then
   if [ -z "${STOP}" ]; then
