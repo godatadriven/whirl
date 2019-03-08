@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 AIRFLOW_UI_PORT=5000
-DAEMON=""
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 
 # load and export environment variables
@@ -67,18 +66,47 @@ detect_potential_dag() {
   test -f $(pwd)/*.py || test -f $(pwd)/*.zip;
 }
 
+test_dag_state() {
+  local ARG=$1
+  result=$(curl -s "http://localhost:${AIRFLOW_UI_PORT}/admin/airflow/dag_stats" | \
+           jq ".[][] | select(.state == \"${ARG}\") | .count")
+  echo "$result"
+}
+
 start() {
     echo "Starting airflow local run for environment ${WHIRL_ENVIRONMENT}"
 
     docker build -t docker-whirl-airflow:local "${SCRIPT_DIR}/docker/airflow"
+
+    DAEMON=""
+    if [ "${CI_MODE}" == true ]; then
+      DAEMON="-d"
+      export UNPAUSE_DAG=true
+    fi
+
     docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build
 
-    if [ "${DAEMON}" == "-d" ]; then
+    if [ "${CI_MODE}" == true ]; then
       while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
         echo "Waiting for Airflow UI to come up..."
         sleep 10;
       done
-      open http://localhost:${AIRFLOW_UI_PORT}
+      while [ $(test_dag_state "running") -gt 0 ]; do
+        echo "Dag is (still) running..."
+        sleep 5;
+      done
+      if [ $(test_dag_state "success") -eq 1 ]; then
+        echo "Dag successfully finished"
+        stop
+        exit 0
+      fi
+      if [ $(test_dag_state "failed") -eq 1 ]; then
+        echo "Dag run failed"
+        if [ "$STOP_ON_FAILURE" = true ]; then
+          stop
+          exit 1
+        fi
+      fi
     fi
 }
 
@@ -88,10 +116,11 @@ stop() {
 }
 
 usage() {
-  echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop]"
+  echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop|ci]"
   echo "  -h|--help                          display usage"
   echo "  -e|--environment environment       specify environment to use"
   echo "  start|stop                         start or stop all"
+  echo "  ci                                 runs in daemonized mode and awaits dag run completion"
   exit 1
 }
 
@@ -106,7 +135,11 @@ function read_arguments() {
           shift # past value
           ;;
       start)
-          DAEMON="-d"
+          CI_MODE=false
+          shift
+          ;;
+      ci)
+          CI_MODE=true
           shift # past argument
           ;;
       stop)
@@ -124,15 +157,21 @@ function read_arguments() {
   done
 }
 
-if detect_potential_dag; then
+function main() {
   read_arguments "$@"
-  export_environment_vars
 
-  if [ -z "${STOP}" ]; then
-    start
+  if detect_potential_dag; then
+    export_environment_vars
+
+    if [ -z "${STOP}" ]; then
+      start
+    else
+      stop
+    fi
   else
-    stop
+    echo "No .py or .zip files found that may contain an Apache Airflow DAG"
   fi
-else
-  echo "No .py or .zip files found that may contain an Apache Airflow DAG"
-fi
+}
+
+main "$@"
+

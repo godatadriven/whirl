@@ -12,7 +12,7 @@ default_args = {
     'owner': 'whirl',
     'start_date': datetime.now() - timedelta(days=2),
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(seconds=10),
 }
 
 FILE = 'mocked-data-{date}.csv'.format(date=DAGRUN_EXECUTION_DATE)

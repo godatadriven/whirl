@@ -20,6 +20,7 @@ services:
       - sftp.env
     environment:
       - WHIRL_SETUP_FOLDER
+      - UNPAUSE_DAG
     volumes:
       - $DAG_FOLDER:/usr/local/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
