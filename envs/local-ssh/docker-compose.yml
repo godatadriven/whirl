@@ -9,5 +9,5 @@ services:
       - WHIRL_SETUP_FOLDER
     volumes:
       - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
-      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
-      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${ENVIRONMENT_FOLDER}/preparations:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/preparations:${WHIRL_SETUP_FOLDER}/dag.d/
