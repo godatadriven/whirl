@@ -92,7 +92,7 @@ To accomodate different examples the environments are split up into separate env
 
 The second part of this project are the DAGs. To provide you with multiple examples also here a split is made into subdirectories in the `examples` directory.
 
-### Environments
+#### Environments
 
 Environments basically use docker compose to startup dependent docker images which together mimick your production environment. Basis of the environment is the docker-compose.yml which in it's minimal form contains the airflow container to startup.
 Extra tools like for example `s3`, `sftp` etc. can be linked together in the docker-compose file to form your specific environment.
@@ -100,7 +100,7 @@ Extra tools like for example `s3`, `sftp` etc. can be linked together in the doc
 Each environment also contains some setup code needed for airflow to understand the environment. Think off `Connections` adn `Variables` for example. For this each environment contains a `whirl.setup.d` directory which is mounted in the Airflow container. On startup all scripts in this directory are executed.
 This is the place to install and configure extra client libraries that are needed to make the environment function correctly (for example awscli for s3 access).
 
-### Dags
+#### Dags
 
 The dags are situated in this project inside the `examples` directory. In your real world project you can have your code inside your own project of course (outside the example directory and outside this project)
 
