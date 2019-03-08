@@ -34,13 +34,13 @@ export PATH=<target directory of whirl>:${PATH}
 
 All starts with executing the _whirl_ script.
 
-### Getting usage information
+#### Getting usage information
 ```bash
 $ whirl -h
 $ whirl --help
 ```
 
-### Starting whirl
+#### Starting whirl
 
 The default action of the script is to start the `default` environment with the dag from your current directory.
 
@@ -53,7 +53,7 @@ Specifying the `start` commandline argument makes _whirl_ start the docker conta
 If you want a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
 
 
-### Stopping whirl
+#### Stopping whirl
 
 ```bash
 $ whirl stop [-e <environment>]
@@ -62,7 +62,7 @@ Stops the `default` environment
 
 If you want to stop all containers from a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
 
-### Configuring environment variables
+#### Configuring environment variables
 
 Instead of passing the environment flag each time when you run _whirl_, you can also configure your environment in an `.whirl.env` file. We look for the `.whirl.env` file in four places:
 
@@ -71,7 +71,7 @@ Instead of passing the environment flag each time when you run _whirl_, you can 
 - You can set a `.whirl.env` in your env directory. The env directory to use can be set in your dag `.whirl.env` file or specified from commandline. This can be handy for environment specific variables.
 - You can set a `.whirl.env` in your DAG directory to override the default environment to be used for that specific DAG.
 
-### Use of environment variables
+#### Use of environment variables
 
 Inside the _whirl_ script the following environment variables are set:
 
@@ -113,7 +113,7 @@ This is also the place to install and configure extra client libraries that are 
 
 This repository comes with a couple of example environments and workflows to demonstrate the use of _whirl_. The components used in the example workflows might be of help in kickstarting the creation of your own environment. If you have a good addition to the environments section, feel free to submit a merge request!
 
-### SSH to Localhost
+#### SSH to Localhost
 
 The first example environment only involves one component, namely the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh`. As the name suggests, this will make SSH to localhost in that container possible. We also add a new connection called `ssh_local` to the Airflow connections.
 
@@ -128,9 +128,9 @@ $ whirl
 
 Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
 
-### api-to-s3
+#### api-to-s3
 
-### SFTPOperator + PythonOperator + MySQL example
+#### SFTPOperator + PythonOperator + MySQL example
 
 In this example we have created an environment that spins up an SFTP Server and a MySQL instance in separate containers, together with the Airflow one. The environment contains two startup scripts in the `whirl.setup.d` folder:
 
