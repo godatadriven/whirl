@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
 
-echo "============================="
-echo "== Configure S3 Connection =="
-echo "============================="
-airflow connections -a \
-          --conn_id local_s3 \
-          --conn_type s3 \
-          --conn_extra "{\"endpoint_url\": \"http://${AWS_SERVER}:${AWS_PORT}\",
-                         \"aws_secret_access_key\": \"${AWS_SECRET_ACCESS_KEY}\",
-                         \"aws_access_key_id\": \"${AWS_ACCESS_KEY_ID}\",
-                         \"host\": \"http://${AWS_SERVER}:${AWS_PORT}\"
-                        }"
+echo "=================="
+echo "== Configure S3 =="
+echo "=================="
 
 pip install awscli awscli-plugin-endpoint
 
@@ -19,9 +11,9 @@ aws configure set plugins.endpoint awscli_plugin_endpoint
 aws configure set default.s3.endpoint_url http://${AWS_SERVER}:${AWS_PORT}
 aws configure set default.s3api.endpoint_url http://${AWS_SERVER}:${AWS_PORT}
 
-echo "================================"
-echo "== Create S3 Bucket ==========="
-echo "================================"
+echo "======================"
+echo "== Create S3 Bucket =="
+echo "======================"
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://${AWS_SERVER}:${PORT_WEB_UI})" != "200" ]]; do
   echo "Waiting for s3server to come up..."
   sleep 2;
