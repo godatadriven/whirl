@@ -5,7 +5,9 @@ services:
     image: docker-whirl-airflow:local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
+    environment:
+      - WHIRL_SETUP_FOLDER
     volumes:
       - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
-      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:/etc/airflow/whirl.setup.d/env.d/
-      - ${DAG_FOLDER}/whirl.setup.d:/etc/airflow/whirl.setup.d/dag.d/
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
