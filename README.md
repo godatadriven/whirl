@@ -62,6 +62,13 @@ Stops the `default` environment
 
 If you want to stop all containers from a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
 
+### Configuring environment variables
+
+Instead of passing the environment flag each time when you run _whirl_, you can also configure your environment in an `.whirl.env` file. We look for the `.whirl.env` file in three places:
+
+- in your home directory, at `~/.whirl.env`. You can configure a default environment that will be used for every DAG.
+- Similarly, there is a `.whirl.env` file in the root of this repository. This also specifies a default environment to be used when starting _whirl_
+- You can set a `.whirl.env` in your DAG directory, to override the default environment to be used for that specific DAG.
 
 ### Use of environment variables
 
@@ -85,9 +92,11 @@ Inside the _whirl_ script the following environment variables are set:
 
 This repository comes with a couple of example environments and workflows to demonstrate the use of _whirl_. The components used in the example workflows might be of help in kickstarting the creation of your own environment. If you have a good addition to the environments section, feel free to submit a merge request!
 
-### Default
+### SSH to Localhost
 
-The default (example) environment only involves one component, namely the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh`. As the name suggests, this will make SSH to localhost in that container possible. We also add a new connection called `ssh_local` to the Airflow connections.
+The first example environment only involves one component, namely the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh`. As the name suggests, this will make SSH to localhost in that container possible. We also add a new connection called `ssh_local` to the Airflow connections.
+
+This example is marked as the default in the `.whirl.env` in the repository's root directory.
 
 To run our DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
 
@@ -102,7 +111,10 @@ Open your browser to http://localhost:5000 to see the Airflow UI appear. Manuall
 
 ### SFTPOperator + PythonOperator + MySQL example
 
-In this example we have created an environment that spins up an SFTP Server and a MySQL instance in separate containers, together with the Airflow one. The environment contains two startup scripts in the `whirl.setup.d` folder: `01_prepare_sftp.sh` which adds an SFTP connection to Airflow and `02_prepare_mysql.sh` which adds a MySQL connection to Airflow.
+In this example we have created an environment that spins up an SFTP Server and a MySQL instance in separate containers, together with the Airflow one. The environment contains two startup scripts in the `whirl.setup.d` folder:
+
+- `01_prepare_sftp.sh` which adds an SFTP connection to Airflow
+- `02_prepare_mysql.sh` which adds a MySQL connection to Airflow.
 
 To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
 
