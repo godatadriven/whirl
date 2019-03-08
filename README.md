@@ -15,6 +15,12 @@ NOTE: _whirl_ should not be a replacement for properly (unit)testing the logic y
 
 _whirl_ under the hood heavenly relies on [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). Make sure you have it installed and that you have given enough RAM (8GB or more recommended) to Docker to let it run all your containers.
 
+When you want to use _whirl_ in your CI (currently in progress), you need to have `jq` installed. E.g. with brew:
+
+```bash
+brew install jq
+```
+
 The current implementation was developed on Mac OSX, but should in theory work with any operating system supported by Docker.
 
 ## Getting Started
@@ -42,25 +48,28 @@ $ whirl --help
 
 #### Starting whirl
 
-The default action of the script is to start the `default` environment with the dag from your current directory.
+The default action of the script is to start the dag from your current directory. It expects an environment to be configured. You can pass it as a commandline argument or you can configure it in a `.whirl.env` (see #Configuring environment variables). The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
 
 ```bash
 $ whirl [start] [-e <environment>]
 ```
 
-Specifying the `start` commandline argument makes _whirl_ start the docker containers in daemonized mode.
-
-If you want a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
-
+Specifying the `start` commandline argument is simply a more explicit way to start _whirl_.
 
 #### Stopping whirl
 
 ```bash
 $ whirl stop [-e <environment>]
 ```
-Stops the `default` environment
+Stops the configured environment.
 
 If you want to stop all containers from a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
+
+#### Using in your CI (work in progress)
+
+Currently we do not yet have a complete running example of using _whirl_ as part of a CI pipeline. The first step in getting there is the ability to start it in `ci` mode. This will run the docker containers in daemonize mode, makes sure the DAG(s) get unpaused and will await for the pipeline either to succeed or fail. When it succeeds, it will stop the containers and exit successfully.
+
+Currently when we fail, we don't yet exit, because it is worthy to be able to check in the logs what happened. Ideally we want to print out the logging of the failed task and then be able to also quit, unsuccessfully.
 
 #### Configuring environment variables
 
