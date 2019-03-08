@@ -130,9 +130,9 @@ Open your browser to http://localhost:5000 to see the Airflow UI appear. Manuall
 
 #### SFTPOperator + PythonOperator + MySQL example
 
-In this example we have created an environment that spins up an SFTP Server and a MySQL instance in separate containers, together with the Airflow one. The environment contains two startup scripts in the `whirl.setup.d` folder:
+In this example we have created an environment that spins up a SFTP Server and a MySQL instance in separate containers, together with the Airflow one. The environment contains two startup scripts in the `whirl.setup.d` folder:
 
-- `01_prepare_sftp.sh` which adds an SFTP connection to Airflow
+- `01_prepare_sftp.sh` which adds a SFTP connection to Airflow
 - `02_prepare_mysql.sh` which adds a MySQL connection to Airflow.
 
 To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
