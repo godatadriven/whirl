@@ -117,8 +117,6 @@ This repository comes with a couple of example environments and workflows to dem
 
 The first example environment only involves one component, namely the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh`. As the name suggests, this will make SSH to localhost in that container possible. We also add a new connection called `ssh_local` to the Airflow connections.
 
-This example is marked as the default in the `.whirl.env` in the repository's root directory.
-
 To run our DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
 
 ```bash
