@@ -68,6 +68,7 @@ export DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
 export ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}
 export DAG_FOLDER=$(pwd)
 export PROJECTNAME=$(basename ${DAG_FOLDER})
+export WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
 if detect_potential_dag; then
   if [ -z "${STOP}" ]; then
