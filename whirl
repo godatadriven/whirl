@@ -1,16 +1,35 @@
 #!/usr/bin/env bash
-
 AIRFLOW_UI_PORT=5000
 DAEMON=""
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
-ENVIRONMENT_COMPOSE="default"
+
+# load and export environment variables
+# priority order:
+#     .whirl.env in home directory
+#     .whirl.env in whirl repository directory
+#     .whirl.env in present working directory
+set -a
+if [ -f ~/.whirl.env ]; then
+  echo "Reading configuration from ~/.whirl.env"
+  . ~/.whirl.env
+fi
+if [ -f ${SCRIPT_DIR}/.whirl.env ]; then
+  echo "Reading configuration from ${SCRIPT_DIR}/.whirl.env"
+  . ${SCRIPT_DIR}/.whirl.env
+fi
+if [ -f ./.whirl.env ]; then
+  echo "Reading configuration from DAG specific .whirl.env"
+  . ./.whirl.env
+fi
+set +a
+
 
 detect_potential_dag() {
   test -f $(pwd)/*.py || test -f $(pwd)/*.zip;
 }
 
 start() {
-    echo "Starting airflow local run for environment ${ENVIRONMENT_COMPOSE}"
+    echo "Starting airflow local run for environment ${WHIRL_ENVIRONMENT}"
 
     docker build -t docker-whirl-airflow:local "${SCRIPT_DIR}/docker/airflow"
     docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build
@@ -26,7 +45,7 @@ start() {
 
 stop() {
   echo "Stopping airflow-localrun containers..."
-  docker-compose -f "${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}/docker-compose.yml" down --volumes
+  docker-compose -f "${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}/docker-compose.yml" down --volumes
 }
 
 usage() {
@@ -42,7 +61,7 @@ do
     key="${1}"
     case ${key} in
     -e|--environment)
-        ENVIRONMENT_COMPOSE="${2}"
+        WHIRL_ENVIRONMENT="${2}"
         shift # past argument
         shift # past value
         ;;
@@ -65,7 +84,7 @@ do
 done
 
 export DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
-export ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${ENVIRONMENT_COMPOSE}
+export ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}
 export DAG_FOLDER=$(pwd)
 export PROJECTNAME=$(basename ${DAG_FOLDER})
 export WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
