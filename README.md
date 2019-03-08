@@ -42,9 +42,9 @@ $ whirl --help
 
 ### Starting whirl
 
-The default action of the script is to start the `default` environment with the dag from your current directory. 
+The default action of the script is to start the `default` environment with the dag from your current directory.
 
-Specifying the `start` commandline argument makes whirl start the docker containers in daemonized mode. 
+Specifying the `start` commandline argument makes whirl start the docker containers in daemonized mode.
 
 ```
 $ whirl [start]
@@ -94,4 +94,8 @@ Inside the whirl script the following environment variables are set:
 
 ### sftp-mysql
 
+## References
 
+An early version of _whirl_ was brought to live at [ING](https://github.com/ing-bank). Bas Beelen gave a presentation about how _whirl_ was helpful in their infrastructure during the 2nd Apache Airflow Meetup, January 23 2019, hosted at Google London HQ.
+
+[![Whirl explained at Apache Airflow Meetup](./whirl-youtube.png)](https://www.youtube.com/watch?v=jqK_HCOJ9Ak)
