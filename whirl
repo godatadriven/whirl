@@ -7,22 +7,61 @@ SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 # priority order:
 #     .whirl.env in home directory
 #     .whirl.env in whirl repository directory
-#     .whirl.env in present working directory
-set -a
-if [ -f ~/.whirl.env ]; then
-  echo "Reading configuration from ~/.whirl.env"
-  . ~/.whirl.env
-fi
-if [ -f ${SCRIPT_DIR}/.whirl.env ]; then
-  echo "Reading configuration from ${SCRIPT_DIR}/.whirl.env"
-  . ${SCRIPT_DIR}/.whirl.env
-fi
-if [ -f ./.whirl.env ]; then
-  echo "Reading configuration from DAG specific .whirl.env"
-  . ./.whirl.env
-fi
-set +a
+#     .whirl.env in environment directory
+#     .whirl.env in dag directory
+function export_environment_vars() {
+  set -a
+  DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
+  DAG_FOLDER=$(pwd)
+  PROJECTNAME=$(basename ${DAG_FOLDER})
+  WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
+  if [ -f ~/.whirl.env ]; then
+    echo "Reading configuration from ~/.whirl.env"
+    . ~/.whirl.env
+  fi
+  if [ -f ${SCRIPT_DIR}/.whirl.env ]; then
+    echo "Reading configuration from ${SCRIPT_DIR}/.whirl.env"
+    . ${SCRIPT_DIR}/.whirl.env
+  fi
+
+  # determine whether to use the environment set at the commandline or
+  # in the DAG FOLDER .whirl.env
+  if [ -z "${WHIRL_ENVIRONMENT_ARG}" ]; then
+    if [ -f ${DAG_FOLDER}/.whirl.env ]; then
+      if grep -qRE "^(\s+)?WHIRL_ENVIRONMENT=(.*)" "${DAG_FOLDER}/.whirl.env"; then
+          echo "Found WHIRL_ENVIRONMENT in ${DAG_FOLDER}/.whirl.env";
+          WHIRL_ENVIRONMENT=$(grep -oRE "^(\s+)?WHIRL_ENVIRONMENT=(.*)" "${DAG_FOLDER}/.whirl.env" | \
+                              sed -e 's/.*=\(.*\)/\1/g')
+      fi
+    fi
+  else
+    WHIRL_ENVIRONMENT=${WHIRL_ENVIRONMENT_ARG}
+  fi
+
+  ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}
+
+  if [[ -z "${WHIRL_ENVIRONMENT}" || ! -d ${ENVIRONMENT_FOLDER} ]]; then
+    echo "No valid environment '${WHIRL_ENVIRONMENT}' specified"
+    exit 2;
+  fi
+
+  if [ -f "${ENVIRONMENT_FOLDER}/.whirl.env" ]; then
+    echo "Reading configuration from ${ENVIRONMENT_FOLDER}/.whirl.env"
+    . "${ENVIRONMENT_FOLDER}/.whirl.env"
+  fi
+
+  if [ -f "${DAG_FOLDER}/.whirl.env" ]; then
+    echo "Reading configuration from ${DAG_FOLDER}/.whirl.env"
+    . "${DAG_FOLDER}/.whirl.env"
+  fi
+
+  # in case DAG_FOLDER specifies WHIRL_ENVIRONMENT, commandline needs to overrule if set
+  if [[ ! -z "${WHIRL_ENVIRONMENT_ARG}" ]]; then
+    WHIRL_ENVIRONMENT=${WHIRL_ENVIRONMENT_ARG}
+  fi
+  set +a
+}
 
 detect_potential_dag() {
   test -f $(pwd)/*.py || test -f $(pwd)/*.zip;
@@ -56,40 +95,39 @@ usage() {
   exit 1
 }
 
-while [[ $# -gt 0 ]]
-do
-    key="${1}"
-    case ${key} in
-    -e|--environment)
-        WHIRL_ENVIRONMENT="${2}"
-        shift # past argument
-        shift # past value
-        ;;
-    start)
-        DAEMON="-d"
-        shift # past argument
-        ;;
-    stop)
-        STOP=true
-        shift # past argument
-        ;;
-    -h|--help)
-        usage
-        ;;
-    *)  # unknown option
-        echo "WARNING: Skipping unknown commandline argument: '${key}'"
-        shift # past argument
-        ;;
-    esac
-done
-
-export DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
-export ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}
-export DAG_FOLDER=$(pwd)
-export PROJECTNAME=$(basename ${DAG_FOLDER})
-export WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
+function read_arguments() {
+  while [[ $# -gt 0 ]]
+  do
+      key="${1}"
+      case ${key} in
+      -e|--environment)
+          WHIRL_ENVIRONMENT_ARG="${2}"
+          shift # past argument
+          shift # past value
+          ;;
+      start)
+          DAEMON="-d"
+          shift # past argument
+          ;;
+      stop)
+          STOP=true
+          shift # past argument
+          ;;
+      -h|--help)
+          usage
+          ;;
+      *)  # unknown option
+          echo "WARNING: Skipping unknown commandline argument: '${key}'"
+          shift # past argument
+          ;;
+      esac
+  done
+}
 
 if detect_potential_dag; then
+  read_arguments "$@"
+  export_environment_vars
+
   if [ -z "${STOP}" ]; then
     start
   else

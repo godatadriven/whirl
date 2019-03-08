@@ -64,11 +64,12 @@ If you want to stop all containers from a more specialized environment you can a
 
 ### Configuring environment variables
 
-Instead of passing the environment flag each time when you run _whirl_, you can also configure your environment in an `.whirl.env` file. We look for the `.whirl.env` file in three places:
+Instead of passing the environment flag each time when you run _whirl_, you can also configure your environment in an `.whirl.env` file. We look for the `.whirl.env` file in four places:
 
 - in your home directory, at `~/.whirl.env`. You can configure a default environment that will be used for every DAG.
 - Similarly, there is a `.whirl.env` file in the root of this repository. This also specifies a default environment to be used when starting _whirl_
-- You can set a `.whirl.env` in your DAG directory, to override the default environment to be used for that specific DAG.
+- You can set a `.whirl.env` in your env directory. The env directory to use can be set in your dag `.whirl.env` file or specified from commandline. This can be handy for environment specific variables.
+- You can set a `.whirl.env` in your DAG directory to override the default environment to be used for that specific DAG.
 
 ### Use of environment variables
 
