@@ -78,7 +78,7 @@ Inside the _whirl_ script the following environment variables are set:
 
 This project revolves around docker-compose and the notion of different environments where airflow is a central part. The rest of the environment depends on the tools/setup of the production environment used in your situation.
 
-The +whirl_ script combines the dag and the environment to make a fully functional setup.
+The _whirl_ script combines the dag and the environment to make a fully functional setup.
 
 To accomodate different examples the environments are split up into separate environment directories inside the `envs` directory.
 
@@ -86,7 +86,7 @@ The second part of this project are the DAGs. To provide you with multiple examp
 
 ### Environments
 
-Environments basically use docker compose to startup dependent docker images which together mimick your production environment. Basis of the envrionment is the docker-compose.yml which in it's minimal form contains the airflow container to startup.
+Environments basically use docker compose to startup dependent docker images which together mimick your production environment. Basis of the environment is the docker-compose.yml which in it's minimal form contains the airflow container to startup.
 Extra tools like for example `s3`, `sftp` etc. can be linked together in the docker-compose file to form your specific environment.
 
 Each environment also contains some setup code needed for airflow to understand the environment. Think off `Connections` adn `Variables` for example. For this each environment contains a `whirl.setup.d` directory which is mounted in the Airflow container. On startup all scripts in this directory are executed.
@@ -96,7 +96,8 @@ This is the place to install and configure extra client libraries that are neede
 
 The dags are situated in this project inside the `examples` directory. In your real world project you can have your code inside your own project of course (outside the example directory and outside this project)
 
-Each example directory consists of at least an example DAG. Also project specific code can be made available there. Same as with the environment the DAG directory can contain a `whirl.setup.d` directory which is also mounted in the Airflow container. On startup all scripts in this directory are executed.
+Each example directory consists of at least an example DAG. Also project specific code can be made available there. Same as with the environment the DAG directory can contain a `whirl.setup.d` directory which is also mounted in the Airflow container. On startup all scripts in this directory are executed. The order of execution is DAG `whirl.setup.d` after environment `whirl.setup.d`.
+
 This is also the place to install and configure extra client libraries that are needed to make the dag function correctly (for example adding a mock api endpoint).
 
 
