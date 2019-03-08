@@ -5,6 +5,8 @@ services:
     image: docker-whirl-airflow:local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
     volumes:
       - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
@@ -25,6 +27,8 @@ services:
     ports:
       - "4563-4584:4563-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    env_file:
+      - .whirl.env
     environment:
       - SERVICES=s3
 

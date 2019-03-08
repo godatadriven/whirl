@@ -126,7 +126,33 @@ $ whirl -e local-ssh
 
 Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
 
-#### api-to-s3
+#### Rest API to S3 storage example
+
+In this example we are going to consume a rest api and convert the json data to parquet and store it in a S3 bucket.
+We have created an environment that spins up an S3 Server and a MockServer instance in separate containers, together with the Airflow one. The environment contains a setup script in the `whirl.setup.d` folder:
+
+- `01_add_connection_api.sh` which:
+	-  adds an S3 connection to Airflow
+	-  Installs awscli python libraries and configures them to connect to the S3 server
+	-  Creates a bucket (with adding a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html))
+
+
+To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+
+```bash
+$ cd ./examples/api-python-s3
+$ whirl
+```
+
+Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+
+The environment to be used is set in the `.whirl.env` in the dag directory. In the environment folder there is also a `.whirl.env` which specifies s3 specific variables. Next to that, in the example folder we have a `whirl.setup.d` as well, which contains the script `01_add_connection_api_and_mockdata.sh`. This script gets executed in the container after the environment specific scripts have run and will do a couple of things:
+
+- Add a connection to the API endpoint
+- Add a [expectation](http://www.mock-server.com/mock_server/creating_expectations.html) for the mockserver to know which response needs to be send for which path that is requested
+- Install pandas and pyarrow to support transforming the json into a parquet file in the first task
+- Create a local directory where the intermediate file is stored before it is send to S3 in the second task
+
 
 #### SFTPOperator + PythonOperator + MySQL example
 
