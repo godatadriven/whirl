@@ -123,7 +123,7 @@ To run our DAG, perform the following (assuming you have put _whirl_ to your `PA
 
 ```bash
 $ cd ./examples/localhost-ssh-example
-$ whirl
+$ whirl -e local-ssh
 ```
 
 Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
@@ -141,16 +141,15 @@ To run the corresponding example DAG, perform the following (assuming you have p
 
 ```bash
 $ cd ./examples/sftp-mysql-example
-$ MOCK_DATA_FOLDER=$(pwd)/mock-data
-$ whirl -e sftp-mysql-example
+$ whirl
 ```
 
 Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
 
-In this example we set an extra environment variable `MOCK_DATA_FOLDER` that will be mounted to our Airflow container. Next to that, in the example folder we have a `whirl.setup.d` as well, which contains the script `01_cp_mock_data_to_sftp.sh`. This script gets executed in the container as well and will do a couple of things:
+The environment to be used is set in the `.whirl.env` in the dag directory. In the environment folder there is also a `.whirl.env` which specifies that the `MOCK_DATA_FOLDER` is set. Next to that, in the example folder we have a `whirl.setup.d` as well, which contains the script `01_cp_mock_data_to_sftp.sh`. This script gets executed in the container after the environment specific scripts have run and will do a couple of things:
 
-- it will rename the file `mocked-data-#ds_nodash#.csv` that is in the `./mock-data` folder. It will replace `#ds_nodash#` with the same value that Apache Airflow will give when templating `ds_nodash` in the Python files. This means we have a file available for our specific DAG run. The logic to rename these files is provide by the Apache Airflow container we build. it is located in the `/etc/airflow/functions/date_replacement.sh` in the container.
-- It will copy this file to the SFTP server. Because that is what our DAG expects. When it starts it will try to obtain that file from the SFTP server to the local filesystem.
+- it will rename the file `mocked-data-#ds_nodash#.csv` that is in the `./mock-data` folder. It will replace `#ds_nodash#` with the same value that Apache Airflow will give when templating `ds_nodash` in the Python files. This means we have a file available for our specific DAG run. The logic to rename these files is located in `/etc/airflow/functions/date_replacement.sh` in the Airflow container.
+- It will copy this file to the SFTP server, because that is what our DAG expects. When it starts it will try to obtain that file from the SFTP server to the local filesystem.
 
 
 ## References
