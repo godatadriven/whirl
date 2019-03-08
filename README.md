@@ -120,6 +120,8 @@ In this example we set an extra environment variable `MOCK_DATA_FOLDER` that wil
 - It will copy this file to the SFTP server. Because that is what our DAG expects. When it starts it will try to obtain that file from the SFTP server to the local filesystem.
 
 
+## References
 
+An early version of _whirl_ was brought to live at [ING](https://github.com/ing-bank). Bas Beelen gave a presentation about how _whirl_ was helpful in their infrastructure during the 2nd Apache Airflow Meetup, January 23 2019, hosted at Google London HQ.
 
-
+[![Whirl explained at Apache Airflow Meetup](./whirl-youtube.png)](https://www.youtube.com/watch?v=jqK_HCOJ9Ak)
