@@ -63,7 +63,7 @@ function export_environment_vars() {
 }
 
 detect_potential_dag() {
-  test -f $(pwd)/*.py || test -f $(pwd)/*.zip;
+  test `find . -type f -name '*.py' -o -name '*.zip' | wc -l` -gt 0
 }
 
 test_dag_state() {
