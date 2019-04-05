@@ -2,35 +2,35 @@
 
 <img src="logo.png" width="250px" align="right" />
 
-_Fast iterative local development and testing of Apache Airflow workflows_
+_Fast iterative local development and testing of Apache Airflow workflows._
 
-The idea of _whirl_ is pretty simple: use Docker containers to start up Apache Airflow and the other components used in your workflow. This gives you a copy of your production environment that runs on your local machine. This allows you to run your DAG locally from start to finish - with the same code as it would on production. Being able to see your pipeline succeed gives you more confidence about the logic you are creating/refactoring and the integration between the different components you are facing. An additional benefit is that it gives (new) developers an isolated environment to experiment with your workflows.
+The idea of _whirl_ is pretty simple: use Docker containers to start up Apache Airflow and the other components used in your workflow. This gives you a copy of your production environment that runs on your local machine. You can run your DAG locally from start to finish - with the same code as in production. Seeing your pipeline succeed gives you more confidence about the logic you are creating/refactoring and how it integrates with other components. It also gives new developers an isolated environment for experimenting with your workflows.
 
-_whirl_ connects the code of your DAG and your (mock) data to the Apache Airflow container that it spins up. By using volume mounts, you are able to make changes to your code in your favorite IDE and immediately see the effect in the running Apache Airflow UI on your machine. This even works with custom Python modules that you are developing (and using) in your DAGs.
+_whirl_ connects the code of your DAG and your (mock) data to the Apache Airflow container that it spins up. Using volume mounts you are able to make changes to your code in your favorite IDE and immediately see the effect in the running Apache Airflow UI on your machine. This also works with custom Python modules that you are developing and using in your DAGs.
 
-NOTE: _whirl_ should not be a replacement for properly (unit) testing the logic you are orchestrating with Apache Airflow.
+NOTE: _whirl_ is not intended to replace proper (unit) testing of the logic you are orchestrating with Apache Airflow.
 
 
 ## Prerequisites
 
-_whirl_ relies on [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). Make sure you have it installed and that you have given enough RAM (8GB or more recommended) to Docker to let it run all your containers.
+_whirl_ relies on [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). Make sure you have it installed. If using _Docker for Mac_ or _Windows_ ensure that you have configured it with sufficient RAM (8GB or more recommended) for running all your containers.
 
-When you want to use _whirl_ in your CI (currently work in progress), you need to have `jq` installed. E.g. with brew:
+When you want to use _whirl_ in your CI pipeline (currently work in progress), you need to have `jq` installed. For example, with Homebrew:
 
 ```bash
 brew install jq
 ```
 
-The current implementation was developed on Mac OSX, but should in theory work with any operating system supported by Docker.
+The current implementation was developed on macOS but it intended to work with any platform supported by Docker.
 
 ## Getting Started
 
-Clone this repository
+Clone this repository:
 
 ```
 git clone https://github.com/godatadriven/whirl.git <target directory of whirl>
 ```
-For ease of use you can add the basedirectory  to your `PATH` environment variable
+For ease of use you can add the base directory  to your `PATH` environment variable
 
 ```
 export PATH=<target directory of whirl>:${PATH}
@@ -38,9 +38,10 @@ export PATH=<target directory of whirl>:${PATH}
 
 ## Usage
 
-All starts with executing the _whirl_ script.
+The `whirl` script is used to perform all actions.
 
 #### Getting usage information
+
 ```bash
 $ whirl -h
 $ whirl --help
@@ -48,13 +49,13 @@ $ whirl --help
 
 #### Starting whirl
 
-The default action of the script is to start the DAG from your current directory. It expects an environment to be configured. You can pass it as a command line argument or you can configure it in a `.whirl.env` (see #Configuring environment variables). The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
+The default action is to start the DAG in your current directory. It expects an environment to be configured. You can pass this as a command line argument or you can configure it in a `.whirl.env` file. (See #Configuring environment variables.) The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
 
 ```bash
 $ whirl [start] [-e <environment>]
 ```
 
-Specifying the `start` command line argument is simply a more explicit way to start _whirl_.
+Specifying the `start` command line argument is a more explicit way to start _whirl_.
 
 #### Stopping whirl
 
@@ -63,66 +64,70 @@ $ whirl stop [-e <environment>]
 ```
 Stops the configured environment.
 
-If you want to stop all containers from a more specialized environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
+If you want to stop all containers from a specific environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
 
-#### Using in your CI (work in progress)
+#### Usage in a CI Pipeline _(work in progress)_
 
-Currently we do not yet have a complete running example of using _whirl_ as part of a CI pipeline. The first step in getting there is the ability to start it in `ci` mode. This will run the Docker containers in daemonize mode, makes sure the DAG(s) get unpaused and will await for the pipeline either to succeed or fail. When it succeeds, it will stop the containers and exit successfully.
+We do not currently have a complete example of how to usage _whirl_ as part of a CI pipeline. However the first step in doing this is involves starting while in `ci` mode. This will:
+ 
+  - run the Docker containers daemonized in the background;
+  - ensure the DAG(s) are unpaused; and
+  - wait for the pipeline to either succeed or fail.
+  
+Upon success the containers will be stopped and exit successfully.
 
-Currently when we fail, we don't yet exit, because it is worthy to be able to check in the logs what happened. Ideally we want to print out the logging of the failed task and then be able to also quit, unsuccessfully.
+At present we don't exit upon failure because it can be useful to be able to inspect the environment to see what happened. In the future we plan to print out the logs of the failed task and cleanup before indicating the pipeline has failed.
 
-#### Configuring environment variables
+#### Configuring Environment Variables
 
-Instead of passing the environment flag each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. We look for the `.whirl.env` file in four places:
+Instead of using the environment option each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. This can be in four places:
 
 - In your home directory, at `~/.whirl.env`. You can configure a default environment that will be used for every DAG.
-- Similarly, there can be a `.whirl.env` file in the root of this repository. This can also specify a default environment to be used when starting _whirl_. Currently this file is added as template file.
-- You can set a `.whirl.env` in your env directory. The env directory to use can be set in your dag `.whirl.env` file or specified from commandline. This can be handy for environment specific variables.
-- You can set a `.whirl.env` in your DAG directory to override the default environment to be used for that specific DAG.
+- In the root directory of this repository. This can also specify a default environment to be used when starting _whirl_. (This repository already containers an example file that you can modify.)
+- In your `env/` directory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the commandline. This can be handy for environment specific variables.
+- In your DAG directory to override the default environment to be used for that specific DAG.
 
-E.g., you can set the `PYTHON_VERSION` that you want to be used. The default `PYTHON_VERSION` used is 3.6.
+For example, you can set the `PYTHON_VERSION` that you want to be used. The default `PYTHON_VERSION` used is 3.6.
 
 #### Use of environment variables
 
 Inside the _whirl_ script the following environment variables are set:
 
-| var | value | description |
+| Environment Variable | Value | Description |
 | ----- | ----- | ----- |
-| DOCKER\_CONTEXT\_FOLDER | ${SCRIPT_DIR}/docker | Base build context folder for Docker builds referenced in Docker Compose |
-| ENVIRONMENT\_FOLDER | ${SCRIPT_DIR}/envs/\<environment\> | Base folder for environment to start. Contains docker-compose.yml and environment specific preparation scripts |
-| DAG\_FOLDER | $(pwd) | Current working directory. Used as Airflow DAG folder. Can contain preparation scripts to prepare for this specific DAG. |
-| PROJECTNAME | $(basename ${DAG_FOLDER}) | |
+| `DOCKER_CONTEXT_FOLDER` | `${SCRIPT_DIR}/docker` | Base build context folder for Docker builds referenced in Docker Compose |
+| `ENVIRONMENT_FOLDER` | `${SCRIPT_DIR}/envs/<environment>` | Base folder for environment to start. Contains `docker-compose.yml` and environment specific preparation scripts. |
+| `DAG_FOLDER` | `$(pwd)` | Current working directory. Used as Airflow DAG folder. Can contain preparation scripts to prepare for this specific DAG. |
+| `PROJECTNAME` | `$(basename ${DAG_FOLDER})` | |
 
 ## Structure
 
-This project revolves around docker-compose and the notion of different environments where Airflow is a central part. The rest of the environment depends on the tools/setup of the production environment used in your situation.
+This project is based on docker-compose and the notion of different environments where Airflow is a central part. The rest of the environment depends on the tools/setup of the production environment used in your situation.
 
 The _whirl_ script combines the DAG and the environment to make a fully functional setup.
 
-To accommodate different examples the environments are split up into separate environment directories inside the `envs` directory.
+To accommodate different examples:
 
-The second part of this project are the DAGs. To provide you with multiple examples also here a split is made into subdirectories in the `examples` directory.
+ - The environments are split up into separate environment-specific directories inside the `envs/` directory.
+ - The DAGS are split into sub-directories in the `examples/` directory.
 
 #### Environments
 
-Environments basically use Docker Compose to startup dependent Docker images which together mimick your production environment. Basis of the environment is the docker-compose.yml which in its minimal form contains the Airflow container to startup.
-Extra tools like for example `s3`, `sftp` etc. can be linked together in the docker-compose file to form your specific environment.
+Environments use Docker Compose to start containers which together mimic your production environment. The basis of the environment is the `docker-compose.yml` file which as a minimum declares the Airflow container to run. Extra tools (e.g. `s3`, `sftp`) can be linked together in the docker-compose file to form your specific environment.
 
-Each environment also contains some setup code needed for Airflow to understand the environment. Think off `Connections` adn `Variables` for example. For this each environment contains a `whirl.setup.d` directory which is mounted in the Airflow container. On startup all scripts in this directory are executed.
-This is the place to install and configure extra client libraries that are needed to make the environment function correctly (for example awscli for s3 access).
+Each environment also contains some setup code needed for Airflow to understand the environment, for example `Connections` and `Variables`. Each environment has a `whirl.setup.d/` directory which is mounted in the Airflow container. On startup all scripts in this directory are executed. This is a location for installing and configuring extra client libraries that are needed to make the environment function correctly; for example `awscli` if S3 access is required.
 
 #### DAGs
 
-The DAGs are situated in this project inside the `examples` directory. In your real world project you can have your code inside your own project of course (outside the example directory and outside this project).
+The DAGs in this project are inside the `examples/` directory. In your own project you can have your code in its own location outside this repository.
 
-Each example directory consists of at least an example DAG. Also project specific code can be made available there. Same as with the environment the DAG directory can contain a `whirl.setup.d` directory which is also mounted in the Airflow container. On startup all scripts in this directory are executed. The order of execution is DAG `whirl.setup.d` after environment `whirl.setup.d`.
+Each example directory consists of at least one example DAG. Also project- specific code can be placed there. As with the environment the DAG directory can contain a `whirl.setup.d/` directory which is also mounted inside the Airflow container. Upon startup all scripts in this directory are executed. The environment-specific `whirl.setup.d/` is executed first, followed by the DAG one.
 
-This is also the place to install and configure extra client libraries that are needed to make the DAG function correctly (for example adding a mock API endpoint).
-
+This is also a location for installing and configuring extra client libraries that are needed to make the DAG function correctly; for example a mock API endpoint.
 
 ## Examples
 
-This repository comes with a couple of example environments and workflows to demonstrate the use of _whirl_. The components used in the example workflows might be of help in kickstarting the creation of your own environment. If you have a good addition to the environments section, feel free to submit a merge request!
+This repository contains some example environments and workflows. The components used in the example workflows might serve as a starting point for your own environment. If you have a good example you'd like to add, please submit a merge request!
 
 #### SSH to Localhost
 
