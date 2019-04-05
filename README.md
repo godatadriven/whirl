@@ -127,73 +127,88 @@ This is also a location for installing and configuring extra client libraries th
 
 ## Examples
 
-This repository contains some example environments and workflows. The components used in the example workflows might serve as a starting point for your own environment. If you have a good example you'd like to add, please submit a merge request!
+This repository contains some example environments and workflows. The components used might serve as a starting point for your own environment. If you have a good example you'd like to add, please submit a merge request!
 
 #### SSH to Localhost
 
-The first example environment only involves one component, namely the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh`. As the name suggests, this will make SSH to localhost in that container possible. We also add a new connection called `ssh_local` to the Airflow connections.
+The first example environment only involves one component, the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh` which makes it possible in that container to SSH to `localhost`. The script also adds a new connection called `ssh_local` to the Airflow connections.
 
-To run our DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+To run this example:
 
 ```bash
 $ cd ./examples/localhost-ssh-example
 $ whirl -e local-ssh
 ```
 
-Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+Open your browser to [http://localhost:5000](http://localhost:5000) to access the Airflow UI. Manually enable the DAG and watch the pipeline run to successful completion.
 
-#### Rest API to S3 storage example
+#### Rest API to S3 Storage Example
 
-In this example we are going to consume a rest api and convert the JSON data to Parquet and store it in an S3 bucket.
-We have created an environment that spins up an S3 server and a MockServer instance in separate containers, together with the Airflow one. The environment contains a setup script in the `whirl.setup.d` folder:
+In this example we are going to:
 
-- `01_add_connection_api.sh` which:
-	-  adds an S3 connection to Airflow
-	-  Installs awscli Python libraries and configures them to connect to the S3 server
-	-  Creates a bucket (with adding a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html))
+1. Consume a REST API;
+2. Convert the JSON data to Parquet;
+3. Store the result in a S3 bucket.
 
+The environment includes containers for:
 
-To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+ - A S3 server;
+ - A MockServer instance
+ - The core Airflow component.
+ 
+The environment contains a setup script in the `whirl.setup.d/` folder:
+
+ - `01_add_connection_api.sh` which:
+
+   -  Adds a S3 connection to Airflow;
+   -  Installs the `awscli` Python libraries and configures them to connect to the S3 server;
+   -  Creates a bucket (with a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html)).
+
+To run this example:
 
 ```bash
 $ cd ./examples/api-python-s3
 $ whirl
 ```
 
-Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+Open your browser to [http://localhost:5000](http://localhost:5000) to access the Airflow UI. Manually enable the DAG and watch the pipeline run to successful completion.
 
-The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies S3 specific variables. Next to that, in the example folder we have a `whirl.setup.d` as well, which contains the script `01_add_connection_api_and_mockdata.sh`. This script gets executed in the container after the environment specific scripts have run and will do a couple of things:
+This example includes a `.whirl.env` configuration file in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies S3-specific variables. The example folder also contains a `whirl.setup.d/` directory which contains an initialization script (`01_add_connection_api_and_mockdata.sh`). This script is executed in the container after the environment-specific scripts have run and will:
 
-- Add a connection to the API endpoint
-- Add a [expectation](http://www.mock-server.com/mock_server/creating_expectations.html) for the mockserver to know which response needs to be send for which path that is requested
-- Install Pandas and PyArrow to support transforming the JSON into a Parquet file in the first task
-- Create a local directory where the intermediate file is stored before it is sent to S3 in the second task
+ - Add a connection to the API endpoint;
+ - Add an [expectation](http://www.mock-server.com/mock_server/creating_expectations.html) for the MockServer to know which response needs to be sent for which requested path;
+ - Install Pandas and PyArrow to support transforming the JSON into a Parquet file;
+ - Create a local directory where the intermediate file is stored before being uploaded to S3.
 
+#### SFTPOperator + PythonOperator + MySQL Example
 
-#### SFTPOperator + PythonOperator + MySQL example
+This example includes containers for:
 
-In this example we have created an environment that spins up a SFTP Server and a MySQL instance in separate containers, together with the Airflow one. The environment contains two startup scripts in the `whirl.setup.d` folder:
+ - A SFTP server;
+ - A MySQL instance;
+ - The core Airflow component.
+ 
+The environment contains two startup scripts in the `whirl.setup.d/` folder:
 
-- `01_prepare_sftp.sh` which adds a SFTP connection to Airflow
-- `02_prepare_mysql.sh` which adds a MySQL connection to Airflow
+ - `01_prepare_sftp.sh` which adds a SFTP connection to Airflow;
+ - `02_prepare_mysql.sh` which adds a MySQL connection to Airflow.
 
-To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+To run this example:
 
 ```bash
 $ cd ./examples/sftp-mysql-example
 $ whirl
 ```
 
-Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+Open your browser to [http://localhost:5000](http://localhost:5000) to access the Airflow UI. Manually enable the DAG and watch the pipeline run to successful completion.
 
-The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies that the `MOCK_DATA_FOLDER` is set. Next to that, in the example folder we have a `whirl.setup.d` as well, which contains the script `01_cp_mock_data_to_sftp.sh`. This script gets executed in the container after the environment specific scripts have run and will do a couple of things:
+The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies how `MOCK_DATA_FOLDER` is set. The DAG folder also contains a `whirl.setup.d/` directory which contains the script `01_cp_mock_data_to_sftp.sh`. This script gets executed in the container after the environment specific scripts have run and will do a couple of things:
 
-- it will rename the file `mocked-data-#ds_nodash#.csv` that is in the `./mock-data` folder. It will replace `#ds_nodash#` with the same value that Apache Airflow will give when templating `ds_nodash` in the Python files. This means we have a file available for our specific DAG run. The logic to rename these files is located in `/etc/airflow/functions/date_replacement.sh` in the Airflow container.
-- It will copy this file to the SFTP server, because that is what our DAG expects. When it starts it will try to obtain that file from the SFTP server to the local filesystem.
-
+1. It will rename the file `mocked-data-#ds_nodash#.csv` that is in the `./mock-data/` folder. It will replace `#ds_nodash#` with the same value that Apache Airflow will use when templating `ds_nodash` in the Python files. This means we have a file available for our specific DAG run. (The logic to rename these files is located in `/etc/airflow/functions/date_replacement.sh` in the Airflow container.)
+2. It will copy this file to the SFTP server, where the DAG expects to find it. When the DAG starts it will try to copy that file from the SFTP server to the local filesystem.
 
 ## References
 
-An early version of _whirl_ was brought to live at [ING](https://github.com/ing-bank). Bas Beelen gave a presentation about how _whirl_ was helpful in their infrastructure during the 2nd Apache Airflow Meetup, January 23 2019, hosted at Google London HQ.
+An early version of _whirl_ was brought to life at [ING](https://github.com/ing-bank). Bas Beelen gave a presentation describing how _whirl_ was helpful in their infrastructure during the 2nd Apache Airflow Meetup, January 23 2019, hosted at Google London HQ.
 
 [![Whirl explained at Apache Airflow Meetup](./whirl-youtube.png)](https://www.youtube.com/watch?v=jqK_HCOJ9Ak)
