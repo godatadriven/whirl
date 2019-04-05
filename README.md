@@ -80,6 +80,8 @@ Instead of passing the environment flag each time you run _whirl_, you can also 
 - You can set a `.whirl.env` in your env directory. The env directory to use can be set in your dag `.whirl.env` file or specified from commandline. This can be handy for environment specific variables.
 - You can set a `.whirl.env` in your DAG directory to override the default environment to be used for that specific DAG.
 
+E.g., you can set the `PYTHON_VERSION` that you want to be used. The default `PYTHON_VERSION` used is 3.6.
+
 #### Use of environment variables
 
 Inside the _whirl_ script the following environment variables are set:

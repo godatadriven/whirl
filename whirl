@@ -76,7 +76,7 @@ test_dag_state() {
 start() {
     echo "Starting airflow local run for environment ${WHIRL_ENVIRONMENT}"
 
-    docker build -t docker-whirl-airflow:local "${SCRIPT_DIR}/docker/airflow"
+    docker build --build-arg PYTHON_VERSION=${PYTHON_VERSION} -t docker-whirl-airflow:py-${PYTHON_VERSION}-local "${SCRIPT_DIR}/docker/airflow"
 
     DAEMON=""
     if [ "${CI_MODE}" == true ]; then

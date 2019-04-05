@@ -2,7 +2,7 @@ version: '3'
 
 services:
   airflow:
-    image: docker-whirl-airflow:local
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:

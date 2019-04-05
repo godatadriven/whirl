@@ -4,8 +4,10 @@ ENV AIRFLOW_BUILD_DEPS="freetds-dev libkrb5-dev libssl-dev libffi-dev libpq-dev 
 ENV AIRFLOW_APT_DEPS="libsasl2-dev freetds-bin build-essential default-libmysqlclient-dev apt-utils curl rsync netcat locales"
 
 ENV CONDA_DIR /opt/miniconda
-ENV CONDA_VERSION 2-4.5.4
-ENV CONDA_CHECKSUM=77d95c99996495b9e44db3c3b7d7981143d32d5e9a58709c51d35bf695fda67d
+ENV CONDA_VERSION 3-4.5.12
+ENV CONDA_CHECKSUM=e5e5b4cd2a918e0e96b395534222773f7241dc59d776db1b9f7fedfcb489157a
+ARG PYTHON_VERSION=3.6
+ENV PYTHON_VERSION=${PYTHON_VERSION}
 
 ENV HADOOP_VERSION=2.7
 ENV PY4J_VERSION=0.10.7
@@ -61,6 +63,8 @@ RUN wget https://repo.continuum.io/miniconda/Miniconda$CONDA_VERSION-Linux-x86_6
 
 ENV PATH="$CONDA_DIR/bin/":$PATH
 ENV PIP_CONFIG_FILE=/opt/.pip/pip.conf
+
+RUN conda update conda && conda install python=$PYTHON_VERSION -y --force
 
 RUN pip install apache-airflow[all]==${AIRFLOW_VERSION} && \
     airflow initdb && \
