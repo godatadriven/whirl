@@ -23,11 +23,11 @@ echo "================================"
 echo "== Create S3 Bucket ==========="
 echo "================================"
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://${AWS_SERVER}:${PORT_WEB_UI})" != "200" ]]; do
-  echo "Waiting for s3server to come up..."
+  echo "Waiting for ${AWS_SERVER} to come up..."
   sleep 2;
 done
 
 echo "creating bucket"
-S3_SERVER_IP=$(dig +short s3server)
+S3_SERVER_IP=$(dig +short ${AWS_SERVER})
 aws s3api create-bucket --bucket ${S3_LOG_BUCKET}
 echo -e "${S3_SERVER_IP}\t${S3_LOG_BUCKET}.${AWS_SERVER}" >> /etc/hosts
