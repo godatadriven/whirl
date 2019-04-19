@@ -67,12 +67,13 @@ ENV PIP_CONFIG_FILE=/opt/.pip/pip.conf
 RUN conda update conda && conda install python=$PYTHON_VERSION -y --force
 
 RUN pip install apache-airflow[all]==${AIRFLOW_VERSION} && \
-    airflow initdb && \
     mkdir -p $AIRFLOW_HOME/dags
 
-RUN sed -i -r "s/load_examples = True/load_examples = False/" /usr/local/airflow/airflow.cfg && \
-    sed -i -r "s/logging_level = INFO/logging_level = ${AIRFLOW_LOG_LEVEL}/" /usr/local/airflow/airflow.cfg && \
-    mkdir -p ${WHIRL_SETUP_FOLDER}/env.d && \
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
+ENV AIRFLOW__CORE__LOGGING_LEVEL=${AIRFLOW_LOG_LEVEL}
+ENV AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+
+RUN mkdir -p ${WHIRL_SETUP_FOLDER}/env.d && \
     mkdir -p ${WHIRL_SETUP_FOLDER}/dag.d
 
 EXPOSE 5000
