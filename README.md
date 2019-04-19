@@ -73,16 +73,13 @@ Currently when we fail, we don't yet exit, because it is worthy to be able to ch
 
 #### Configuring environment variables
 
-Instead of passing the environment flag each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. We look for the `.whirl.env` file in four places:
+Instead of passing the environment flag each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. We look for the `.whirl.env` file in three places and parsed in this order:
 
-- In your home directory, at `~/.whirl.env`. You can configure a default environment that will be used for every DAG.
-- Similarly, there can be a `.whirl.env` file in the root of this repository. This can also specify a default environment to be used when starting _whirl_. Currently this file is added as template file.
-- You can set a `.whirl.env` in your env directory. The env directory to use can be set in your dag `.whirl.env` file or specified from commandline. This can be handy for environment specific variables.
-- You can set a `.whirl.env` in your DAG directory to override the default environment to be used for that specific DAG.
+- There can be a `.whirl.env` file in the root of directory where the _whirl_ script is located (i.e. this repository). This may contain a default environment to be used when starting _whirl_, by setting the `WHIRL_ENVIRONMENT` which references a directory in the [envs](./envs) folder. Currently this file already exists at this location and specifies the default `PYTHON_VERSION` to be used in any enviornment.
+- You can set a `.whirl.env` in your [envs](./envs) directory. This is helpful to set environment specific variables. Of course it doesn't make much sense to set the `WHIRL_ENVIRONMENT` here.
+- You can set a `.whirl.env` in your DAG directory to override any environment variables that were set in the previous mentioned locations. This can be useful for example to overwrite the (default) `WHIRL_ENVIRONMENT`.
 
-E.g., you can set the `PYTHON_VERSION` that you want to be used. The default `PYTHON_VERSION` used is 3.6.
-
-#### Use of environment variables
+#### Internal environment variables
 
 Inside the _whirl_ script the following environment variables are set:
 
