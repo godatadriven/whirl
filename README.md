@@ -183,9 +183,10 @@ The environment to be used is set in the `.whirl.env` in the DAG directory. In t
 - it will rename the file `mocked-data-#ds_nodash#.csv` that is in the `./mock-data` folder. It will replace `#ds_nodash#` with the same value that Apache Airflow will give when templating `ds_nodash` in the Python files. This means we have a file available for our specific DAG run. The logic to rename these files is located in `/etc/airflow/functions/date_replacement.sh` in the Airflow container.
 - It will copy this file to the SFTP server, because that is what our DAG expects. When it starts it will try to obtain that file from the SFTP server to the local filesystem.
 
+
 #### Remote logging for Airflow
 
-In this example the dag is not the most important prt. This example is all about how to configure airflow to log to S3.
+In this example the dag is not the most important part. This example is all about how to configure airflow to log to S3.
 We have created an environment that spins up an S3 server together with the Airflow one. The environment contains a setup script in the `whirl.setup.d` folder:
 
 - `01_add_connection_s3.sh` which:
@@ -206,6 +207,24 @@ $ whirl
 Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success. If you open one of the logs, the first line shows that the log is retrieved from S3.
 
 The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies S3 specific variables.
+
+
+#### Having a external database for Airflow
+
+In this example the dag is not the most important part. This example is all about how to configure airflow to use a external database.
+We have created an environment that spins up an postgres database server together with the Airflow one.
+
+
+To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+
+```bash
+$ cd ./examples/external-airflow-db
+$ whirl
+```
+
+Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+
+The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies Postgres specific variables.
 
 
 ## References
