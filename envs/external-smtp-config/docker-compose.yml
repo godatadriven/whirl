@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  airflow:
+    build:
+      context: ../../docker/airflow
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION}
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - UNPAUSE_DAG
+    volumes:
+      - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - smtp-server
+
+  smtp-server:
+    image: djfarrelly/maildev
+    command: ["bin/maildev", "--web", "1080", "--smtp", "2525", "--incoming-user", "airflow_smtp_user", "--incoming-pass", "airflow_smtp_passw0rd" ]
+    hostname: smtp-server
+    domainname: airflow.local.io
+    ports:
+      - 1080:1080
+      - 2525:2525
