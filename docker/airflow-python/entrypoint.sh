@@ -26,6 +26,18 @@ for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
   fi
 done
 
+echo "========================================="
+echo "== Setup DAG specifics =================="
+echo "========================================="
+for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
+  echo "Executing DAG prepare script: $filename"
+  if [ -x "$filename" ]; then
+    "$filename"
+  else
+    . "$filename"
+  fi
+done
+
 echo "Starting Airflow scheduler..."
 airflow scheduler -D && sleep 15
 

@@ -17,6 +17,7 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
       - POSTGRES_DB
+      - SPARK_HOME=/home/airflow/.local/lib/python3.6/site_packages/pyspark/
     volumes:
       - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/

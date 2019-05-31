@@ -7,6 +7,7 @@ ENV AIRFLOW_VERSION=1.10.3
 ENV AIRFLOW_HOME /usr/local/airflow
 ENV AIRFLOW_GPL_UNIDECODE=yes
 ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
+ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
 RUN mkdir -p /usr/share/man/man1 \
   && update-ca-certificates -f \
@@ -71,17 +72,18 @@ RUN mkdir -p /etc/nginx/ssl \
     && openssl x509 -req -days 3650 -in /etc/nginx/ssl/server.csr -signkey /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.crt \
     && openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048 \
     && cat /etc/nginx/ssl/server.key > /etc/nginx/ssl/server.pem \
-    && cat /etc/nginx/ssl/server.crt >> /etc/nginx/ssl/server.pem
+    && cat /etc/nginx/ssl/server.crt >> /etc/nginx/ssl/server.pem \
+    && ln -s /etc/nginx/ssl/server.crt /etc/ssl/certs/nginx_selfsigned.crt \
+    && update-ca-certificates -f
 
 ADD nginx-ssl.conf /etc/nginx/conf.d/
-
-ENV REQUESTS_CA_BUNDLE=/etc/nginx/ssl/server.crt
 
 USER airflow
 
 EXPOSE 5000
 
-ADD entrypoint.sh delete_all_airflow_connections.py /
+ADD --chown=airflow:airflow entrypoint.sh delete_all_airflow_connections.py /
 ADD includes /etc/airflow/functions
 
+ENV PATH="${PATH}:/home/airflow/.local/bin"
 ENTRYPOINT "/entrypoint.sh"
