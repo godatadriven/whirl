@@ -24,8 +24,7 @@ ENV AIRFLOW_HOME /usr/local/airflow
 ENV AIRFLOW_GPL_UNIDECODE=yes
 ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
 
-RUN update-ca-certificates -f \
-  && apt-get update \
+RUN  apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y --reinstall build-essential \
   && apt-get install -y --allow-unauthenticated \
