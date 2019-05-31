@@ -27,9 +27,20 @@ dag = DAG(dag_id='spark-s3-to-postgres',
           schedule_interval='@daily',
           dagrun_timeout=timedelta(seconds=120))
 
+spark_conf = {
+    'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
+    'spark.hadoop.fs.s3a.access.key': os.environ.get('AWS_ACCESS_KEY_ID', ''),
+    'spark.hadoop.fs.s3a.secret.key': os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
+    'spark.hadoop.fs.s3a.endpoint': "{}:{}".format(os.environ.get('AWS_SERVER', ''), os.environ.get('AWS_PORT', '')),
+    'spark.hadoop.fs.s3a.connection.ssl.enabled': 'false',
+    'spark.hadoop.fs.s3a.path.style.access': 'true',
+    'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem'
+}
+
 spark = SparkSubmitOperator(
     task_id='fetch_csv_from_s3_and_update_postgres',
     dag=dag,
+    conf=spark_conf,
     application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
     application_args=[
         '-f', FILE,
