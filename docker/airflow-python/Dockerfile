@@ -65,8 +65,8 @@ RUN mkdir -p /etc/nginx/ssl \
     && mkdir -p /etc/nginx/conf.d/locations.d \
     && openssl genrsa -des3 -passout pass:p4ssw0rd -out server.pass.key 2048 \
     && openssl rsa -passin pass:p4ssw0rd -in server.pass.key -out /etc/nginx/ssl/server.key \
-	&& rm server.pass.key \
-	&& openssl req -new -key /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.csr \
+    && rm server.pass.key \
+    && openssl req -new -key /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.csr \
         -subj "/C=NL/ST=Utrecht/L=Utrecht/O=Airflow/OU=IT Department/CN=localhost" \
     && openssl x509 -req -days 3650 -in /etc/nginx/ssl/server.csr -signkey /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.crt \
     && openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048 \
