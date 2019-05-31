@@ -80,16 +80,13 @@ At present we don't exit upon failure because it can be useful to be able to ins
 
 #### Configuring Environment Variables
 
-Instead of using the environment option each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. This can be in four places:
+Instead of using the environment option each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. This can be in three places. They are applied in order:
 
-- In your home directory, at `~/.whirl.env`. You can configure a default environment that will be used for every DAG.
-- In the root directory of this repository. This can also specify a default environment to be used when starting _whirl_. (This repository already containers an example file that you can modify.)
-- In your `env/` directory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the commandline. This can be handy for environment specific variables.
-- In your DAG directory to override the default environment to be used for that specific DAG.
+- A `.whirl.env` file in the root this repository. This can also specify a default environment to be used when starting _whirl_. You do this by setting the `WHIRL_ENVIRONMENT` which references a directory in the [envs](./envs) folder. This repository contains an example you can modify. It specifies the default `PYTHON_VERSION` to be used in any environment.
+- A `.whirl.env` file in your [envs/{your-env}](./envs) subdirectory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the commandline. This is helpful to set environment specific variables. Of course it doesn't make much sense to set the `WHIRL_ENVIRONMENT` here.
+- A `.whirl.env` in your DAG directory to override any environment variables. This can be useful for example to overwrite the (default) `WHIRL_ENVIRONMENT`.
 
-For example, you can set the `PYTHON_VERSION` that you want to be used. The default `PYTHON_VERSION` used is 3.6.
-
-#### Use of environment variables
+#### Internal environment variables
 
 Inside the _whirl_ script the following environment variables are set:
 
@@ -206,6 +203,67 @@ The environment to be used is set in the `.whirl.env` in the DAG directory. In t
 
 1. It will rename the file `mocked-data-#ds_nodash#.csv` that is in the `./mock-data/` folder. It will replace `#ds_nodash#` with the same value that Apache Airflow will use when templating `ds_nodash` in the Python files. This means we have a file available for our specific DAG run. (The logic to rename these files is located in `/etc/airflow/functions/date_replacement.sh` in the Airflow container.)
 2. It will copy this file to the SFTP server, where the DAG expects to find it. When the DAG starts it will try to copy that file from the SFTP server to the local filesystem.
+
+#### Remote logging for Airflow
+
+In this example the dag is not the most important part. This example is all about how to configure airflow to log to S3.
+We have created an environment that spins up an S3 server together with the Airflow one. The environment contains a setup script in the `whirl.setup.d` folder:
+
+- `01_add_connection_s3.sh` which:
+	-  adds an S3 connection to Airflow
+	-  Installs awscli Python libraries and configures them to connect to the S3 server
+	-  Creates a bucket (with adding a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html))
+- `02_configue_logging_to_s3.sh` which:
+	-  exports environment varibles which airflow uses to override the default config. For example: `export AIRFLOW__CORE__REMOTE_LOGGING=True`
+
+
+To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+
+```bash
+$ cd ./examples/logging-to-s3
+$ whirl
+```
+
+Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success. If you open one of the logs, the first line shows that the log is retrieved from S3.
+
+The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies S3 specific variables.
+
+
+#### Having a external database for Airflow
+
+In this example the dag is not the most important part. This example is all about how to configure airflow to use a external database.
+We have created an environment that spins up an postgres database server together with the Airflow one.
+
+
+To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+
+```bash
+$ cd ./examples/external-airflow-db
+$ whirl
+```
+
+Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+
+The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies Postgres specific variables.
+
+
+#### Testing failure email
+
+In this example the dag is set to fail. This example is all about how to configure airflow to use a external smtp server for sending the failure emails.
+We have created an environment that spins up an smtp server together with the Airflow one.
+
+
+To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)
+
+```bash
+$ cd ./examples/external-smtp-for-failure-emails
+$ whirl
+```
+
+Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked failed.
+Also open your browser at http://localhost:1080 for the email client where the emails should show up.
+
+The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies specific Airflow configuration variables.
 
 ## References
 

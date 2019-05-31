@@ -29,5 +29,5 @@ done
 
 echo "creating bucket"
 S3_SERVER_IP=$(dig +short ${AWS_SERVER})
-aws s3api create-bucket --bucket ${DEMO_BUCKET}
-echo -e "${S3_SERVER_IP}\t${DEMO_BUCKET}.${AWS_SERVER}" >> /etc/hosts
+aws s3api create-bucket --bucket ${S3_LOG_BUCKET}
+echo -e "${S3_SERVER_IP}\t${S3_LOG_BUCKET}.${AWS_SERVER}" >> /etc/hosts

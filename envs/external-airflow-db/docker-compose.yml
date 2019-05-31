@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  airflow:
+    build:
+      context: ../../docker/airflow
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION}
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - UNPAUSE_DAG
+    volumes:
+      - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - postgresdb
+
+  postgresdb:
+    image: postgres:11
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST=postgresdb
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+
+

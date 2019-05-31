@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 echo "========================================="
+echo "== Initialize Airflow ==================="
+echo "========================================="
+airflow upgradedb
+echo "========================================="
 echo "== Reset Airflow ========================"
 echo "========================================="
 rm -rf ${AIRFLOW_HOME}/*.pid
@@ -10,6 +14,9 @@ echo "y" | airflow resetdb
 echo "Removing airflows default connections"
 python /delete_all_airflow_connections.py
 
+echo "========================================="
+echo "== Setup environment specifics =========="
+echo "========================================="
 for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
   echo "Executing environment prepare script: $filename"
   if [ -x "$filename" ]; then
@@ -19,6 +26,9 @@ for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
   fi
 done
 
+echo "========================================="
+echo "== Setup dag specifics =================="
+echo "========================================="
 for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
   echo "Executing dag prepare script: $filename"
   if [ -x "$filename" ]; then
