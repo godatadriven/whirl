@@ -5,19 +5,8 @@ services:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
-    environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - DEMO_BUCKET
-      - AWS_SERVER
-      - AWS_PORT
-      - PORT_WEB_UI
-      - POSTGRES_HOST=postgresdb
-      - POSTGRES_PORT
-      - POSTGRES_PASSWORD
-      - POSTGRES_USER
-      - POSTGRES_DB
-      - SPARK_HOME=/home/airflow/.local/lib/python3.6/site-packages/pyspark/
+    env_file:
+      - .whirl.env
     volumes:
       - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
@@ -27,6 +16,9 @@ services:
       - s3server
       - postgresdb
       - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
 
   s3server:
     build:
@@ -59,6 +51,8 @@ services:
     build:
       context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
       dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
     environment:
       - SPARK_NO_DAEMONIZE=true
       - AWS_ACCESS_KEY_ID
@@ -70,20 +64,6 @@ services:
       - 18080:8080
     entrypoint:
       - /usr/spark/sbin/start-master.sh
-#      - --conf
-#      - spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
-#      - --conf
-#      - spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID}
-#      - --conf
-#      - spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY}
-#      - --conf
-#      - spark.hadoop.fs.s3a.endpoint=${AWS_SERVER}:${AWS_PORT}
-#      - --conf
-#      - spark.hadoop.fs.s3a.connection.ssl.enabled=false
-#      - --conf
-#      - spark.hadoop.fs.s3a.path.style.access=true
-#      - --conf
-#      - spark.hadoop.fs.s3.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
     links:
       - s3server:${DEMO_BUCKET}.s3server
 
@@ -91,6 +71,8 @@ services:
     build:
       context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
       dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
     environment:
       - SPARK_NO_DAEMONIZE=true
       - AWS_ACCESS_KEY_ID
@@ -100,20 +82,6 @@ services:
     entrypoint:
       - /usr/spark/sbin/start-slave.sh
       - spark://sparkmaster:7077
-#      - --conf
-#      - spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
-#      - --conf
-#      - spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID}
-#      - --conf
-#      - spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY}
-#      - --conf
-#      - spark.hadoop.fs.s3a.endpoint=${AWS_SERVER}:${AWS_PORT}
-#      - --conf
-#      - spark.hadoop.fs.s3a.connection.ssl.enabled=false
-#      - --conf
-#      - spark.hadoop.fs.s3a.path.style.access=true
-#      - --conf
-#      - spark.hadoop.fs.s3.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
     depends_on:
       - sparkmaster
     links:

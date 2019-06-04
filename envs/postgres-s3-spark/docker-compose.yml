@@ -5,18 +5,8 @@ services:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
-    environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - DEMO_BUCKET
-      - AWS_SERVER
-      - AWS_PORT
-      - PORT_WEB_UI
-      - POSTGRES_HOST=postgresdb
-      - POSTGRES_PORT
-      - POSTGRES_PASSWORD
-      - POSTGRES_USER
-      - POSTGRES_DB
+    env_file:
+      - .whirl.env
     volumes:
       - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
@@ -25,6 +15,8 @@ services:
     depends_on:
       - s3server
       - postgresdb
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
 
   s3server:
     build:
