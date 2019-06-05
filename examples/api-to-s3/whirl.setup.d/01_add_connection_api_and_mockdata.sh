@@ -35,6 +35,6 @@ curl -v -X PUT "http://mockserver:1080/mockserver/expectation" -d '{
   }
 }'
 
-pip install --user pandas pyarrow
+pip install pandas pyarrow
 
 mkdir -p /tmp/whirl-local-api-to-s3-example/

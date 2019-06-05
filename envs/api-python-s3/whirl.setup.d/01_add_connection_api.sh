@@ -12,7 +12,7 @@ airflow connections -a \
                          \"host\": \"http://${AWS_SERVER}:${AWS_PORT}\"
                         }"
 
-pip install --user awscli awscli-plugin-endpoint
+pip install awscli awscli-plugin-endpoint
 
 echo -e "$AWS_ACCESS_KEY_ID\n$AWS_SECRET_ACCESS_KEY\n\n" | aws configure
 aws configure set plugins.endpoint awscli_plugin_endpoint

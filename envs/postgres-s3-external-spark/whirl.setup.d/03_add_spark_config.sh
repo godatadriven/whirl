@@ -13,7 +13,7 @@ POSTGRES_JDBC_CHECKSUM=7ffa46f8c619377cdebcd17721b6b21ecf6659850179f96fec3d1035c
 HADOOP_AWS_CHECKSUM=af9f18a0fcef4c564deea6f3ca1eec040b59be3d1cfd7fa557975d25d90e23f6
 AWS_SDK_CHECKSUM=ab74b9bd8baf700bbb8c1270c02d87e570cd237af2464bafa9db87ca1401143a
 
-pip install --user pyspark==${SPARK_VERSION}
+pip install pyspark==${SPARK_VERSION}
 export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
 echo "-------------------------------"
 echo "SPARK_HOME set to ${SPARK_HOME}"

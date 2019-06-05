@@ -84,6 +84,7 @@ EXPOSE 5000
 
 ADD --chown=airflow:airflow entrypoint.sh delete_all_airflow_connections.py /
 ADD includes /etc/airflow/functions
+ADD pip.conf /home/airflow/.config/pip/pip.conf
 
 ENV PATH="${PATH}:/home/airflow/.local/bin"
 ENTRYPOINT "/entrypoint.sh"
