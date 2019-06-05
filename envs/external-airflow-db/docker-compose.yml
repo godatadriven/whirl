@@ -2,11 +2,12 @@ version: '3'
 
 services:
   airflow:
-    build:
-      context: ../../docker/airflow
-      dockerfile: Dockerfile
-      args:
-        - PYTHON_VERSION=${PYTHON_VERSION}
+#    build:
+#      context: ../../docker/airflow
+#      dockerfile: Dockerfile
+#      args:
+#        - PYTHON_VERSION=${PYTHON_VERSION}
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:
