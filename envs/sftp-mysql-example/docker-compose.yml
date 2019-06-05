@@ -18,6 +18,7 @@ services:
     env_file:
       - mysql.env
       - sftp.env
+      - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
       - UNPAUSE_DAG

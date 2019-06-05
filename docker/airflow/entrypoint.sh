@@ -53,7 +53,6 @@ if [ "${UNPAUSE_DAG}" = true ]; then
       echo "Enabling DAG ${d}"
       airflow unpause "${d}" || true
     done
-  end
 fi
 
 airflow webserver -p 5000
