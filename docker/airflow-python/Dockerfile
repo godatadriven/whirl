@@ -1,4 +1,5 @@
-FROM python:3.6-slim as airflow-base
+ARG PYTHON_VERSION=3.6
+FROM python:${PYTHON_VERSION}-slim as airflow-base
 
 ENV AIRFLOW_BUILD_DEPS="freetds-dev python-dev libkrb5-dev libssl-dev libffi-dev libpq-dev git"
 ENV AIRFLOW_APT_DEPS="libsasl2-dev sasl2-bin libsasl2-2 libsasl2-dev libsasl2-modules freetds-bin build-essential default-libmysqlclient-dev apt-utils curl rsync netcat locales"
