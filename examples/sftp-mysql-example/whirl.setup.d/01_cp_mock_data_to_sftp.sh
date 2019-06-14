@@ -7,7 +7,7 @@ echo "== Prepare mock data =="
 echo "======================="
 
 MOCK_DATA_ORIGINAL_DIR=/mock-data       # mounted
-MOCK_DATA_WORKING_DIR=/working-dir
+MOCK_DATA_WORKING_DIR=${HOME}/working-dir
 
 # /mockdata is mounted, so any action on this folder
 # will alter the contents of that folder
@@ -48,5 +48,5 @@ echo "================================="
 
 export SSHPASS=$SFTP_PASS
 sshpass -e sftp -oBatchMode=no -b - $SFTP_USER@ftp-server <<EOF
-mput /working-dir/* $SFTP_ROOTDIR/
+mput ${MOCK_DATA_WORKING_DIR}/* $SFTP_ROOTDIR/
 EOF

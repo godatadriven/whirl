@@ -15,8 +15,10 @@ services:
     depends_on:
       - s3server
       - postgresdb
+      - sparkmaster
     links:
       - s3server:${DEMO_BUCKET}.s3server
+
 
   s3server:
     build:
@@ -44,3 +46,44 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
       - POSTGRES_DB
+
+  sparkmaster:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 7077:7077
+      - 18080:8080
+    entrypoint:
+      - /usr/spark/sbin/start-master.sh
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkworker:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    entrypoint:
+      - /usr/spark/sbin/start-slave.sh
+      - spark://sparkmaster:7077
+    depends_on:
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+

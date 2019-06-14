@@ -2,11 +2,7 @@ version: '3'
 
 services:
   airflow:
-    build:
-      context: ../../docker/airflow
-      dockerfile: Dockerfile
-      args:
-        - PYTHON_VERSION=${PYTHON_VERSION}
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:
@@ -20,6 +16,8 @@ services:
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
     depends_on:
       - s3server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
 
   s3server:
     image: atlassianlabs/localstack:0.6.2

@@ -27,10 +27,10 @@ for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
 done
 
 echo "========================================="
-echo "== Setup dag specifics =================="
+echo "== Setup DAG specifics =================="
 echo "========================================="
 for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
-  echo "Executing dag prepare script: $filename"
+  echo "Executing DAG prepare script: $filename"
   if [ -x "$filename" ]; then
     "$filename"
   else

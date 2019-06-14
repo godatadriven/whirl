@@ -21,7 +21,7 @@ When you want to use _whirl_ in your CI pipeline (currently work in progress), y
 brew install jq
 ```
 
-The current implementation was developed on macOS but it intended to work with any platform supported by Docker.
+The current implementation was developed on macOS but is intended to work with any platform supported by Docker. In our experience, Linux and macOS are fine. You can run it on native Windows 10 using [WSL](https://docs.microsoft.com/en-us/windows/wsl/about). Unfortunately, Docker on Windows 10 (version 1809) is hamstrung because it relies on Windows File Sharing (CIFS) to establish the volume mounts. Airflow hammers the volume a little harder than CIFS can handle, and you'll see intermittent FileNotFound errors in the volume mount. This may improve in the future. For now, running _whirl_ inside a Linux VM in Hyper-V gives more reliable results.
 
 ## Getting Started
 
@@ -82,8 +82,8 @@ At present we don't exit upon failure because it can be useful to be able to ins
 
 Instead of using the environment option each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. This can be in three places. They are applied in order:
 
-- A `.whirl.env` file in the root this repository. This can also specify a default environment to be used when starting _whirl_. You do this by setting the `WHIRL_ENVIRONMENT` which references a directory in the [envs](./envs) folder. This repository contains an example you can modify. It specifies the default `PYTHON_VERSION` to be used in any environment.
-- A `.whirl.env` file in your [envs/{your-env}](./envs) subdirectory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the commandline. This is helpful to set environment specific variables. Of course it doesn't make much sense to set the `WHIRL_ENVIRONMENT` here.
+- A `.whirl.env` file in the root this repository. This can also specify a default environment to be used when starting _whirl_. You do this by setting the `WHIRL_ENVIRONMENT` which references a directory in the [`envs`](./envs) folder. This repository contains an example you can modify. It specifies the default `PYTHON_VERSION` to be used in any environment.
+- A `.whirl.env` file in your [`envs/{your-env}`](./envs) subdirectory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the commandline. This is helpful to set environment specific variables. Of course it doesn't make much sense to set the `WHIRL_ENVIRONMENT` here.
 - A `.whirl.env` in your DAG directory to override any environment variables. This can be useful for example to overwrite the (default) `WHIRL_ENVIRONMENT`.
 
 #### Internal environment variables
@@ -210,11 +210,11 @@ In this example the dag is not the most important part. This example is all abou
 We have created an environment that spins up an S3 server together with the Airflow one. The environment contains a setup script in the `whirl.setup.d` folder:
 
 - `01_add_connection_s3.sh` which:
-	-  adds an S3 connection to Airflow
-	-  Installs awscli Python libraries and configures them to connect to the S3 server
-	-  Creates a bucket (with adding a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html))
+    -  adds an S3 connection to Airflow
+    -  Installs awscli Python libraries and configures them to connect to the S3 server
+    -  Creates a bucket (with adding a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html))
 - `02_configue_logging_to_s3.sh` which:
-	-  exports environment varibles which airflow uses to override the default config. For example: `export AIRFLOW__CORE__REMOTE_LOGGING=True`
+    -  exports environment varibles which airflow uses to override the default config. For example: `export AIRFLOW__CORE__REMOTE_LOGGING=True`
 
 
 To run the corresponding example DAG, perform the following (assuming you have put _whirl_ to your `PATH`)

@@ -17,6 +17,8 @@ services:
     depends_on:
       - mockserver
       - s3server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
 
   mockserver:
     image: jamesdbloom/mockserver:mockserver-5.5.1

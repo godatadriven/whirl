@@ -11,6 +11,7 @@ airflow connections -a --conn_id ftp_server \
                        --conn_port 22 \
                        --conn_password $SFTP_PASS
 
-mkdir -p ~/.ssh && ssh-keyscan ftp-server >> ~/.ssh/known_hosts
-
-apt-get install -y sshpass
+mkdir -p ${HOME}/.ssh
+sudo apt-get update
+sudo apt-get install -y openssh-client sshpass
+ssh-keyscan ftp-server >> ${HOME}/.ssh/known_hosts
