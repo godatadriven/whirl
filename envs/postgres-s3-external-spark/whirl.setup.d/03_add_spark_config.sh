@@ -22,9 +22,9 @@ echo "-------------------------------"
 curl -o ${SPARK_HOME}/jars/aws-java-sdk-1.7.4.jar http://central.maven.org/maven2/com/amazonaws/aws-java-sdk/1.7.4/aws-java-sdk-1.7.4.jar && \
   echo "$AWS_SDK_CHECKSUM ${SPARK_HOME}/jars/aws-java-sdk-1.7.4.jar" | sha256sum -c -
 
-RUN curl -o ${SPARK_HOME}/jars/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
+curl -o ${SPARK_HOME}/jars/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
   echo "$POSTGRES_JDBC_CHECKSUM ${SPARK_HOME}/jars/postgresql-42.2.5.jar" | sha256sum -c -
 
-RUN curl -o ${SPARK_HOME}/jars/hadoop-aws-2.7.3.jar http://central.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.7.3/hadoop-aws-2.7.3.jar && \
+curl -o ${SPARK_HOME}/jars/hadoop-aws-2.7.3.jar http://central.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.7.3/hadoop-aws-2.7.3.jar && \
   echo "$HADOOP_AWS_CHECKSUM ${SPARK_HOME}/jars/hadoop-aws-2.7.3.jar" | sha256sum -c -
 
