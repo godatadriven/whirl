@@ -52,7 +52,7 @@ $ whirl --help
 The default action is to start the DAG in your current directory. It expects an environment to be configured. You can pass this as a command line argument or you can configure it in a `.whirl.env` file. (See #Configuring environment variables.) The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
 
 ```bash
-$ whirl [start] [-e <environment>]
+$ whirl [start] [-d <directory>] [-e <environment>]
 ```
 
 Specifying the `start` command line argument is a more explicit way to start _whirl_.
@@ -60,7 +60,7 @@ Specifying the `start` command line argument is a more explicit way to start _wh
 #### Stopping whirl
 
 ```bash
-$ whirl stop [-e <environment>]
+$ whirl stop [-d <directory>] [-e <environment>]
 ```
 Stops the configured environment.
 
