@@ -41,12 +41,31 @@ function export_environment_vars() {
     WHIRL_ENVIRONMENT=${WHIRL_ENVIRONMENT_ARG}
   fi
 
-  if [[ -z "${ENVS_FOLDER}" ]]; then
-    ENVS_FOLDER=${SCRIPT_DIR}/envs
-  fi
-  ENVIRONMENT_FOLDER=${ENVS_FOLDER}/${WHIRL_ENVIRONMENT};
-  
+  # determine whether to use the environment dir set at the commandline or
+  # in the DAG FOLDER .whirl.env
+  echo ""
+  if [ -z "${WHIRL_ENVIRONMENT_DIR_ARG}" ]; then
+    if [ -f ${DAG_FOLDER}/.whirl.env ]; then
+      grep -qRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env"
+      if grep -qRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env"; then
+          echo "Found WHIRL_ENVIRONMENT_DIR in ${DAG_FOLDER}/.whirl.env";
 
+          grep -oRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env";
+          grep -oRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env" | sed -e 's/.*=\(.*\)/\1/g';
+          WHIRL_ENVIRONMENT_DIR=$(grep -oRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env" | \
+                              sed -e 's/.*=\(.*\)/\1/g')
+          echo "environment directory is ${WHIRL_ENVIRONMENT_DIR}"
+      fi
+    fi
+  else
+    WHIRL_ENVIRONMENT_DIR=${WHIRL_ENVIRONMENT_DIR_ARG}
+  fi
+
+  if [[ -z "${WHIRL_ENVIRONMENT_DIR}" ]]; then
+    WHIRL_ENVIRONMENT_DIR=${SCRIPT_DIR}/envs
+  fi
+  ENVIRONMENT_FOLDER=${WHIRL_ENVIRONMENT_DIR}/${WHIRL_ENVIRONMENT};
+  
   if [[ -z "${WHIRL_ENVIRONMENT}" || ! -d ${ENVIRONMENT_FOLDER} ]]; then
     echo "No valid environment '${WHIRL_ENVIRONMENT}' specified"
     exit 2;
@@ -143,7 +162,7 @@ function read_arguments() {
           shift # past value
           ;;
       -d|--directory)
-          ENVS_FOLDER="${2}"
+          WHIRL_ENVIRONMENT_DIR_ARG="${2}"
           shift # past argument
           shift # past value
           ;;
