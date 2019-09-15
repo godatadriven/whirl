@@ -2,6 +2,7 @@
 AIRFLOW_UI_PORT=5000
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 
+set -ev
 # load and export environment variables
 # priority order:
 #     .whirl.env in home directory
@@ -33,14 +34,38 @@ function export_environment_vars() {
           echo "Found WHIRL_ENVIRONMENT in ${DAG_FOLDER}/.whirl.env";
           WHIRL_ENVIRONMENT=$(grep -oRE "^(\s+)?WHIRL_ENVIRONMENT=(.*)" "${DAG_FOLDER}/.whirl.env" | \
                               sed -e 's/.*=\(.*\)/\1/g')
+          echo "environment is ${WHIRL_ENVIRONMENT}"
       fi
     fi
   else
     WHIRL_ENVIRONMENT=${WHIRL_ENVIRONMENT_ARG}
   fi
 
-  ENVIRONMENT_FOLDER=${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}
+  # determine whether to use the environment dir set at the commandline or
+  # in the DAG FOLDER .whirl.env
+  echo ""
+  if [ -z "${WHIRL_ENVIRONMENT_DIR_ARG}" ]; then
+    if [ -f ${DAG_FOLDER}/.whirl.env ]; then
+      grep -qRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env"
+      if grep -qRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env"; then
+          echo "Found WHIRL_ENVIRONMENT_DIR in ${DAG_FOLDER}/.whirl.env";
 
+          grep -oRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env";
+          grep -oRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env" | sed -e 's/.*=\(.*\)/\1/g';
+          WHIRL_ENVIRONMENT_DIR=$(grep -oRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env" | \
+                              sed -e 's/.*=\(.*\)/\1/g')
+          echo "environment directory is ${WHIRL_ENVIRONMENT_DIR}"
+      fi
+    fi
+  else
+    WHIRL_ENVIRONMENT_DIR=${WHIRL_ENVIRONMENT_DIR_ARG}
+  fi
+
+  if [[ -z "${WHIRL_ENVIRONMENT_DIR}" ]]; then
+    WHIRL_ENVIRONMENT_DIR=${SCRIPT_DIR}/envs
+  fi
+  ENVIRONMENT_FOLDER=${WHIRL_ENVIRONMENT_DIR}/${WHIRL_ENVIRONMENT};
+  
   if [[ -z "${WHIRL_ENVIRONMENT}" || ! -d ${ENVIRONMENT_FOLDER} ]]; then
     echo "No valid environment '${WHIRL_ENVIRONMENT}' specified"
     exit 2;
@@ -120,6 +145,7 @@ usage() {
   echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop|ci]"
   echo "  -h|--help                          display usage"
   echo "  -e|--environment environment       specify environment to use"
+  echo "  -d|--directory environment_folder  specify the folder that contains the environments (defaults to SCRIPT_DIR)"
   echo "  start|stop                         start or stop all"
   echo "  ci                                 runs in daemonized mode and awaits dag run completion"
   exit 1
@@ -132,6 +158,11 @@ function read_arguments() {
       case ${key} in
       -e|--environment)
           WHIRL_ENVIRONMENT_ARG="${2}"
+          shift # past argument
+          shift # past value
+          ;;
+      -d|--directory)
+          WHIRL_ENVIRONMENT_DIR_ARG="${2}"
           shift # past argument
           shift # past value
           ;;
