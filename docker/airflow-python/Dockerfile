@@ -4,7 +4,7 @@ FROM python:${PYTHON_VERSION}-slim as airflow-base
 ENV AIRFLOW_BUILD_DEPS="freetds-dev python-dev libkrb5-dev libssl-dev libffi-dev libpq-dev git"
 ENV AIRFLOW_APT_DEPS="libsasl2-dev sasl2-bin libsasl2-2 libsasl2-dev libsasl2-modules freetds-bin build-essential default-libmysqlclient-dev apt-utils curl rsync netcat locales"
 
-ENV AIRFLOW_VERSION=1.10.4
+ENV AIRFLOW_VERSION=1.10.5
 ENV AIRFLOW_HOME /usr/local/airflow
 ENV AIRFLOW_GPL_UNIDECODE=yes
 ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
