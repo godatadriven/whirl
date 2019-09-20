@@ -21,7 +21,7 @@ services:
       - s3server:${DEMO_BUCKET}.s3server
 
   mockserver:
-    image: jamesdbloom/mockserver:mockserver-5.5.0
+    image: jamesdbloom/mockserver:mockserver-5.6.1
     ports:
       - 1080:1080
       - 1081:1081
