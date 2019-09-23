@@ -4,11 +4,13 @@ FROM python:${PYTHON_VERSION}-slim as airflow-base
 ENV AIRFLOW_BUILD_DEPS="freetds-dev python-dev libkrb5-dev libssl-dev libffi-dev libpq-dev git"
 ENV AIRFLOW_APT_DEPS="libsasl2-dev sasl2-bin libsasl2-2 libsasl2-dev libsasl2-modules freetds-bin build-essential default-libmysqlclient-dev apt-utils curl rsync netcat locales"
 
-ENV AIRFLOW_VERSION=1.10.3
+ENV AIRFLOW_VERSION=1.10.5
 ENV AIRFLOW_HOME /usr/local/airflow
 ENV AIRFLOW_GPL_UNIDECODE=yes
 ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
 ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN mkdir -p /usr/share/man/man1 \
   && update-ca-certificates -f \
@@ -22,7 +24,6 @@ RUN mkdir -p /usr/share/man/man1 \
      git \
      default-libmysqlclient-dev \
      gcc \
-     openjdk-8-jre-headless \
      ${AIRFLOW_BUILD_DEPS} \
      ${AIRFLOW_APT_DEPS} \
      nginx \
@@ -33,14 +34,7 @@ RUN mkdir -p /usr/share/man/man1 \
   && rm -rf /var/cache/apk/* /var/lib/apt/lists/* \
   && (find /usr/share/doc -type f -and -not -name copyright -print0 | xargs -0 -r rm)
 
-RUN mkdir /home/airflow \
-    && groupadd airflow \
-    && useradd -r -g airflow airflow \
-    && chown airflow:airflow /home/airflow \
-    && echo "airflow ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/airflow \
-    && chmod 0440 /etc/sudoers.d/airflow
-
-FROM airflow-base as main
+FROM airflow-base as main_image
 
 # Optimizing installation of Cassandra driver
 # Speeds up building the image - cassandra driver without CYTHON saves around 10 minutes
@@ -56,11 +50,11 @@ ARG PIP_NO_CACHE_DIR="true"
 ENV PIP_NO_CACHE_DIR=${PIP_NO_CACHE_DIR}
 
 RUN pip install --upgrade pip \
-    && pip install apache-airflow[all]==${AIRFLOW_VERSION} \
-    && mkdir -p ${AIRFLOW_HOME}/dags \
-    && chown -R airflow.airflow ${AIRFLOW_HOME}
+    && pip install apache-airflow[all_dbs,atlas,async,cassandra,celery,cgroups,cloudant,crypto,dask,databricks,datadog,doc,docker,druid,elasticsearch,gcp_api,github_enterprise,google_auth,hdfs,hive,jdbc,jira,kerberos,ldap,mongo,mssql,mysql,oracle,password,pinot,postgres,qds,rabbitmq,redis,salesforce,samba,sendgrid,segment,slack,snowflake,ssh,statsd,vertica,webhdfs,winrm]=="${AIRFLOW_VERSION}" \
+    && mkdir -p "${AIRFLOW_HOME}/dags" \
 
-RUN mkdir -p ${WHIRL_SETUP_FOLDER}/env.d
+RUN mkdir -p "${WHIRL_SETUP_FOLDER}/env.d"
+RUN mkdir -p "${WHIRL_SETUP_FOLDER}/dag.d"
 
 # Make sure a ssl certificate is generated and configured. Nginx can be configured if needed from now on.
 RUN mkdir -p /etc/nginx/ssl \
@@ -77,15 +71,21 @@ RUN mkdir -p /etc/nginx/ssl \
     && ln -s /etc/nginx/ssl/server.crt /etc/ssl/certs/nginx_selfsigned.crt \
     && update-ca-certificates -f
 
-ADD nginx-ssl.conf /etc/nginx/conf.d/
+COPY nginx-ssl.conf /etc/nginx/conf.d/
 
+# Harden Image
+COPY harden.sh .
+RUN chmod +x harden.sh && \
+    sh harden.sh airflow
+
+RUN chown -R airflow.airflow ${AIRFLOW_HOME}
 USER airflow
 
 EXPOSE 5000
 
-ADD --chown=airflow:airflow entrypoint.sh delete_all_airflow_connections.py /
-ADD includes /etc/airflow/functions
-ADD pip.conf /home/airflow/.config/pip/pip.conf
+COPY --chown=airflow:airflow entrypoint.sh delete_all_airflow_connections.py /
+COPY includes /etc/airflow/functions
+COPY pip.conf /home/airflow/.config/pip/pip.conf
 
 ENV PATH="${PATH}:/home/airflow/.local/bin"
-ENTRYPOINT "/entrypoint.sh"
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+echo "============================"
+echo "======== Add java =========="
+echo "============================"
+
+sudo apt-get update && sudo apt-get install -y openjdk-11-jre
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 echo "============================"
 echo "== Configure Spark config =="
