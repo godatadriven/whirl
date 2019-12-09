@@ -46,7 +46,6 @@ function export_environment_vars() {
   echo ""
   if [ -z "${WHIRL_ENVIRONMENT_DIR_ARG}" ]; then
     if [ -f ${DAG_FOLDER}/.whirl.env ]; then
-      grep -qRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env"
       if grep -qRE "^(\s+)?WHIRL_ENVIRONMENT_DIR=(.*)" "${DAG_FOLDER}/.whirl.env"; then
           echo "Found WHIRL_ENVIRONMENT_DIR in ${DAG_FOLDER}/.whirl.env";
 
@@ -65,7 +64,7 @@ function export_environment_vars() {
     WHIRL_ENVIRONMENT_DIR=${SCRIPT_DIR}/envs
   fi
   ENVIRONMENT_FOLDER=${WHIRL_ENVIRONMENT_DIR}/${WHIRL_ENVIRONMENT};
-  
+
   if [[ -z "${WHIRL_ENVIRONMENT}" || ! -d ${ENVIRONMENT_FOLDER} ]]; then
     echo "No valid environment '${WHIRL_ENVIRONMENT}' specified"
     exit 2;
