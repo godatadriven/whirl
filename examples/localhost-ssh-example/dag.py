@@ -18,5 +18,5 @@ dag = DAG(dag_id='whirl-local-ssh-example',
 ssh_copy = SSHOperator(
     ssh_conn_id='local_ssh',
     task_id='test_ssh_operator',
-    command="cp /usr/local/airflow/airflow.cfg /tmp/copied_airflow.cfg",
+    command="cp /opt/airflow/airflow.cfg /tmp/copied_airflow.cfg",
     dag=dag)

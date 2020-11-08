@@ -1,8 +1,9 @@
 version: '3'
 
 services:
-  airflow:
+  webserver:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["webserver", "-p", "5000"]
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:
@@ -11,14 +12,29 @@ services:
       - WHIRL_SETUP_FOLDER
       - UNPAUSE_DAG
     volumes:
-      - ${DAG_FOLDER}:/usr/local/airflow/dags/$PROJECTNAME
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - postgresdb
+
+  scheduler:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["scheduler"]
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - UNPAUSE_DAG
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
     depends_on:
       - postgresdb
 
   postgresdb:
-    image: postgres:11
+    image: postgres:13
     ports:
       - 5432:5432
     environment:
