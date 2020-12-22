@@ -2,7 +2,8 @@ import os
 from datetime import timedelta, datetime
 from airflow import DAG
 
-from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.bash_operator import BashOperator
+from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 
 default_args = {
     'owner': 'whirl',
@@ -12,12 +13,11 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"
-
+THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
+SPARK_DIRECTORY = THIS_DIRECTORY + 'spark'
 BUCKET = os.environ.get('DBT_BUCKET')
-FILE = 's3://{bucket}/input/data/dbt/{date}/'.format(
-    bucket=BUCKET,
-    date=DAGRUN_EXECUTION_DATE
+FILE = 's3://{bucket}/input/data/dbt/{{{{ ds_nodash }}}}/flights_data.zip'.format(
+    bucket=BUCKET
 )
 
 spark_conf = {
@@ -35,4 +35,50 @@ dag = DAG(dag_id='whirl-dbt-example',
           schedule_interval='@once',
           dagrun_timeout=timedelta(seconds=120))
 
-dummy = DummyOperator(task_id="dummy-dbt", dag=dag)
+get_file = BashOperator(task_id="get_file", bash_command="mkdir -p /tmp/flights_data && aws s3 cp {} /tmp/flights_data/ && unzip -o /tmp/flights_data/flights_data.zip -d /tmp/flights_data/extract".format(FILE), dag=dag)
+
+put_airports_file = BashOperator(task_id="put_airports_file", bash_command="aws s3 cp /tmp/flights_data/extract/flights_data/airports.csv s3://{}/csv/".format(BUCKET), dag=dag)
+
+put_flights_file = BashOperator(task_id="put_flights_file", bash_command="aws s3 cp /tmp/flights_data/extract/flights_data/flights.csv s3://{}/csv/".format(BUCKET), dag=dag)
+
+put_carriers_file = BashOperator(task_id="put_carriers_file", bash_command="aws s3 cp /tmp/flights_data/extract/flights_data/carriers.csv s3://{}/csv/".format(BUCKET), dag=dag)
+
+load_airports = SparkSubmitOperator(
+    task_id='fetch_airports_csv_from_s3_and_update_postgres',
+    dag=dag,
+    conf=spark_conf,
+    application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
+    application_args=[
+        '-f', 's3://dbt-s3-output/csv/airports.csv',
+        '-t', 'airports'
+    ]
+)
+
+load_carriers = SparkSubmitOperator(
+    task_id='fetch_carriers_csv_from_s3_and_update_postgres',
+    dag=dag,
+    conf=spark_conf,
+    application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
+    application_args=[
+        '-f', 's3://dbt-s3-output/csv/carriers.csv',
+        '-t', 'carriers'
+    ]
+)
+
+load_flights = SparkSubmitOperator(
+    task_id='fetch_flights_csv_from_s3_and_update_postgres',
+    dag=dag,
+    conf=spark_conf,
+    application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
+    application_args=[
+        '-f', 's3://dbt-s3-output/csv/flights.csv',
+        '-t', 'flights_data'
+    ]
+)
+
+
+get_file >> [ put_airports_file, put_flights_file, put_carriers_file ]
+put_airports_file >> load_airports
+put_carriers_file >> load_carriers
+put_flights_file >> load_flights
+
