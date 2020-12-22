@@ -11,8 +11,10 @@ services:
         - 22:22
     env_file:
       - sftp.env
+
   airflow:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:
@@ -23,7 +25,7 @@ services:
       - WHIRL_SETUP_FOLDER
       - UNPAUSE_DAG
     volumes:
-      - $DAG_FOLDER:/usr/local/airflow/dags/$PROJECTNAME
+      - $DAG_FOLDER:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
       - ${MOCK_DATA_FOLDER}:/mock-data

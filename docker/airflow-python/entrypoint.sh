@@ -1,18 +1,26 @@
 #!/usr/bin/env bash
-echo "========================================="
-echo "== Initialize Airflow ==================="
-echo "========================================="
-airflow upgradedb
-echo "========================================="
-echo "== Reset Airflow ========================"
-echo "========================================="
-rm -rf ${AIRFLOW_HOME}/*.pid
-rm -rf ${AIRFLOW_HOME}/*.err
-rm -rf ${AIRFLOW_HOME}/*.log
-rm -rf ${AIRFLOW_HOME}/logs/*
-echo "y" | airflow resetdb
-echo "Removing airflows default connections"
-python /delete_all_airflow_connections.py
+# Might be empty
+AIRFLOW_COMMAND="${1}"
+if [[ ${AIRFLOW_COMMAND} == "scheduler" || ${AIRFLOW_COMMAND} == "webserver" ]]; then
+  echo  "wait a while for the other systems to be started"
+  sleep 15
+fi
+
+if [[ ${AIRFLOW_COMMAND} == "scheduler" || ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
+  echo "========================================="
+  echo "== Reset Airflow ========================"
+  echo "========================================="
+  rm -rf ${AIRFLOW_HOME}/*.pid
+  rm -rf ${AIRFLOW_HOME}/*.err
+  rm -rf ${AIRFLOW_HOME}/*.log
+  rm -rf ${AIRFLOW_HOME}/logs/*
+  echo "y" | airflow resetdb
+else
+  if [[ ${AIRFLOW_COMMAND} == "webserver" ]]; then
+    echo "wait a bit more to let the scheduler do the database reset."
+    sleep 15
+  fi
+fi
 
 echo "========================================="
 echo "== Setup environment specifics =========="
@@ -38,14 +46,9 @@ for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
   fi
 done
 
-echo "Starting Airflow scheduler..."
-nohup airflow scheduler -D &
+if [[ ${AIRFLOW_COMMAND} == "webserver" || ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
 
-echo  "wait a while for the scheduler to be started"
-sleep 15
-
-echo "If needed, unpause dags..."
-if [ "${UNPAUSE_DAG}" = true ]; then
+  if [ "${UNPAUSE_DAG}" = true ]; then
     echo "================================="
     echo "== Enabling all available DAGs =="
     echo "================================="
@@ -57,8 +60,14 @@ if [ "${UNPAUSE_DAG}" = true ]; then
       echo "Enabling DAG ${d}"
       airflow unpause "${d}" || true
     done
-  end
+  fi
 fi
 
-echo "Starting Airflow webserver..."
-airflow webserver -p 5000
+if [[ ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
+  nohup /entrypoint scheduler -D &
+  # echo  "wait a while for the scheduler to be started"
+  # sleep 15
+  /entrypoint webserver -p 5000
+else
+  /entrypoint "${@}"
+fi

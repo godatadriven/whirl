@@ -44,7 +44,7 @@ function replace_date() {
   echo $RENAMES
 }
 
-SCHEDULE=$(grep -oP "schedule_interval=\K[^,]*" /usr/local/airflow/dags/*/*.py | head -n1 | sed -e "s/['\"]//g")
+SCHEDULE=$(grep -oP "schedule_interval=\K[^,]*" /opt/airflow/dags/*/*.py | head -n1 | sed -e "s/['\"]//g")
 
 # Change Airflow schedule annotations to crontab schedule values
 if [[ ${SCHEDULE} == *"@"* ]]; then
