@@ -14,6 +14,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/env.d"
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/dag.d"
 
+RUN chown -R airflow:airflow "${WHIRL_SETUP_FOLDER}"
+
 # Make sure a ssl certificate is generated and configured. Nginx can be configured if needed from now on.
 RUN mkdir -p /etc/nginx/ssl \
     && mkdir -p /etc/nginx/conf.d/locations.d \

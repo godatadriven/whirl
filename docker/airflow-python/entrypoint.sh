@@ -27,11 +27,7 @@ echo "== Setup environment specifics =========="
 echo "========================================="
 for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
   echo "Executing environment prepare script: $filename"
-  if [ -x "$filename" ]; then
-    "$filename"
-  else
-    . "$filename"
-  fi
+  . "$filename"
 done
 
 echo "========================================="
@@ -39,11 +35,7 @@ echo "== Setup DAG specifics =================="
 echo "========================================="
 for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
   echo "Executing DAG prepare script: $filename"
-  if [ -x "$filename" ]; then
-    "$filename"
-  else
-    . "$filename"
-  fi
+  . "$filename"
 done
 
 if [[ ${AIRFLOW_COMMAND} == "webserver" || ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
