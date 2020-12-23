@@ -4,6 +4,7 @@ from airflow import DAG
 
 from airflow.operators.bash_operator import BashOperator
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
+from airflow_dbt.operators.dbt_operator import DbtRunOperator, DbtTestOperator
 
 default_args = {
     'owner': 'whirl',
@@ -15,6 +16,7 @@ default_args = {
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark'
+DBT_DIRECTORY = THIS_DIRECTORY + 'dbt'
 BUCKET = os.environ.get('DBT_BUCKET')
 FILE = 's3://{bucket}/input/data/dbt/{{{{ ds_nodash }}}}/flights_data.zip'.format(
     bucket=BUCKET
@@ -47,6 +49,8 @@ load_airports = SparkSubmitOperator(
     task_id='fetch_airports_csv_from_s3_and_update_postgres',
     dag=dag,
     conf=spark_conf,
+    driver_memory='1G',
+    executor_memory='1G',
     application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
     application_args=[
         '-f', 's3://dbt-s3-output/csv/airports.csv',
@@ -58,6 +62,8 @@ load_carriers = SparkSubmitOperator(
     task_id='fetch_carriers_csv_from_s3_and_update_postgres',
     dag=dag,
     conf=spark_conf,
+    driver_memory='1G',
+    executor_memory='1G',
     application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
     application_args=[
         '-f', 's3://dbt-s3-output/csv/carriers.csv',
@@ -69,6 +75,8 @@ load_flights = SparkSubmitOperator(
     task_id='fetch_flights_csv_from_s3_and_update_postgres',
     dag=dag,
     conf=spark_conf,
+    driver_memory='1G',
+    executor_memory='1G',
     application='{spark_dir}/s3topostgres.py'.format(spark_dir=SPARK_DIRECTORY),
     application_args=[
         '-f', 's3://dbt-s3-output/csv/flights.csv',
@@ -76,9 +84,27 @@ load_flights = SparkSubmitOperator(
     ]
 )
 
+dbt_run = DbtRunOperator(
+    task_id='dbt_run',
+    dir=DBT_DIRECTORY,
+    profiles_dir=DBT_DIRECTORY,
+    target='airflow',
+    dag=dag
+)
+
+
+dbt_test = DbtTestOperator(
+    task_id='dbt_test',
+    dir=DBT_DIRECTORY,
+    profiles_dir=DBT_DIRECTORY,
+    target='airflow',
+    dag=dag
+)
 
 get_file >> [ put_airports_file, put_flights_file, put_carriers_file ]
 put_airports_file >> load_airports
 put_carriers_file >> load_carriers
 put_flights_file >> load_flights
+
+[ load_airports, load_carriers, load_flights ] >> dbt_run >> dbt_test
 
