@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-pip install dbt airflow-dbt
+sudo apt update && sudo apt install build-essential libsasl2-dev -y
+pip install dbt airflow-dbt dbt-spark

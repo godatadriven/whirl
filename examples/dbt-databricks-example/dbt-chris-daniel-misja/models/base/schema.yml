@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: default
+    tables:
+
+        - name: airports
+          description: 'Mapping of airport IDs'
+          columns:
+            - name: code
+              description: "BLALAALALALA"
+              tests:
+                - unique
+                - not_null
+            - name: Description
+
+        - name: carriers
+          description: 'Mapping of carrier IDs'
+          columns:
+            - name: code
+              tests:
+              - unique
+              - not_null
+            - name: Description
+
+        - name: flights
+          description: 'Flight statistics'
+          columns: 
+            - name: FL_DATE
+            - name: OP_UNIQUE_CARRIER
+              tests:
+                - relationships:
+                    to: ref('carriers')
+                    field: carrier_id
+            - name: ORIGIN_AIRPORT_ID
+              tests:
+                - relationships:
+                    to: ref('airports')
+                    field: airport_id
+            - name: ORIGIN_AIRPORT_SEQ_ID
+            - name: ORIGIN_CITY_MARKET_ID
+            - name: ORIGIN_CITY_NAME
+            - name: DEST_AIRPORT_ID
+              tests:
+                - relationships:
+                    to: ref('airports')
+                    field: airport_id
+            - name: DEST_AIRPORT_SEQ_ID
+            - name: DEST_CITY_MARKET_ID
+            - name: DEST_CITY_NAME
+            - name: DEP_DELAY_NEW
+            - name: ARR_DELAY_NEW
+            - name: CANCELLED
+            - name: DIVERTED
+            - name: ACTUAL_ELAPSED_TIME
+            - name: DISTANCE
+            - name: string_field_16

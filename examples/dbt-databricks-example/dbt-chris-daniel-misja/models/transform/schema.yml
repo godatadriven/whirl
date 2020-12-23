@@ -1,0 +1,38 @@
+version: 2
+
+models:
+
+  - name: flights_per_carrier
+    description: 'Number of flights per carrier'
+    columns:
+      - name: carrier_id
+        tests:
+          - relationships:
+              to: ref('carriers')
+              field: carrier_id
+      - name: carrier_name
+        tests:
+          - relationships:
+              to: ref('carriers')
+              field: carrier_name
+      - name: n_flights
+  - name: enriched_flights
+    description: 'blalbalblablala'
+    columns:
+      - name: origin_airport_name
+        tests:
+          - relationships:
+              to: ref('airports')
+              field: airport_name
+      - name: destination_airport_name
+        tests:
+          - relationships:
+              to: ref('airports')
+              field: airport_name
+      - name: carrier_name
+        tests:
+          - relationships:
+              to: ref('carriers')
+              field: carrier_name
+
+        
