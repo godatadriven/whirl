@@ -14,7 +14,8 @@ if [[ ${AIRFLOW_COMMAND} == "scheduler" || ${AIRFLOW_COMMAND} == "singlemachine"
   rm -rf ${AIRFLOW_HOME}/*.err
   rm -rf ${AIRFLOW_HOME}/*.log
   rm -rf ${AIRFLOW_HOME}/logs/*
-  echo "y" | airflow resetdb
+  echo "y" | airflow db reset
+  airflow users create --username admin --password admin --firstname Anonymous --lastname Admin --role Admin --email admin@example.org
 else
   if [[ ${AIRFLOW_COMMAND} == "webserver" ]]; then
     echo "wait a bit more to let the scheduler do the database reset."

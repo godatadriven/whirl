@@ -9,11 +9,11 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 echo "============================"
 echo "== Configure Spark config =="
 echo "============================"
-airflow connections -a \
-    --conn_id spark_default \
-    --conn_type spark \
-    --conn_host local \
-    --conn_extra "{\"queue\": \"root.default\"}"
+airflow connections add \
+    spark_default \
+    --conn-type spark \
+    --conn-host local \
+    --conn-extra "{\"queue\": \"root.default\"}"
 
 SDK_AWS_VERSION=1.11.563
 HADOOP_AWS_VERSION=3.2.0

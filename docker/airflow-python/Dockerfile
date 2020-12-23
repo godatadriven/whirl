@@ -40,7 +40,6 @@ COPY nginx-ssl.conf /etc/nginx/conf.d/
 
 RUN echo "airflow ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER airflow
-
 EXPOSE 5000
 
 COPY --chown=airflow:airflow entrypoint.sh /entrypoint-whirl.sh

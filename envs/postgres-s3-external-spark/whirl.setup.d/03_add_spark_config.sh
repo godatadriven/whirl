@@ -7,13 +7,12 @@ sudo apt-get update && sudo apt-get install -y openjdk-11-jre
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 echo "============================"
-echo "== Configure Spark config =="
+echo "== Configure Spark configXXX =="
 echo "============================"
-airflow connections -a \
-    --conn_id spark_default \
-    --conn_type spark \
-    --conn_host "spark://sparkmaster:7077" \
-    --conn_extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
+airflow connections add spark_default \
+    --conn-type spark \
+    --conn-host "spark://sparkmaster:7077" \
+    --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
 
 SDK_AWS_VERSION=1.11.563
 HADOOP_AWS_VERSION=3.2.0
