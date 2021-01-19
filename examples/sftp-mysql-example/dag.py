@@ -1,8 +1,8 @@
 from datetime import timedelta, datetime
 from airflow import DAG
-from airflow.contrib.operators.sftp_operator import SFTPOperator, SFTPOperation
-from airflow.operators.python_operator import PythonOperator
-from airflow.hooks.mysql_hook import MySqlHook
+from airflow.providers.sftp.operators.sftp import SFTPOperator, SFTPOperation
+from airflow.operators.python import PythonOperator
+from airflow.providers.mysql.hooks.mysql import MySqlHook
 import pandas
 
 
