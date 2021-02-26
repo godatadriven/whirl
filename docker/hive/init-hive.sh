@@ -18,4 +18,4 @@ sleep 10
 
 #$HIVE_HOME/bin/hiveserver2 --hiveconf hive.root.logger=Info,console &
 
-/usr/bin/tail -f /dev/null
+/usr/bin/tail -f $HIVE_HOME/hcatalog/var/log/hcat.err -f $HIVE_HOME/hcatalog/var/log/hcat.out
