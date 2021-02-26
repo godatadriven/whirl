@@ -6,19 +6,19 @@
 </property>
 <property>
   <name>fs.s3a.endpoint</name>
-  <value>http://s3server:4563</value>
+  <value>http://AWS_SERVER:AWS_PORT</value>
 </property>
 <property>
   <name>fs.s3a.access.key</name>
-  <value>foo</value>
+  <value>AWS_ACCESS_KEY_ID</value>
 </property>
   <property>
     <name>fs.s3a.secret.key</name>
-    <value>bar</value>
+    <value>AWS_SECRET_ACCESS_KEY</value>
   </property>
 <property>
   <name>fs.defaultFS</name>
-  <value>s3a://demo-s3-output</value>
+  <value>s3a://HIVE_DW_BUCKET</value>
 </property>
 <property>
   <name>fs.s3a.path.style.access</name>
