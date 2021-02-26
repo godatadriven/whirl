@@ -21,4 +21,6 @@ RUN curl -o /usr/spark/jars/hadoop-aws-2.7.4.jar https://repo1.maven.org/maven2/
 RUN echo "spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem" > ${SPARK_HOME}/conf/spark-defaults.conf && \
   echo "spark.hadoop.fs.s3a.connection.ssl.enabled=false" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
   echo "spark.hadoop.fs.s3a.path.style.access=true" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
-  echo "spark.hadoop.fs.s3.impl=org.apache.hadoop.fs.s3a.S3AFileSystem" >> ${SPARK_HOME}/conf/spark-defaults.conf
+  echo "spark.hadoop.fs.s3.impl=org.apache.hadoop.fs.s3a.S3AFileSystem" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
+  echo "spark.sql.catalogImplementation=hive" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
+  echo "spark.hadoop.hive.metastore.uris=thrift://hive:9083" >> ${SPARK_HOME}/conf/spark-defaults.conf
