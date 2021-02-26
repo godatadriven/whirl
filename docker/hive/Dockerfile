@@ -1,5 +1,8 @@
 FROM openjdk:8-jre
 
+ENV HADOOP_AWS_CHECKSUM=acf05db5e92f79b287444c9e6bd71f27f125193c47ef59149460ef02ef73a72c
+ENV AWS_SDK_CHECKSUM=ab74b9bd8baf700bbb8c1270c02d87e570cd237af2464bafa9db87ca1401143a
+
 # Bootstrap
 RUN apt-get update \
  && apt-get install -y libpostgresql-jdbc-java procps libsasl2-modules libsasl2-dev \
@@ -37,8 +40,14 @@ RUN curl -L \
   && chmod 777 $HIVE_HOME/var/log
 
 # Configure
-ADD hive-site.xml $HIVE_CONF_DIR/
+ADD hive-site.xml core-site.xml $HIVE_CONF_DIR/
 ADD init-hive.sh /
+
+RUN curl -o $HIVE_HOME/lib/aws-java-sdk-1.7.4.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.7.4/aws-java-sdk-1.7.4.jar && \
+  echo "$AWS_SDK_CHECKSUM $HIVE_HOME/lib/aws-java-sdk-1.7.4.jar" | sha256sum -c -
+
+RUN curl -o $HIVE_HOME/lib/hadoop-aws-2.7.4.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.7.4/hadoop-aws-2.7.4.jar && \
+  echo "$HADOOP_AWS_CHECKSUM $HIVE_HOME/lib/hadoop-aws-2.7.4.jar" | sha256sum -c -
 
 RUN chmod +x /init-hive.sh
 

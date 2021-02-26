@@ -40,8 +40,18 @@ services:
     build:
       context: ${DOCKER_CONTEXT_FOLDER}/hive
       dockerfile: Dockerfile
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+      - DEMO_BUCKET
     ports:
       - 9083:9083
+    depends_on:
+      - s3server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
 
   sparkmaster:
     build:
