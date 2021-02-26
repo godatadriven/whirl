@@ -21,9 +21,10 @@ services:
 
 
   s3server:
-    build:
-      context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
-      dockerfile: Dockerfile
+    image: localstack/localstack-full:latest
+    #build:
+    #  context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
+    #  dockerfile: Dockerfile
     ports:
       - "4563-4584:4563-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
@@ -31,10 +32,13 @@ services:
       - SERVICES=s3
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - HIVE_DW_BUCKET
       - DEMO_BUCKET
       - AWS_SERVER
       - AWS_PORT
       - PORT_WEB_UI
+    volumes:
+      - ./aws.setup.d:/docker-entrypoint-initaws.d
 
   hive:
     build:
@@ -44,14 +48,15 @@ services:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_SERVER
+      - PORT_WEB_UI
       - AWS_PORT
-      - DEMO_BUCKET
+      - HIVE_DW_BUCKET
     ports:
       - 9083:9083
     depends_on:
       - s3server
     links:
-      - s3server:${DEMO_BUCKET}.s3server
+      - s3server:${HIVE_DW_BUCKET}.s3server
 
   sparkmaster:
     build:
