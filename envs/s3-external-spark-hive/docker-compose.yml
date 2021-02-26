@@ -36,6 +36,13 @@ services:
       - AWS_PORT
       - PORT_WEB_UI
 
+  hive:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/hive
+      dockerfile: Dockerfile
+    ports:
+      - 9083:9083
+
   sparkmaster:
     build:
       context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
