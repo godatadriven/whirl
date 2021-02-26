@@ -34,16 +34,12 @@ RUN curl -L \
   && mkdir -p /data/hive/ \
   && mkdir -p $HIVE_CONF_DIR \
   && chmod 777 $HIVE_HOME/hcatalog/var/log \
-  && chmod 777 $HIVE_HOME/var/log && \
-  # Install ^&%@#^$&@^$ gcs connector to metastore. If you don't do this you will be
-  #  sorry because the spark thrift server will claim it doesn't get the gs:// filepath.
-  curl -s -L --url "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.0.1.jar" \
-    --output $HIVE_HOME/lib/gcs-connector-latest-hadoop2.jar
+  && chmod 777 $HIVE_HOME/var/log
 
 # Configure
-ADD files/hive-site.xml files/core-site.xml $HIVE_CONF_DIR/
+ADD hive-site.xml $HIVE_CONF_DIR/
+ADD init-hive.sh /
 
-ADD files/init-hive.sh /
 RUN chmod +x /init-hive.sh
 
 EXPOSE 9083
