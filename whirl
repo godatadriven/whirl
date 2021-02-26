@@ -109,7 +109,7 @@ start() {
       export UNPAUSE_DAG=true
     fi
 
-    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build
+    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build --force-recreate
 
     if [ "${CI_MODE}" == true ]; then
       while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
