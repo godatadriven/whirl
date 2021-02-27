@@ -21,7 +21,7 @@ services:
 
 
   s3server:
-    image: localstack/localstack-full:latest
+    image: localstack/localstack:0.10.0
     #build:
     #  context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
     #  dockerfile: Dockerfile
@@ -37,6 +37,7 @@ services:
       - AWS_SERVER
       - AWS_PORT
       - PORT_WEB_UI
+      - DEBUG=true
     volumes:
       - ./aws.setup.d:/docker-entrypoint-initaws.d
 
