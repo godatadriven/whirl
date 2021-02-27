@@ -17,8 +17,12 @@
     <value>AWS_SECRET_ACCESS_KEY</value>
   </property>
 <property>
-  <name>fs.defaultFS</name>
-  <value>s3a://HIVE_DW_BUCKET</value>
+	<name>fs.default.name</name>
+	<value>s3a://HIVE_DW_BUCKET</value>
+</property>
+<property>
+	<name>fs.defaultFS</name>
+	<value>s3a://HIVE_DW_BUCKET</value>
 </property>
 <property>
   <name>fs.s3a.path.style.access</name>
