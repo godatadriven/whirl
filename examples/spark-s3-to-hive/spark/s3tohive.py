@@ -1,19 +1,10 @@
-import os
 import argparse
 from pyspark.sql import SparkSession
 
 
 def run_job(spark, input_path, output_table):
     df = spark.read.json(input_path)
-
-    # jdbc_url = "jdbc:postgresql://{0}:{1}/{2}?user={3}&password={4}".format(
-    #     os.environ.get('POSTGRES_HOST'),
-    #     os.environ.get('POSTGRES_PORT'),
-    #     os.environ.get('POSTGRES_DB'),
-    #     os.environ.get('POSTGRES_USER'),
-    #     os.environ.get('POSTGRES_PASSWORD')
-    # )
-    # df.write.jdbc(jdbc_url, output_table)
+    df.write.saveAsTable(output_table)
 
 
 if __name__ == "__main__":

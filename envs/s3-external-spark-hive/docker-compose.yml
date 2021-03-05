@@ -21,7 +21,7 @@ services:
 
 
   s3server:
-    image: localstack/localstack:0.10.0
+    image: localstack/localstack-full:0.12.7
     #build:
     #  context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
     #  dockerfile: Dockerfile
@@ -30,6 +30,7 @@ services:
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
       - SERVICES=s3
+      - EDGE_PORT=4563
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - HIVE_DW_BUCKET
