@@ -97,8 +97,47 @@ services:
     entrypoint:
       - /usr/spark/sbin/start-slave.sh
       - spark://sparkmaster:7077
+      - "-m"
+      - "8G"
     depends_on:
       - sparkmaster
+      - hive
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkthrift:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    entrypoint:
+      - /usr/spark/sbin/start-thriftserver.sh
+      - "--master"
+      - spark://sparkmaster:7077
+      - "--num-executors"
+      - "2"
+      - "--executor-cores"
+      - "1"
+      # - "--executor-memory"
+      # - "512M"
+      # - "--conf"
+      # - "spark.dynamicAllocation.enabled=false"
+      # - "--conf"
+      # - "spark.dynamicAllocation.initialExecutors=1"
+      # - "--conf"
+      # - "spark.dynamicAllocation.minExecutors=1"
+      # - "--conf"
+      # - "spark.dynamicAllocation.maxExecutors=2"
+    depends_on:
+      - sparkmaster
+      - sparkworker
       - hive
     links:
       - s3server:${DEMO_BUCKET}.s3server
