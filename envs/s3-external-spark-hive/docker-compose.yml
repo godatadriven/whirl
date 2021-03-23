@@ -125,6 +125,8 @@ services:
       - "2"
       - "--executor-cores"
       - "1"
+      - "--total-executor-cores"
+      - "2"
       # - "--executor-memory"
       # - "512M"
       # - "--conf"
