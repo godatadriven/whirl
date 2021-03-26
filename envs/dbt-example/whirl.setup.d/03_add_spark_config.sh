@@ -14,10 +14,12 @@ airflow connections -a \
     --conn_type spark \
     --conn_host "spark://sparkmaster:7077" \
     --conn_extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
+SDK_AWS_VERSION=1.11.563
+HADOOP_AWS_VERSION=3.2.0
 
 POSTGRES_JDBC_CHECKSUM=7ffa46f8c619377cdebcd17721b6b21ecf6659850179f96fec3d1035cf5a0cdc
-HADOOP_AWS_CHECKSUM=acf05db5e92f79b287444c9e6bd71f27f125193c47ef59149460ef02ef73a72c
-AWS_SDK_CHECKSUM=ab74b9bd8baf700bbb8c1270c02d87e570cd237af2464bafa9db87ca1401143a
+SDK_AWS_CHECKSUM=b323857424e133b44c1156a184dc3a83fa152b656f2e320a71b5637a854822d5
+HADOOP_AWS_CHECKSUM=ceac8724f8bb47d2f039eaecf4ee147623b46e4bbf26ddf73a9bb8808743655e
 
 pip install pyspark==${SPARK_VERSION}
 export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
@@ -25,12 +27,11 @@ echo "-------------------------------"
 echo "SPARK_HOME set to ${SPARK_HOME}"
 echo "-------------------------------"
 
-curl -o ${SPARK_HOME}/jars/aws-java-sdk-1.7.4.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.7.4/aws-java-sdk-1.7.4.jar && \
-  echo "$AWS_SDK_CHECKSUM ${SPARK_HOME}/jars/aws-java-sdk-1.7.4.jar" | sha256sum -c -
-
 curl -o ${SPARK_HOME}/jars/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
   echo "$POSTGRES_JDBC_CHECKSUM ${SPARK_HOME}/jars/postgresql-42.2.5.jar" | sha256sum -c -
 
-curl -o ${SPARK_HOME}/jars/hadoop-aws-2.7.4.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.7.4/hadoop-aws-2.7.4.jar && \
-  echo "$HADOOP_AWS_CHECKSUM ${SPARK_HOME}/jars/hadoop-aws-2.7.4.jar" | sha256sum -c -
+curl -o ${SPARK_HOME}/jars/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${SDK_AWS_VERSION}/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar && \
+  echo "$SDK_AWS_CHECKSUM ${SPARK_HOME}/jars/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar" | sha256sum -c -
 
+curl -o ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_AWS_VERSION}.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar && \
+  echo "$HADOOP_AWS_CHECKSUM ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_AWS_VERSION}.jar" | sha256sum -c -

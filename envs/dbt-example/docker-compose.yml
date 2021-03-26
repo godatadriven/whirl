@@ -23,20 +23,20 @@ services:
       - s3server:${DBT_BUCKET}.s3server
 
   s3server:
-    build:
-      context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
-      dockerfile: Dockerfile
+    image: localstack/localstack-full:0.12.8
     ports:
       - "4563-4584:4563-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
       - SERVICES=s3
+      - EDGE_PORT=4563
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - DBT_BUCKET
       - AWS_SERVER
       - AWS_PORT
       - PORT_WEB_UI
+      - DEBUG=true
 
   postgresdb:
     image: postgres:13

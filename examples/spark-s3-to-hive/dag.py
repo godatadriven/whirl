@@ -57,4 +57,6 @@ spark = SparkSubmitOperator(
 # )
 
 # spark >> check
+# TODO: Can we use great expectations to do the check here?
+
 spark

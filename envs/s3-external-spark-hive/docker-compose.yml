@@ -22,9 +22,6 @@ services:
 
   s3server:
     image: localstack/localstack-full:0.12.8
-    #build:
-    #  context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
-    #  dockerfile: Dockerfile
     ports:
       - "4563-4584:4563-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
