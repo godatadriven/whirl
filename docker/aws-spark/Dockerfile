@@ -21,9 +21,7 @@ RUN curl -o /usr/spark/jars/hadoop-aws-$HADOOP_AWS_VERSION.jar https://repo1.mav
 RUN curl -o /usr/spark/jars/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
   echo "$POSTGRES_JDBC_CHECKSUM /usr/spark/jars/postgresql-42.2.5.jar" | sha256sum -c -
 
-RUN echo "spark.sql.catalogImplementation=hive" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
-  echo "spark.hadoop.hive.metastore.uris=thrift://hive:9083" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
-  echo "spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem" > ${SPARK_HOME}/conf/spark-defaults.conf && \
+RUN echo "spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem" > ${SPARK_HOME}/conf/spark-defaults.conf && \
   echo "spark.hadoop.fs.s3a.connection.ssl.enabled=false" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
   echo "spark.hadoop.fs.s3a.path.style.access=true" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
   echo "spark.hadoop.fs.s3a.multipart.size=104857600" >> ${SPARK_HOME}/conf/spark-defaults.conf

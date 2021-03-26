@@ -21,7 +21,7 @@ services:
 
 
   s3server:
-    image: localstack/localstack-full:0.12.7
+    image: localstack/localstack-full:0.12.8
     #build:
     #  context: ${DOCKER_CONTEXT_FOLDER}/patched-localstack
     #  dockerfile: Dockerfile
@@ -31,6 +31,7 @@ services:
     environment:
       - SERVICES=s3
       - EDGE_PORT=4563
+      - DATA_DIR=/tmp/localstack/data
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - HIVE_DW_BUCKET
@@ -41,6 +42,7 @@ services:
       - DEBUG=true
     volumes:
       - ./aws.setup.d:/docker-entrypoint-initaws.d
+      - ./.s3-mount:/tmp/localstack
 
   hive:
     build:
@@ -94,6 +96,8 @@ services:
       - AWS_SECRET_ACCESS_KEY
       - AWS_SERVER
       - AWS_PORT
+    ports:
+      - 18081:8081
     entrypoint:
       - /usr/spark/sbin/start-slave.sh
       - spark://sparkmaster:7077
@@ -127,16 +131,18 @@ services:
       - "1"
       - "--total-executor-cores"
       - "2"
-      # - "--executor-memory"
-      # - "512M"
-      # - "--conf"
-      # - "spark.dynamicAllocation.enabled=false"
-      # - "--conf"
-      # - "spark.dynamicAllocation.initialExecutors=1"
-      # - "--conf"
-      # - "spark.dynamicAllocation.minExecutors=1"
-      # - "--conf"
-      # - "spark.dynamicAllocation.maxExecutors=2"
+      - "--conf"
+      - "spark.hadoop.hive.metastore.uris=thrift://hive:9083"
+      - "--conf"
+      - "spark.hadoop.hive.metastore.connect.retries=10"
+      - "--conf"
+      - "spark.hadoop.hive.metastore.client.connect.retry.delay=5"
+      - "--conf"
+      - "spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID}"
+      - "--conf"
+      - "spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY}"
+      - "--conf"
+      - "spark.hadoop.fs.s3a.endpoint=${AWS_SERVER}:${AWS_PORT}"
     depends_on:
       - sparkmaster
       - sparkworker
