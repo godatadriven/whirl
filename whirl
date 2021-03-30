@@ -2,7 +2,7 @@
 AIRFLOW_UI_PORT=5000
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 
-set -ev
+set -e
 # load and export environment variables
 # priority order:
 #     .whirl.env in home directory
@@ -98,10 +98,25 @@ test_dag_state() {
   echo "$result"
 }
 
+run_compose_setup_scripts() {
+  if [[ -d ${ENVIRONMENT_FOLDER}/compose.setup.d ]]; then
+    echo "============================================"
+    echo "== Setup docker-compose specifics =========="
+    echo "============================================"
+    for filename in ${ENVIRONMENT_FOLDER}/compose.setup.d/*.sh; do
+      echo "Executing compose prepare script: $filename"
+      . "$filename"
+    done
+  fi
+}
+
 start() {
     echo "Starting airflow local run for environment ${WHIRL_ENVIRONMENT}"
 
-    docker build --build-arg PYTHON_VERSION=${PYTHON_VERSION} -t docker-whirl-airflow:py-${PYTHON_VERSION}-local "${SCRIPT_DIR}/docker/airflow-python"
+    # Possible cleanup before starting
+    run_compose_setup_scripts
+
+    docker build --build-arg PYTHON_VERSION=${PYTHON_VERSION} --build-arg AIRFLOW_VERSION=${AIRFLOW_VERSION} -t docker-whirl-airflow:py-${PYTHON_VERSION}-local "${SCRIPT_DIR}/docker/airflow-python"
 
     DAEMON=""
     if [ "${CI_MODE}" == true ]; then
@@ -109,7 +124,7 @@ start() {
       export UNPAUSE_DAG=true
     fi
 
-    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build
+    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build --force-recreate
 
     if [ "${CI_MODE}" == true ]; then
       while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
@@ -140,11 +155,17 @@ stop() {
   docker-compose -f "${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}/docker-compose.yml" down --volumes --rmi local --remove-orphans
 }
 
+logs() {
+  echo "Showing logs of airflow-localrun service ${WHIRL_SERVICE_NAME}"
+  docker-compose -f "${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}/docker-compose.yml" logs -f ${WHIRL_SERVICE_NAME}
+}
+
 usage() {
   echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop|ci]"
   echo "  -h|--help                          display usage"
   echo "  -e|--environment environment       specify environment to use"
   echo "  -d|--directory environment_folder  specify the folder that contains the environments (defaults to SCRIPT_DIR)"
+  echo "  -l|--logs servicename              tail the logs of the service"
   echo "  start|stop                         start or stop all"
   echo "  ci                                 runs in daemonized mode and awaits dag run completion"
   exit 1
@@ -162,6 +183,12 @@ function read_arguments() {
           ;;
       -d|--directory)
           WHIRL_ENVIRONMENT_DIR_ARG="${2}"
+          shift # past argument
+          shift # past value
+          ;;
+      -l|--logs)
+          LOGS=true
+          WHIRL_SERVICE_NAME="${2}"
           shift # past argument
           shift # past value
           ;;
@@ -194,10 +221,14 @@ function main() {
   if detect_potential_dag; then
     export_environment_vars
 
-    if [ -z "${STOP}" ]; then
-      start
+    if [ -z "${LOGS}" ]; then
+      if [ -z "${STOP}" ]; then
+        start
+      else
+        stop
+      fi
     else
-      stop
+      logs
     fi
   else
     echo "No .py or .zip files found that may contain an Apache Airflow DAG"

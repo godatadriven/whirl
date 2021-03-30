@@ -1,0 +1,148 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${MOCK_DATA_FOLDER}:/mock-data
+    depends_on:
+      - s3server
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+
+  s3server:
+    image: localstack/localstack-full:0.12.8
+    ports:
+      - "4563-4584:4563-4584"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=s3
+      - EDGE_PORT=4563
+      - DATA_DIR=/tmp/localstack/data
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - HIVE_DW_BUCKET
+      - DEMO_BUCKET
+      - AWS_SERVER
+      - AWS_PORT
+      - PORT_WEB_UI
+      - DEBUG=true
+    volumes:
+      - ./aws.setup.d:/docker-entrypoint-initaws.d
+      - ./.s3-mount:/tmp/localstack
+
+  hive:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/hive
+      dockerfile: Dockerfile
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - PORT_WEB_UI
+      - AWS_PORT
+      - HIVE_DW_BUCKET
+    ports:
+      - 9083:9083
+    depends_on:
+      - s3server
+    links:
+      - s3server:${HIVE_DW_BUCKET}.s3server
+
+  sparkmaster:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 7077:7077
+      - 18080:8080
+    entrypoint:
+      - /usr/spark/sbin/start-master.sh
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+    depends_on:
+      - hive
+
+  sparkworker:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 18081:8081
+    entrypoint:
+      - /usr/spark/sbin/start-slave.sh
+      - spark://sparkmaster:7077
+      - "-m"
+      - "8G"
+    depends_on:
+      - sparkmaster
+      - hive
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkthrift:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    entrypoint:
+      - /usr/spark/sbin/start-thriftserver.sh
+      - "--master"
+      - spark://sparkmaster:7077
+      - "--num-executors"
+      - "2"
+      - "--executor-cores"
+      - "1"
+      - "--total-executor-cores"
+      - "2"
+      - "--conf"
+      - "spark.hadoop.hive.metastore.uris=thrift://hive:9083"
+      - "--conf"
+      - "spark.hadoop.hive.metastore.connect.retries=10"
+      - "--conf"
+      - "spark.hadoop.hive.metastore.client.connect.retry.delay=5"
+      - "--conf"
+      - "spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID}"
+      - "--conf"
+      - "spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY}"
+      - "--conf"
+      - "spark.hadoop.fs.s3a.endpoint=${AWS_SERVER}:${AWS_PORT}"
+    depends_on:
+      - sparkmaster
+      - sparkworker
+      - hive
+    links:
+      - s3server:${DEMO_BUCKET}.s3server

@@ -1,0 +1,4 @@
+.idea
+dbt_modules
+logs
+target

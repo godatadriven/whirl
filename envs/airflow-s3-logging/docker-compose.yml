@@ -21,12 +21,14 @@ services:
       - s3server:${DEMO_BUCKET}.s3server
 
   s3server:
-    image: atlassianlabs/localstack:0.6.2
+    image: localstack/localstack-full:0.12.8
     ports:
       - "4563-4584:4563-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
-    env_file:
-      - .whirl.env
     environment:
       - SERVICES=s3
+      - EDGE_PORT=4563
+      - DEMO_BUCKET
+    env_file:
+      - .whirl.env
 

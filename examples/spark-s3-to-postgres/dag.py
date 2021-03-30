@@ -4,6 +4,7 @@ from airflow import DAG
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 from airflow.operators.check_operator import CheckOperator
 
+
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
 DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"

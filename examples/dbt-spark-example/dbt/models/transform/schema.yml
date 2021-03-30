@@ -1,0 +1,19 @@
+version: 2
+
+models:
+
+  - name: flights_per_carrier
+    description: 'Number of flights per carrier'
+    columns:
+      - name: carrier_id
+        tests:
+          - relationships:
+              to: ref('carriers_dbt')
+              field: carrier_id
+      - name: carrier_name
+        tests:
+          - relationships:
+              to: ref('carriers_dbt')
+              field: carrier_name
+      - name: n_flights
+        
