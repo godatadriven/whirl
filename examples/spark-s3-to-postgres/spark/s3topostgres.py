@@ -13,7 +13,7 @@ def run_job(spark, input_path, output_table):
         os.environ.get('POSTGRES_USER'),
         os.environ.get('POSTGRES_PASSWORD')
     )
-    df.write.jdbc(jdbc_url, output_table)
+    df.write.jdbc(jdbc_url, output_table, 'overwrite')
 
 
 if __name__ == "__main__":
