@@ -23,3 +23,5 @@ sudo sh -c 'echo "ALL: localhost" >> /etc/hosts.allow'
 
 sudo service ssh restart
 ssh-keyscan -H localhost >> ${HOME}/.ssh/known_hosts
+
+pip install apache-airflow-providers-ssh

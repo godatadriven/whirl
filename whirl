@@ -148,6 +148,9 @@ start() {
         fi
       fi
     fi
+
+    echo "Closing down the environment"
+    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" down
 }
 
 stop() {

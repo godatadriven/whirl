@@ -9,6 +9,5 @@ airflow connections add local_pg \
           --conn-port ${POSTGRES_PORT} \
           --conn-login ${POSTGRES_USER} \
           --conn-password ${POSTGRES_PASSWORD} \
-          --conn-schema ${POSTGRES_DB} \
-          --conn-extra "{\"conn-prefix\": \"jdbc:postgresql://\"}"
+          --conn-schema ${POSTGRES_DB}
 

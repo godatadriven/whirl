@@ -4,8 +4,7 @@ echo "=============================="
 echo "== Configure API Connection =="
 echo "=============================="
 
-airflow connections add \
-          local_api \
+airflow connections add local_api \
           --conn-type HTTP \
           --conn-host "http://mockserver:1080/testapi" \
           --conn-login apitest \

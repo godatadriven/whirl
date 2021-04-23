@@ -17,6 +17,7 @@ default_args = {
 }
 
 BUCKET = os.environ.get('DEMO_BUCKET')
+HIVE_DW_BUCKET = os.environ.get('HIVE_DW_BUCKET')
 FILE = 's3://{bucket}/input/data/demo/spark/{date}/'.format(
     bucket=BUCKET,
     date=DAGRUN_EXECUTION_DATE
@@ -29,13 +30,17 @@ dag = DAG(dag_id='spark-s3-to-hive',
           dagrun_timeout=timedelta(seconds=120))
 
 spark_conf = {
+    'spark.sql.catalogImplementation': 'hive',
+    'spark.hadoop.hive.metastore.uris': 'thrift://hive:9083',
+    'spark.hadoop.fs.defaultFS': "s3a://{}".format(HIVE_DW_BUCKET),
     'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
     'spark.hadoop.fs.s3a.access.key': os.environ.get('AWS_ACCESS_KEY_ID', ''),
     'spark.hadoop.fs.s3a.secret.key': os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
     'spark.hadoop.fs.s3a.endpoint': "{}:{}".format(os.environ.get('AWS_SERVER', ''), os.environ.get('AWS_PORT', '')),
     'spark.hadoop.fs.s3a.connection.ssl.enabled': 'false',
     'spark.hadoop.fs.s3a.path.style.access': 'true',
-    'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem'
+    'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
+    'spark.hadoop.fs.s3a.multipart.size': '104857600'
 }
 
 spark = SparkSubmitOperator(
