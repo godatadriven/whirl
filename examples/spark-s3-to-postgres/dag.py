@@ -1,8 +1,8 @@
 import os
 from datetime import timedelta, datetime
 from airflow import DAG
-from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
-from airflow.operators.check_operator import CheckOperator
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.operators.sql import SQLCheckOperator
 
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
@@ -49,7 +49,7 @@ spark = SparkSubmitOperator(
     ]
 )
 
-check = CheckOperator(
+check = SQLCheckOperator(
     task_id='check_demo_contains_data',
     conn_id='local_pg',
     sql='SELECT COUNT(*) FROM {table}'.format(table=TABLE),

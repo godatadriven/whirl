@@ -4,10 +4,10 @@ echo "====================="
 echo "== Configure MySQL =="
 echo "====================="
 
-airflow connections -a --conn_id mysql_connection \
-                       --conn_type mysql \
-                       --conn_schema my_database \
-                       --conn_host mysql \
-                       --conn_login $MYSQL_USER \
-                       --conn_port 3306 \
-                       --conn_password $MYSQL_PASSWORD
+airflow connections add mysql_connection \
+                       --conn-type mysql \
+                       --conn-schema my_database \
+                       --conn-host mysql \
+                       --conn-login $MYSQL_USER \
+                       --conn-port 3306 \
+                       --conn-password $MYSQL_PASSWORD

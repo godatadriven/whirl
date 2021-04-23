@@ -4,7 +4,11 @@ echo "======================================"
 echo "== Configure SSH ====================="
 echo "======================================"
 
-airflow connections -a --conn_id local_ssh --conn_type SSH --conn_host localhost --conn_login airflow --conn_port 22
+airflow connections add local_ssh \
+    --conn-type SSH \
+    --conn-host localhost \
+    --conn-login airflow \
+    --conn-port 22
 
 # Enable SSH to localhost and install postgresql-client
 mkdir -p ${HOME}/.ssh
@@ -19,3 +23,5 @@ sudo sh -c 'echo "ALL: localhost" >> /etc/hosts.allow'
 
 sudo service ssh restart
 ssh-keyscan -H localhost >> ${HOME}/.ssh/known_hosts
+
+pip install apache-airflow-providers-ssh

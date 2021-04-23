@@ -80,9 +80,13 @@ services:
       - AWS_SECRET_ACCESS_KEY
       - AWS_SERVER
       - AWS_PORT
+    ports:
+      - 18081:8081
     entrypoint:
       - /usr/spark/sbin/start-slave.sh
       - spark://sparkmaster:7077
+      - "-m"
+      - "8G"
     depends_on:
       - sparkmaster
     links:

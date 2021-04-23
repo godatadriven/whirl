@@ -9,11 +9,10 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 echo "============================"
 echo "== Configure Spark config =="
 echo "============================"
-airflow connections -a \
-    --conn_id spark_default \
-    --conn_type spark \
-    --conn_host local \
-    --conn_extra "{\"queue\": \"root.default\"}"
+airflow connections add spark_default \
+    --conn-type spark \
+    --conn-host local \
+    --conn-extra "{\"queue\": \"root.default\"}"
 
 SDK_AWS_VERSION=1.11.563
 HADOOP_AWS_VERSION=3.2.0
@@ -23,6 +22,8 @@ SDK_AWS_CHECKSUM=b323857424e133b44c1156a184dc3a83fa152b656f2e320a71b5637a854822d
 HADOOP_AWS_CHECKSUM=ceac8724f8bb47d2f039eaecf4ee147623b46e4bbf26ddf73a9bb8808743655e
 
 pip install pyspark==${SPARK_VERSION}
+pip install apache-airflow-providers-apache-spark
+
 export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
 echo "-------------------------------"
 echo "SPARK_HOME set to ${SPARK_HOME}"

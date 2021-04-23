@@ -3,10 +3,9 @@
 echo "============================="
 echo "== Configure S3 Connection =="
 echo "============================="
-airflow connections -a \
-          --conn_id local_s3 \
-          --conn_type s3 \
-          --conn_extra "{\"endpoint_url\": \"http://${AWS_SERVER}:${AWS_PORT}\",
+airflow connections add local_s3 \
+          --conn-type s3 \
+          --conn-extra "{\"endpoint_url\": \"http://${AWS_SERVER}:${AWS_PORT}\",
                          \"aws_secret_access_key\": \"${AWS_SECRET_ACCESS_KEY}\",
                          \"aws_access_key_id\": \"${AWS_ACCESS_KEY_ID}\",
                          \"host\": \"http://${AWS_SERVER}:${AWS_PORT}\"

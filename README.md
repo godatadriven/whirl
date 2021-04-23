@@ -23,6 +23,9 @@ brew install jq
 
 The current implementation was developed on macOS but is intended to work with any platform supported by Docker. In our experience, Linux and macOS are fine. You can run it on native Windows 10 using [WSL](https://docs.microsoft.com/en-us/windows/wsl/about). Unfortunately, Docker on Windows 10 (version 1809) is hamstrung because it relies on Windows File Sharing (CIFS) to establish the volume mounts. Airflow hammers the volume a little harder than CIFS can handle, and you'll see intermittent FileNotFound errors in the volume mount. This may improve in the future. For now, running _whirl_ inside a Linux VM in Hyper-V gives more reliable results.
 
+### Airflow Versions
+As of January 2021, Whirl uses Airflow 2.0.0 as the default version. A specific tag was made for Airflow 1.10.x, which can be found [here](https://github.com/godatadriven/whirl/tree/airflow-1.10.x)
+
 ## Getting Started
 
 Clone this repository:

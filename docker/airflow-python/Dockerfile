@@ -1,12 +1,11 @@
-ARG AIRFLOW_VERSION=1.10.12
+ARG AIRFLOW_VERSION=2.0.2
 ARG PYTHON_VERSION=3.7
 FROM apache/airflow:${AIRFLOW_VERSION}-python${PYTHON_VERSION}
 
 USER root
 
-ARG AIRFLOW_VERSION=1.10.12
+ARG AIRFLOW_VERSION=2.0.2
 ENV AIRFLOW_VERSION=${AIRFLOW_VERSION}
-#ENV AIRFLOW_HOME /usr/local/airflow
 ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -33,14 +32,8 @@ RUN mkdir -p /etc/nginx/ssl \
 
 COPY nginx-ssl.conf /etc/nginx/conf.d/
 
-# Harden Image
-#COPY harden.sh .
-#RUN chmod +x harden.sh && \
-#    sh harden.sh airflow
-
 RUN echo "airflow ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER airflow
-
 EXPOSE 5000
 
 COPY --chown=airflow:airflow entrypoint.sh /entrypoint-whirl.sh

@@ -4,12 +4,11 @@ echo "=============================="
 echo "== Configure API Connection =="
 echo "=============================="
 
-airflow connections -a \
-          --conn_id local_api \
-          --conn_type HTTP \
-          --conn_host "http://mockserver:1080/testapi" \
-          --conn_login apitest \
-          --conn_password testapi
+airflow connections add local_api \
+          --conn-type HTTP \
+          --conn-host "http://mockserver:1080/testapi" \
+          --conn-login apitest \
+          --conn-password testapi
 
 
 # Creating a expectation for our mockserver to respond to a specific api rest call with a fixed set of JSON data
