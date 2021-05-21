@@ -8,6 +8,8 @@ services:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:
       - .whirl.env
+    environment:
+      - AIRFLOW__API__AUTH_BACKEND
     volumes:
       - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/

@@ -23,7 +23,7 @@ services:
       - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
-      - UNPAUSE_DAG
+      - AIRFLOW__API__AUTH_BACKEND
     volumes:
       - $DAG_FOLDER:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
