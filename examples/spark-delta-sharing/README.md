@@ -1,5 +1,9 @@
 # Delta sharing experiment
 
+## Preparation
+
+We need the docker container for delta server. It can be build from the [github repo](git@github.com:delta-io/delta-sharing.git) with the command `build.sbt docker:publishLocal` for now. It might become available on docker-hub
+
 ## First experiments without airflow
 
 `docker exec -ti s3-spark-delta-sharing_airflow_1 /bin/bash`
