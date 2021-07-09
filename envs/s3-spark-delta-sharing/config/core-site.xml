@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+<property>
+  <name>fs.s3.awsAccessKeyId</name>
+  <value>test</value>
+</property>
+
+<property>
+  <name>fs.s3.awsSecretAccessKey</name>
+  <value>test</value>
+</property>
+
+<property>
+  <name>fs.s3n.awsAccessKeyId</name>
+  <value>test</value>
+</property>
+
+<property>
+  <name>fs.s3n.awsSecretAccessKey</name>
+  <value>test</value>
+</property>
+
+<property>
+  <name>fs.s3a.access.key</name>
+  <value>test</value>
+</property>
+
+<property>
+  <name>fs.s3a.secret.key</name>
+  <value>test</value>
+</property>
+
+<property>
+  <name>fs.s3a.connection.ssl.enabled</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>fs.s3a.endpoint</name>
+  <value>s3server:4563</value>
+</property>
+
+<property>
+  <name>fs.s3a.path.style.access</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>fs.s3a.impl</name>
+  <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+</property>
+
+<property>
+  <name>fs.s3.impl</name>
+  <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+</property>
+
+</configuration>
