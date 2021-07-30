@@ -2,8 +2,24 @@ import os
 from datetime import timedelta, datetime
 from airflow import DAG
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
-from airflow.operators.check_operator import CheckOperator
+from airflow.operators.python_operator import PythonOperator
 
+import delta_sharing
+import logging
+
+
+def _check_sharing_pandas(templates_dict, **context):
+    logging.basicConfig(level=logging.DEBUG)
+
+    profile_file = "file:///opt/airflow/delta.profile"
+
+    client = delta_sharing.SharingClient(profile_file)
+    print(client.list_all_tables())
+
+    table_url = profile_file + f"#airflow.spark.{templates_dict['table']}"
+
+    sharingDF = delta_sharing.load_as_pandas(table_url)
+    print(sharingDF.head())
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
@@ -22,7 +38,9 @@ FILE = 's3://{bucket}/input/data/demo/spark/{date}/'.format(
     bucket=BUCKET,
     date=DAGRUN_EXECUTION_DATE
 )
-DELTA_TABLE = 's3://{bucket}/output/data/demo/spark/delta/'.format(
+DELTA_TABLE = 's3://{bucket}/output/data/demo/spark/cars/'.format(
+    bucket=BUCKET)
+DELTA_NP_TABLE = 's3://{bucket}/output/data/demo/spark/cars-all/'.format(
     bucket=BUCKET)
 
 dag = DAG(dag_id='spark-s3-to-delta-with-delta-sharing',
@@ -61,6 +79,17 @@ spark = SparkSubmitOperator(
     ]
 )
 
+spark_np = SparkSubmitOperator(
+    task_id='fetch_csv_from_s3_and_save_as_delta-nonpartiotioned',
+    dag=dag,
+    conf=spark_conf,
+    application='{spark_dir}/s3todelta-nonpartitioned.py'.format(spark_dir=SPARK_DIRECTORY),
+    application_args=[
+        '-i', FILE,
+        '-o', DELTA_NP_TABLE
+    ]
+)
+
 delta = SparkSubmitOperator(
     task_id='read_through_delta_sharing',
     dag=dag,
@@ -71,14 +100,33 @@ delta = SparkSubmitOperator(
         '-t', 'cars'
     ]
 )
-# check = CheckOperator(
-#     task_id='check_demo_contains_data',
-#     conn_id='local_pg',
-#     sql='SELECT COUNT(*) FROM {table}'.format(table=TABLE),
-#     dag=dag
-# )
 
-# spark >> check
-# TODO: Can we use great expectations to do the check here?
+delta_np = SparkSubmitOperator(
+    task_id='read_through_delta_sharing_non_partitioned',
+    dag=dag,
+    conf=spark_sharing_conf,
+    application='{spark_dir}/readdeltasharing.py'.format(spark_dir=SPARK_DIRECTORY),
+    application_args=[
+        '-s', 'spark',
+        '-t', 'cars-all'
+    ]
+)
 
-spark >> delta
+pandas_share_cars = PythonOperator(
+    task_id="pandas_share_cars",
+    python_callable=_check_sharing_pandas,
+    templates_dict={"table": "cars"},
+    provide_context=True,
+    dag=dag,
+)
+
+pandas_share_cars_np = PythonOperator(
+    task_id="pandas_share_cars_np",
+    python_callable=_check_sharing_pandas,
+    templates_dict={"table": "cars-all"},
+    provide_context=True,
+    dag=dag,
+)
+
+spark >> delta >> pandas_share_cars
+spark_np >> delta_np >> pandas_share_cars_np

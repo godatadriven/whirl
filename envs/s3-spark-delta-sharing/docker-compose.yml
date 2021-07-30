@@ -21,7 +21,7 @@ services:
 
 
   s3server:
-    image: localstack/localstack-full:0.12.13
+    image: localstack/localstack-full:0.12.15
     ports:
       - "4563-4584:4563-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
@@ -31,7 +31,6 @@ services:
       - DATA_DIR=/tmp/localstack/data
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
-      - HIVE_DW_BUCKET
       - DEMO_BUCKET
       - AWS_SERVER
       - AWS_PORT
@@ -43,7 +42,8 @@ services:
       - ./.s3-mount:/tmp/localstack
 
   delta:
-    image: delta-sharing-server:0.2.0-SNAPSHOT
+    # image: delta-sharing-server:0.2.0-SNAPSHOT
+    image: krisgeus/delta-sharing:0.2.0-SNAPSHOT
     command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
     ports:
       - 38080:8080
@@ -52,24 +52,6 @@ services:
       # - JAVA_OPTS=-Dlog4j.debug=true -Dlog4j.logLevel=DEBUG -Dlog4j.configuration=file:///opt/docker/conf/log4j.properties -Dlog4j.configurationFile=file:///opt/docker/conf/log4j.properties
     volumes:
       - ./config/:/opt/docker/conf/
-
-  hive:
-    build:
-      context: ${DOCKER_CONTEXT_FOLDER}/hive
-      dockerfile: Dockerfile
-    environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_SERVER
-      - PORT_WEB_UI
-      - AWS_PORT
-      - HIVE_DW_BUCKET
-    ports:
-      - 9083:9083
-    depends_on:
-      - s3server
-    links:
-      - s3server:${HIVE_DW_BUCKET}.s3server
 
   sparkmaster:
     build:
@@ -90,8 +72,6 @@ services:
       - /usr/spark/sbin/start-master.sh
     links:
       - s3server:${DEMO_BUCKET}.s3server
-    depends_on:
-      - hive
 
   sparkworker:
     build:
@@ -114,48 +94,6 @@ services:
       - "8G"
     depends_on:
       - sparkmaster
-      - hive
-    links:
-      - s3server:${DEMO_BUCKET}.s3server
-
-  sparkthrift:
-    build:
-      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
-      dockerfile: Dockerfile
-      args:
-        - SPARK_VERSION=${SPARK_VERSION}
-    environment:
-      - SPARK_NO_DAEMONIZE=true
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_SERVER
-      - AWS_PORT
-    entrypoint:
-      - /usr/spark/sbin/start-thriftserver.sh
-      - "--master"
-      - spark://sparkmaster:7077
-      - "--num-executors"
-      - "2"
-      - "--executor-cores"
-      - "1"
-      - "--total-executor-cores"
-      - "2"
-      - "--conf"
-      - "spark.hadoop.hive.metastore.uris=thrift://hive:9083"
-      - "--conf"
-      - "spark.hadoop.hive.metastore.connect.retries=10"
-      - "--conf"
-      - "spark.hadoop.hive.metastore.client.connect.retry.delay=5"
-      - "--conf"
-      - "spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID}"
-      - "--conf"
-      - "spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY}"
-      - "--conf"
-      - "spark.hadoop.fs.s3a.endpoint=${AWS_SERVER}:${AWS_PORT}"
-    depends_on:
-      - sparkmaster
-      - sparkworker
-      - hive
     links:
       - s3server:${DEMO_BUCKET}.s3server
 

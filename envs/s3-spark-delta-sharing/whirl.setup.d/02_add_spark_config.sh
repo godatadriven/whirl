@@ -22,8 +22,6 @@ SDK_AWS_CHECKSUM=b323857424e133b44c1156a184dc3a83fa152b656f2e320a71b5637a854822d
 HADOOP_AWS_CHECKSUM=ceac8724f8bb47d2f039eaecf4ee147623b46e4bbf26ddf73a9bb8808743655e
 
 pip install pyspark==${SPARK_VERSION}
-pip install delta-spark==${DELTA_VERSION}
-pip install delta-sharing
 pip install apache-airflow-providers-apache-spark
 
 export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
