@@ -24,32 +24,34 @@ services:
     image: localstack/localstack-full:0.12.15
     ports:
       - "4563-4584:4563-4584"
-      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
       - SERVICES=s3
       - EDGE_PORT=4563
       - DATA_DIR=/tmp/localstack/data
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
-      - DEMO_BUCKET
       - AWS_SERVER
       - AWS_PORT
-      - PORT_WEB_UI
+      - DEMO_BUCKET
       - DEBUG=true
       - S3_SKIP_SIGNATURE_VALIDATION=0
     volumes:
       - ./aws.setup.d:/docker-entrypoint-initaws.d
       - ./.s3-mount:/tmp/localstack
 
+  # We use a docker image build from the code of git@github.com:delta-io/delta-sharing.git until it is properly relaesed
+  #  sbt docker:publishLocal
+  #  docker tag delta-sharing-server:0.2.0-SNAPSHOT krisgeus/delta-sharing:0.2.0-SNAPSHOT
+  #  docker push krisgeus/delta-sharing:0.2.0-SNAPSHOT
   delta:
     # image: delta-sharing-server:0.2.0-SNAPSHOT
     image: krisgeus/delta-sharing:0.2.0-SNAPSHOT
     command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
     ports:
       - 38080:8080
-    # environment:
-      # - HADOOP_ROOT_LOGGER=TRACE,console
-      # - JAVA_OPTS=-Dlog4j.debug=true -Dlog4j.logLevel=DEBUG -Dlog4j.configuration=file:///opt/docker/conf/log4j.properties -Dlog4j.configurationFile=file:///opt/docker/conf/log4j.properties
+    environment:
+      - HADOOP_ROOT_LOGGER=ERROR,console
+      - JAVA_OPTS=-Dlog4j.debug=false -Dlog4j.logLevel=INFO -Dlog4j.configuration=file:///opt/docker/conf/log4j.properties -Dlog4j.configurationFile=file:///opt/docker/conf/log4j.properties
     volumes:
       - ./config/:/opt/docker/conf/
 
