@@ -8,7 +8,7 @@ function check_docker_mem() {
     AVAILABLE_MEM=$(docker info -f "{{json .MemTotal}}")
 
     if [ "${AVAILABLE_MEM}" -lt "${MEM_12_POINT_5_GB}" ]; then
-        echo "NOT ENOUGH MEMORY AVAILABLE. Need at least 12.5GB"
+        echo "NOT ENOUGH MEMORY AVAILABLE ($(bc <<< "scale=1; $AVAILABLE_MEM / 1024 / 1024 / 1024")). Need at least 12.5GB"
         exit 12;
     fi
 }
