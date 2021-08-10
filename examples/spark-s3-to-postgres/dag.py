@@ -3,10 +3,12 @@ from datetime import timedelta, datetime
 from airflow import DAG
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.operators.sql import SQLCheckOperator
+from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator
 
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
+GE_DIRECTORY = THIS_DIRECTORY + 'great_expectations/'
 DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"
 
 default_args = {
@@ -56,4 +58,17 @@ check = SQLCheckOperator(
     dag=dag
 )
 
-spark >> check
+check_with_ge = GreatExpectationsOperator(
+    task_id='check_ge_suite',
+    expectation_suite_name='public.demo.warning',
+    data_context_root_dir='{ge_root_dir}'.format(ge_root_dir=GE_DIRECTORY),
+    batch_kwargs={
+        'table': 'demo',
+        'datasource': 'postgresdb'
+    },
+    do_xcom_push=False,
+    dag=dag
+)
+
+# spark >> check
+spark >> check >> check_with_ge
