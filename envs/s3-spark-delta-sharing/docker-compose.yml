@@ -1,0 +1,116 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${MOCK_DATA_FOLDER}:/mock-data
+    depends_on:
+      - s3server
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+
+  s3server:
+    image: localstack/localstack-full:0.12.15
+    ports:
+      - "4563-4584:4563-4584"
+    environment:
+      - SERVICES=s3
+      - EDGE_PORT=4563
+      - DATA_DIR=/tmp/localstack/data
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+      - DEMO_BUCKET
+      - DEBUG=true
+      - S3_SKIP_SIGNATURE_VALIDATION=0
+    volumes:
+      - ./aws.setup.d:/docker-entrypoint-initaws.d
+      - ./.s3-mount:/tmp/localstack
+
+  # We use a docker image build from the code of git@github.com:delta-io/delta-sharing.git until it is properly relaesed
+  #  sbt docker:publishLocal
+  #  docker tag delta-sharing-server:0.2.0-SNAPSHOT krisgeus/delta-sharing:0.2.0-SNAPSHOT
+  #  docker push krisgeus/delta-sharing:0.2.0-SNAPSHOT
+  delta:
+    # image: delta-sharing-server:0.2.0-SNAPSHOT
+    image: krisgeus/delta-sharing:0.2.0-SNAPSHOT
+    command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
+    ports:
+      - 38080:8080
+    environment:
+      - HADOOP_ROOT_LOGGER=ERROR,console
+      - JAVA_OPTS=-Dlog4j.debug=false -Dlog4j.logLevel=INFO -Dlog4j.configuration=file:///opt/docker/conf/log4j.properties -Dlog4j.configurationFile=file:///opt/docker/conf/log4j.properties
+    volumes:
+      - ./config/:/opt/docker/conf/
+
+  sparkmaster:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 7077:7077
+      - 18080:8080
+    entrypoint:
+      - /usr/spark/sbin/start-master.sh
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkworker:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 18081:8081
+    entrypoint:
+      - /usr/spark/sbin/start-slave.sh
+      - spark://sparkmaster:7077
+      - "-m"
+      - "8G"
+    depends_on:
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkshell:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    entrypoint:
+      - /usr/bin/tail
+      - "-f"
+      - /dev/null 
+    depends_on:
+      - sparkmaster
+
