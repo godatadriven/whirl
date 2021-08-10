@@ -33,8 +33,7 @@ Clone this repository:
 ```
 git clone https://github.com/godatadriven/whirl.git <target directory of whirl>
 ```
-For ease of use you can add the base directory  to your `PATH` environment variable
-
+For ease of use you can add the base directory to your `PATH` environment variable, so the command `whirl` is available.
 ```
 export PATH=<target directory of whirl>:${PATH}
 ```
@@ -131,12 +130,13 @@ This repository contains some example environments and workflows. The components
 
 #### SSH to Localhost
 
-The first example environment only involves one component, the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh` which makes it possible in that container to SSH to `localhost`. The script also adds a new connection called `ssh_local` to the Airflow connections.
+The first example environment only involves one component, the Apache Airflow docker container itself. The environment contains one preparation script called `01_enable_local_ssh.sh` which makes it possible in that container to SSH to `localhost`. The script also adds a new connection called `ssh_local` to the Airflow connections. The directory `example/localhost-ssh-example/` contains a single file, the Airflow DAG, so we have to pass the whirl environment as an argument. 
 
 To run this example:
 
 ```bash
 $ cd ./examples/localhost-ssh-example
+# Note: here we pass the whirl environment 'local-ssh' as a command-line argument.
 $ whirl -e local-ssh
 ```
 
@@ -167,7 +167,7 @@ The environment contains a setup script in the `whirl.setup.d/` folder:
 To run this example:
 
 ```bash
-$ cd ./examples/api-python-s3
+$ cd ./examples/api-to-s3
 $ whirl
 ```
 
@@ -227,12 +227,12 @@ $ cd ./examples/logging-to-s3
 $ whirl
 ```
 
-Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success. If you open one of the logs, the first line shows that the log is retrieved from S3.
+Open your browser to [http://localhost:5000](http://localhost:5000) to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success. If you open one of the logs, the first line shows that the log is retrieved from S3.
 
 The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies S3 specific variables.
 
 
-#### Having a external database for Airflow
+#### Having an external database for Airflow
 
 In this example the dag is not the most important part. This example is all about how to configure airflow to use a external database.
 We have created an environment that spins up an postgres database server together with the Airflow one.
@@ -245,7 +245,7 @@ $ cd ./examples/external-airflow-db
 $ whirl
 ```
 
-Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
+Open your browser to [http://localhost:5000](http://localhost:5000) to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked success.
 
 The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies Postgres specific variables.
 
@@ -263,8 +263,8 @@ $ cd ./examples/external-smtp-for-failure-emails
 $ whirl
 ```
 
-Open your browser to http://localhost:5000 to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked failed.
-Also open your browser at http://localhost:1080 for the email client where the emails should show up.
+Open your browser to [http://localhost:5000](http://localhost:5000) to see the Airflow UI appear. Manually enable the DAG and see the pipeline get marked failed.
+Also open your browser at [http://localhost:1080](http://localhost:1080) for the email client where the emails should show up.
 
 The environment to be used is set in the `.whirl.env` in the DAG directory. In the environment folder there is also a `.whirl.env` which specifies specific Airflow configuration variables.
 

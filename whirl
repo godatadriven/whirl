@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 AIRFLOW_UI_PORT=5000
-SCRIPT_DIR=$( dirname "${BASH_SOURCE[0]}" )
+# https://stackoverflow.com/a/4774063
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 set -e
 # load and export environment variables
