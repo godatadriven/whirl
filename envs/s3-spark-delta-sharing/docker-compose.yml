@@ -39,13 +39,8 @@ services:
       - ./aws.setup.d:/docker-entrypoint-initaws.d
       - ./.s3-mount:/tmp/localstack
 
-  # We use a docker image build from the code of git@github.com:delta-io/delta-sharing.git until it is properly relaesed
-  #  sbt docker:publishLocal
-  #  docker tag delta-sharing-server:0.2.0-SNAPSHOT krisgeus/delta-sharing:0.2.0-SNAPSHOT
-  #  docker push krisgeus/delta-sharing:0.2.0-SNAPSHOT
   delta:
-    # image: delta-sharing-server:0.2.0-SNAPSHOT
-    image: krisgeus/delta-sharing:0.2.0-SNAPSHOT
+    image: deltaio/delta-sharing-server:${DELTA_SHARING_VERSION}
     command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
     ports:
       - 38080:8080
