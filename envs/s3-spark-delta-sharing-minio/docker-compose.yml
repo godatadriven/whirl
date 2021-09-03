@@ -23,23 +23,18 @@ services:
 
 
   s3server:
-    image: localstack/localstack-full:0.12.15
+    image: minio/minio:RELEASE.2021-08-31T05-46-54Z
+    command:
+      - server
+      - "--address=0.0.0.0:9000"
+      - "/tmp/minio"
     ports:
-      - "4563-4584:4563-4584"
+      - 9000:9000
     environment:
-      - SERVICES=s3
-      - EDGE_PORT=4563
-      - DATA_DIR=/tmp/localstack/data
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_SERVER
-      - AWS_PORT
-      - DEMO_BUCKET
-      - DEBUG=true
-      - S3_SKIP_SIGNATURE_VALIDATION=0
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
-      - ./aws.setup.d:/docker-entrypoint-initaws.d
-      - ./.s3-mount:/tmp/localstack
+      - ./.s3-mount:/tmp/minio
 
   delta:
     image: deltaio/delta-sharing-server:${DELTA_SHARING_VERSION}
