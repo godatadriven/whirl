@@ -6,8 +6,6 @@ sudo apt-get update && sudo apt-get install -y git
 
 pip install delta-spark==${DELTA_VERSION}
 pip install delta-sharing==${DELTA_SHARING_VERSION}
-# Install fsspec from PR until this is properly released
-# pip install git+https://github.com/intake/filesystem_spec.git@refs/pull/718/head
 
 echo '{
   "shareCredentialsVersion": 1,
