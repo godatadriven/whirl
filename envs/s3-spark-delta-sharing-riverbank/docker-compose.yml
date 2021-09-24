@@ -41,16 +41,43 @@ services:
       - ./aws.setup.d:/docker-entrypoint-initaws.d
       - ./.s3-mount:/tmp/localstack
 
-  delta:
-    image: deltaio/delta-sharing-server:${DELTA_SHARING_VERSION}
-    command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
+  postgresdb:
+    image: postgres:13
     ports:
-      - 38080:8080
+      - 5432:5432
     environment:
-      - HADOOP_ROOT_LOGGER=ERROR,console
-      - JAVA_OPTS=-Dlog4j.debug=false -Dlog4j.logLevel=INFO -Dlog4j.configuration=file:///opt/docker/conf/log4j.properties -Dlog4j.configurationFile=file:///opt/docker/conf/log4j.properties
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+      - PGDATA=/var/lib/postgresql/data
     volumes:
-      - ./config/:/opt/docker/conf/
+      - ./.pgdata:/var/lib/postgresql/data
+      - ./pg.setup.d:/docker-entrypoint-initdb.d
+
+  delta:
+    image: krisgeus/riverbank:latest
+    # build:
+    #   context: ${DOCKER_CONTEXT_FOLDER}/riverbank
+    #   dockerfile: Dockerfile
+    # command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
+    command: ["wait-for-it", "${POSTGRES_HOST}:${POSTGRES_PORT}", "--timeout=60", "--", "/usr/src/riverbank"]
+    ports:
+      - 8000:8000
+    environment:
+      - AWS_ENDPOINT_URL=http://${AWS_SERVER}:${AWS_PORT}
+      - AWS_REGION=europe
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - RIVERBANK_ADMIN=admin
+      - RIVERBANK_PASSWORD=admin
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - RUST_LOG=debug
+    # volumes:
+    #   - ./config/:/opt/docker/conf/
+    depends_on:
+      - postgresdb
 
   sparkmaster:
     build:
@@ -104,10 +131,16 @@ services:
         - SPARK_VERSION=${SPARK_VERSION}
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
     entrypoint:
       - /usr/bin/tail
       - "-f"
       - /dev/null 
     depends_on:
       - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
 

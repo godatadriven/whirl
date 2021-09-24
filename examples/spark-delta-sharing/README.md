@@ -46,7 +46,7 @@ profile_file = "file:///opt/airflow/delta.profile"
 client = delta_sharing.SharingClient(profile_file)
 client.list_all_tables()
 
-table_url = profile_file + "#airflow.spark.table1"
+table_url = profile_file + "#airflow.spark.cars"
 
 sharingDF = delta_sharing.load_as_spark(table_url)
 ```
