@@ -1,0 +1,146 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${MOCK_DATA_FOLDER}:/mock-data
+    depends_on:
+      - s3server
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+
+  s3server:
+    image: localstack/localstack-full:0.12.15
+    ports:
+      - "4563-4584:4563-4584"
+    environment:
+      - SERVICES=s3
+      - EDGE_PORT=4563
+      - DATA_DIR=/tmp/localstack/data
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+      - DEMO_BUCKET
+      - DEBUG=true
+      - S3_SKIP_SIGNATURE_VALIDATION=0
+    volumes:
+      - ./aws.setup.d:/docker-entrypoint-initaws.d
+      - ./.s3-mount:/tmp/localstack
+
+  postgresdb:
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./.pgdata:/var/lib/postgresql/data
+      - ./pg.setup.d:/docker-entrypoint-initdb.d
+
+  delta:
+    image: krisgeus/riverbank:latest
+    # build:
+    #   context: ${DOCKER_CONTEXT_FOLDER}/riverbank
+    #   dockerfile: Dockerfile
+    # command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
+    command: ["wait-for-it", "${POSTGRES_HOST}:${POSTGRES_PORT}", "--timeout=60", "--", "/usr/src/riverbank"]
+    ports:
+      - 8000:8000
+    environment:
+      - AWS_ENDPOINT_URL=http://${AWS_SERVER}:${AWS_PORT}
+      - AWS_REGION=europe
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - RIVERBANK_ADMIN=admin
+      - RIVERBANK_PASSWORD=admin
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - RUST_LOG=debug
+    # volumes:
+    #   - ./config/:/opt/docker/conf/
+    depends_on:
+      - postgresdb
+
+  sparkmaster:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 7077:7077
+      - 18080:8080
+    entrypoint:
+      - /usr/spark/sbin/start-master.sh
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkworker:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    ports:
+      - 18081:8081
+    entrypoint:
+      - /usr/spark/sbin/start-slave.sh
+      - spark://sparkmaster:7077
+      - "-m"
+      - "8G"
+    depends_on:
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkshell:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+    entrypoint:
+      - /usr/bin/tail
+      - "-f"
+      - /dev/null 
+    depends_on:
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
