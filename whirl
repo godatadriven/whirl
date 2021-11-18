@@ -95,10 +95,18 @@ detect_potential_dag() {
 test_dag_state() {
   local DAG_ID=$1
   local STATE=$2
+  local SHOW_RESULT=${3:-false}
   echo "Checking dag state(${STATE}) for ${DAG_ID}" >&2
   result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}/dagRuns" | jq ".dag_runs | map(select(.state == \"${STATE}\")) | length")
   echo "Result of checking dag state(${STATE}) for ${DAG_ID} is ${result}" >&2
-  echo "$result"
+  if [ "${SHOW_RESULT}" == true ]; then
+    output=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}/dagRuns" | jq ".dag_runs" )
+    echo "Dagruns: $output" >&2
+    output=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq ".task_instances" )
+    echo "Tasks: $output" >&2
+  else
+    echo "$result"
+  fi
 }
 
 run_compose_setup_scripts() {
@@ -155,13 +163,21 @@ start() {
           echo "Dag '${DAG_ID}' is (still) running..."
           sleep 5;
         done
-        if [ "$(test_dag_state "${DAG_ID}" "success")" -eq 1 ]; then
-          echo "Dag '${DAG_ID}' successfully finished"
+        SUCCES_STATE="success"
+        FAILURE_STATE="failed"
+        if [ "${WHIRL_CI_EXPECT_FAILURE}" == true ]; then
+          SUCCES_STATE="failed"
+          FAILURE_STATE="success"
+        fi
+        if [ "$(test_dag_state "${DAG_ID}" "${SUCCES_STATE}")" -ge 1 ]; then
+          echo "Dag '${DAG_ID}' run(s) successfully finished"
           stop
           exit 0
         fi
-        if [ "$(test_dag_state "${DAG_ID}" "failed")" -eq 1 ]; then
-          echo "Dag '${DAG_ID}' run failed"
+        if [ "$(test_dag_state "${DAG_ID}" "${FAILURE_STATE}")" -ge 1 ]; then
+          echo "Dag '${DAG_ID}' run(s) failed"
+          # output dagrun result
+          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
           if [ "$STOP_ON_FAILURE" = true ]; then
             stop
             exit 1
