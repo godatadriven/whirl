@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: |
-        cd examples/api-to-s3
-        ../../whirl ci
+      - name: Run whirl CI
+          working-directory: ./examples/api-to-s3
+          run: ../../whirl ci
