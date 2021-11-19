@@ -6,15 +6,26 @@ on:
     branches:
       - master
 jobs:
+  directories: # Job that list subdirectories of ./examples
+    runs-on: ubuntu-latest
+    outputs:
+      dir: ${{ steps.set-dirs.outputs.dir }} # generate output name dir by using inner step output
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-dirs # Give it an id to handle to get step outputs in the outputs key above
+        run: echo "::set-output name=dir::$(ls -d ./examples/* | jq -R -s -c 'split("\n")[:-1]')"
+        # Define step output named dir base on ls command transformed to JSON thanks to jq
+
   whirl-ci:
+    needs: [directories]
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
       matrix:
-        example: ['./examples/api-to-s3', './examples/localhost-ssh-example']
+        example: ${{fromJson(needs.directories.outputs.dir)}}
     steps:
       - uses: actions/checkout@v2
-      - name: Run whirl CI
+      - name: Run whirl CI ${{ matrix.example }}
         working-directory: ${{ matrix.example }}
         run: |
           echo Run Ci for example ${{ matrix.example }}
