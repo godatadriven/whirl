@@ -6,10 +6,16 @@ on:
     branches:
       - master
 jobs:
-  whirl-ci-api-to-s3:
+  whirl-ci:
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        example: ['./examples/api-to-s3', './examples/localhost-ssh-example']
     steps:
       - uses: actions/checkout@v2
       - name: Run whirl CI
-        working-directory: ./examples/api-to-s3
-        run: ../../whirl ci
+        working-directory: ${{ matrix.example }}
+        run: |
+          echo Run Ci for example ${{ matrix.example }}
+          ../../whirl ci
