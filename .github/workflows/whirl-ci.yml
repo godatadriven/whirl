@@ -1,0 +1,15 @@
+name: execute whirl ci for examples
+on:
+  push:
+    branches:
+  pull_request:
+    branches:
+      - master
+jobs:
+  whirl-ci-api-to-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+        cd examples/api-to-s3
+        ../../whirl ci
