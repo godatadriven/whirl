@@ -13,7 +13,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/env.d"
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/dag.d"
 
-RUN chown -R airflow "${WHIRL_SETUP_FOLDER}"
+RUN chown -R airflow:root "${WHIRL_SETUP_FOLDER}"
 
 # Make sure a ssl certificate is generated and configured. Nginx can be configured if needed from now on.
 RUN mkdir -p /etc/nginx/ssl \
@@ -36,7 +36,7 @@ RUN echo "airflow ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER airflow
 EXPOSE 5000
 
-COPY --chown=airflow entrypoint.sh /entrypoint-whirl.sh
+COPY --chown=airflow:root entrypoint.sh /entrypoint-whirl.sh
 COPY includes /etc/airflow/functions
 COPY pip.conf /home/airflow/.config/pip/pip.conf
 
