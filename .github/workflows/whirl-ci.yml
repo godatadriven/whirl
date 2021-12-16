@@ -48,3 +48,13 @@ jobs:
         run: |
           echo Run Ci for example ${{ matrix.example }} with non-default env
           ../../whirl ci -e postgres-s3-spark
+
+  whirl-ci-extra-env-ha-scheduler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI ha-scheduler env
+        working-directory: ./examples/external-airflow-db/
+        run: |
+          echo Run Ci for example external-airflow-db with ha-scheduler env
+          ../../whirl ci -e ha-scheduler
