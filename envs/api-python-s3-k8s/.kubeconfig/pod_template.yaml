@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dummy-name-replaced-by-airflow-k8s-executor
+spec:
+  containers:
+    - args: []
+      command: []
+      env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+        # Hard Coded Airflow Envs
+        - name: AIRFLOW__CORE__FERNET_KEY
+          value: W5gmA+dp84hkZEzpxPw4LTmhbXA1uVxKZsgIfay8wno=
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          value: postgresql://airflow:pAssw0rd@postgresdb:5432/airflow
+        # - name: AIRFLOW_CONN_AIRFLOW_DB
+        #   value: connection
+      envFrom: []
+      image: airflow-worker
+      imagePullPolicy: IfNotPresent
+      name: base
+      ports: []
+      volumeMounts:
+        - mountPath: "/opt/airflow/logs"
+          name: airflow-logs
+        # - mountPath: /opt/airflow/dags
+        #   name: airflow-dags
+        #   readOnly: false
+  hostNetwork: true
+  restartPolicy: Never
+  securityContext:
+    runAsUser: 50000
+    fsGroup: 50000
+  nodeSelector:
+    {}
+  affinity:
+    {}
+  tolerations:
+    []
+  # serviceAccountName: 'RELEASE-NAME-worker-serviceaccount'
+  volumes:
+    # - name: dags
+    #   persistentVolumeClaim:
+    #     claimName: RELEASE-NAME-dags
+    - emptyDir: {}
+      name: airflow-logs
