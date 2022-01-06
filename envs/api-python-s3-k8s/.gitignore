@@ -1,1 +1,4 @@
 docker-registry-persistence
+.local-data-share
+.kubeconfig/kubeconfig-k3s.yaml
+.kubeconfig/k3s.yaml

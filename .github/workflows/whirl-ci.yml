@@ -46,5 +46,15 @@ jobs:
       - name: Run whirl CI non-default env
         working-directory: ./examples/spark-s3-to-postgres/
         run: |
-          echo Run Ci for example ${{ matrix.example }} with non-default env
+          echo Run Ci for example spark-s3-to-postgres with non-default env
           ../../whirl ci -e postgres-s3-spark
+
+  whirl-ci-extra-env-api-to-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI api-to-s3 on k8s executor
+        working-directory: ./examples/api-to-s3/
+        run: |
+          echo Run Ci for example api-to-s3 with k8s executor env
+          ../../whirl ci -e api-python-s3-k8s

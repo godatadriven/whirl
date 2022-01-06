@@ -59,8 +59,8 @@ services:
     image: "rancher/k3s:${K3S_VERSION:-latest}"
     command: 
       - server
-      - "--bind-address"
-      - "0.0.0.0"
+      - "--disable"
+      - "traefik"
       - "--tls-san"
       - "k3s-server"
     tmpfs:
@@ -73,40 +73,24 @@ services:
         hard: 65535
     privileged: true
     environment:
+      - K3S_NODE_NAME=whirl-k3s-master
       - K3S_TOKEN=${K3S_TOKEN:?err}
-      - K3S_CONFIG_FILE=/output/kubeconfig.yaml
+      - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig-k3s.yaml
+      - K3S_KUBECONFIG_MODE=666
     volumes:
       - k3s-server:/var/lib/rancher/k3s
       # This is just so that we get the kubeconfig file out
       - ${ENVIRONMENT_FOLDER}/.kubeconfig:/output
       - ${ENVIRONMENT_FOLDER}/.registryconfig/registries.yaml:/etc/rancher/k3s/registries.yaml
+      - ${ENVIRONMENT_FOLDER}/.local-data-share:/data/whirl
     ports:
       - 6443:6443  # Kubernetes API Server
       - 80:80      # Ingress controller port 80
       - 443:443    # Ingress controller port 443
     depends_on:
       - postgresdb
+      - mockserver
       - s3server
-
-  k3s-agent:
-    image: "rancher/k3s:${K3S_VERSION:-latest}"
-    tmpfs:
-    - /run
-    - /var/run
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 65535
-        hard: 65535
-    privileged: true
-    environment:
-      - K3S_URL=https://k3s-server:6443
-      - K3S_TOKEN=${K3S_TOKEN:?err}
-    volumes:
-      - ${ENVIRONMENT_FOLDER}/.registryconfig/registries.yaml:/etc/rancher/k3s/registries.yaml
-    # depends_on:
-    #   - postgresdb
-    #   - s3server
 
   registry:
     image: registry:2

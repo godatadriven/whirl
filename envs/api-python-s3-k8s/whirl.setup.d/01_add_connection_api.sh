@@ -27,5 +27,6 @@ while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://${AWS_SERVER}:${PORT
   sleep 2;
 done
 
-echo "creating bucket"
+echo "creating buckets"
 aws s3api create-bucket --bucket ${DEMO_BUCKET}
+aws s3api create-bucket --bucket ${S3_LOG_BUCKET}
