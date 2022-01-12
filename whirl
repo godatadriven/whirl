@@ -192,12 +192,12 @@ start() {
 
 stop() {
   echo "Stopping airflow-localrun containers..."
-  docker-compose -f "${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}/docker-compose.yml" down --volumes --rmi local --remove-orphans
+  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" down --volumes --rmi local --remove-orphans
 }
 
 logs() {
   echo "Showing logs of airflow-localrun service ${WHIRL_SERVICE_NAME}"
-  docker-compose -f "${SCRIPT_DIR}/envs/${WHIRL_ENVIRONMENT}/docker-compose.yml" logs -f "${WHIRL_SERVICE_NAME}"
+  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs -f "${WHIRL_SERVICE_NAME}"
 }
 
 usage() {
