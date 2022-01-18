@@ -1,0 +1,103 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${ENVIRONMENT_FOLDER}/.kubeconfig:/opt/airflow/.kubeconfig
+    depends_on:
+      - postgresdb
+      - mockserver
+      - s3server
+      - k3s-server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  postgresdb:
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST=postgresdb
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+
+  mockserver:
+    image: jamesdbloom/mockserver:mockserver-5.11.1
+    ports:
+      - 1080:1080
+      - 1081:1081
+    environment:
+      - LOG_LEVEL=ERROR
+      - SERVER_PORT="1080,1081"
+
+  s3server:
+    image: localstack/localstack-full:0.12.8
+    ports:
+      - "4563-4584:4563-4584"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=s3
+      - EDGE_PORT=4563
+    env_file:
+      - .whirl.env
+
+  k3s-server:
+    image: "rancher/k3s:${K3S_VERSION:-latest}"
+    command: 
+      - server
+      - "--disable"
+      - "traefik"
+      - "--tls-san"
+      - "k3s-server"
+    tmpfs:
+    - /run
+    - /var/run
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    privileged: true
+    environment:
+      - K3S_NODE_NAME=whirl-k3s-master
+      - K3S_TOKEN=${K3S_TOKEN:?err}
+      - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig-k3s.yaml
+      - K3S_KUBECONFIG_MODE=666
+    volumes:
+      - k3s-server:/var/lib/rancher/k3s
+      # This is just so that we get the kubeconfig file out
+      - ${ENVIRONMENT_FOLDER}/.kubeconfig:/output
+      - ${ENVIRONMENT_FOLDER}/.registryconfig/registries.yaml:/etc/rancher/k3s/registries.yaml
+      - ${ENVIRONMENT_FOLDER}/.local-data-share:/data/whirl
+    ports:
+      - 6443:6443  # Kubernetes API Server
+      - 80:80      # Ingress controller port 80
+      - 443:443    # Ingress controller port 443
+    depends_on:
+      - postgresdb
+      - mockserver
+      - s3server
+
+  registry:
+    image: registry:2
+    ports: 
+      - 3632:5000
+    volumes:
+      - ${ENVIRONMENT_FOLDER}/docker-registry-persistence:/var/lib/registry
+
+volumes:
+  k3s-server: {}

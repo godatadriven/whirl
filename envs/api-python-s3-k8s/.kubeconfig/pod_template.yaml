@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dummy-name-replaced-by-airflow-k8s-executor
+spec:
+  containers:
+    - args: []
+      command: []
+      env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+        # Hard Coded Airflow Envs
+        - name: AIRFLOW__CORE__FERNET_KEY
+          value: W5gmA+dp84hkZEzpxPw4LTmhbXA1uVxKZsgIfay8wno=
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          value: postgresql://airflow:pAssw0rd@postgresdb:5432/airflow
+        - name: AIRFLOW__LOGGING__REMOTE_LOGGING
+          value: True
+        - name: AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER
+          value: s3://airflow-s3-logs/airflow-k8s
+        - name: AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID
+          value: local_s3
+        - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
+          value: False
+      envFrom: []
+      image: airflow-worker
+      imagePullPolicy: IfNotPresent
+      name: base
+      ports: []
+      volumeMounts:
+        - mountPath: "/opt/airflow/logs"
+          name: airflow-logs
+        - mountPath: "/tmp/whirl-local-api-to-s3-example"
+          name: shared-data
+          readOnly: false
+  restartPolicy: Never
+  securityContext:
+    runAsUser: 50000
+    fsGroup: 50000
+  nodeSelector:
+    {}
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - whirl-k3s-master
+  tolerations:
+    []
+  volumes:
+    - name: shared-data
+      persistentVolumeClaim:
+        claimName: local-path-airflow-worker-pvc
+    - emptyDir: {}
+      name: airflow-logs
