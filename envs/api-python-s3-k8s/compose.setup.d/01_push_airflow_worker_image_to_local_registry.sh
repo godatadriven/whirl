@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function publish_airlfow_worker_image() {
+function publish_airflow_worker_image() {
     echo "==============================================="
     echo "== Start local docker registry               =="
     echo "==============================================="
@@ -28,4 +28,4 @@ function publish_airlfow_worker_image() {
     docker stop registry
 }
 
-publish_airlfow_worker_image
+publish_airflow_worker_image

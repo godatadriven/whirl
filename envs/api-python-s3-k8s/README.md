@@ -1,4 +1,4 @@
-# Airlfow with the KubernetesExecutor
+# Airflow with the KubernetesExecutor
 
 This environment is to test/explain the use of the k8sExecutor in Airflow
 
