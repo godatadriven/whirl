@@ -4,6 +4,7 @@ This environment is to test/explain the use of the k8sExecutor in Airflow
 
 ## Environment
 
+```
 +---------------------+
 |                     |
 |                     |
@@ -43,6 +44,7 @@ This environment is to test/explain the use of the k8sExecutor in Airflow
 |                     |
 |                     |
 +---------------------+
+```
 
 ### The moving parts
 
