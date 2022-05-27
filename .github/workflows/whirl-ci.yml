@@ -9,10 +9,11 @@ jobs:
   directories: # Job that list subdirectories of ./examples
     runs-on: ubuntu-latest
     outputs:
-      dir: ${{ steps.set-dirs.outputs.dir }} # generate output name dir by using inner step output
+      # generate output name dir by using inner step output
+      dir: ${{ steps.setdirs.outputs.dir }}
     steps:
       - uses: actions/checkout@v2
-      - id: set-dirs # Give it an id to handle to get step outputs in the outputs key above
+      - id: setdirs # Give it an id to handle to get step outputs in the outputs key above
         run: echo "::set-output name=dir::$(ls -d ./examples/* | jq -R -s -c 'split("\n")[:-1]')"
         # Define step output named dir base on ls command transformed to JSON thanks to jq
 
@@ -22,7 +23,7 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        example: ${{fromJson(needs.directories.outputs.dir)}}
+        example: ${{ fromJson(needs.directories.outputs.dir) }}
         exclude:
           # Needs more memory than available on the runner
           - example: ./examples/dbt-spark-example
