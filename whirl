@@ -149,6 +149,7 @@ start() {
         echo "Waiting for Airflow UI to come up..."
         sleep 10;
       done
+      sleep 30;
       if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
         echo "Unable to unpause dag with id ${DAG_ID}."
         echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
