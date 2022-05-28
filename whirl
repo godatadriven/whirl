@@ -136,6 +136,8 @@ start() {
         if [ -z "${DAG_ID}" ]; then
           echo "Unable to determine dag id for CI_MODE and DAG_ID not provided"
           exit 4
+        else
+          echo "Found dag_id: ${DAG_ID} in dag file."
         fi
       fi
       DAEMON="-d"
@@ -157,6 +159,8 @@ start() {
         curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
         echo "Available dags:"
         curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags"
+        docker ps
+        docker logs api-python-s3-k8s_airflow_1
         stop
         exit 3
       else
