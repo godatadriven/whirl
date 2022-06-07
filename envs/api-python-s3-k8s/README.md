@@ -65,12 +65,12 @@ AIRFLOW__CORE__EXECUTOR=KubernetesExecutor
 
 AIRFLOW__KUBERNETES__IN_CLUSTER=False
 AIRFLOW__KUBERNETES__NAMESPACE=default
-AIRFLOW__KUBERNETES__CONFIG_FILE=/opt/airflow/.kubeconfig/k3s.yaml
+AIRFLOW__KUBERNETES__CONFIG_FILE=/etc/airflow/whirl.setup.d/config.d/k3s.yaml
 AIRFLOW__KUBERNETES__DELETE_WORKER_PODS=False
 AIRFLOW__KUBERNETES__VERIFY_SSL=True
 AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY=registry:5000/airflow-worker
 AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG=latest
-AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE=/opt/airflow/.kubeconfig/pod_template.yaml
+AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE=/etc/airflow/whirl.setup.d/config.d/pod_template.yaml
 ```
 
 The KubernetesExecutor needs to know how to reach the cluster. This is done through the `AIRFLOW__KUBERNETES__CONFIG_FILE`. This file is created when the k3s master starts and written to a shared volume for simplicity. The airflow startup scripts change the default config file slightly by replacing the `127.0.0.1` ip with the correct hostname on startup.
@@ -86,5 +86,5 @@ To be able to connect to the docker images running S3, Mockserver and the postgr
 ## Kubectl from the Airflow docker container
 
 ```bash
-/opt/airflow/kubectl  --kubeconfig=/opt/airflow/.kubeconfig/k3s.yaml get pods
+/opt/airflow/kubectl  --kubeconfig=/etc/airflow/whirl.setup.d/config.d/k3s.yaml get pods
 ```
