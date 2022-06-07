@@ -5,9 +5,7 @@ metadata:
   name: dummy-name-replaced-by-airflow-k8s-executor
 spec:
   containers:
-    - args: []
-      command: []
-      env:
+    - env:
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
         # Hard Coded Airflow Envs
@@ -23,11 +21,9 @@ spec:
           value: local_s3
         - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
           value: False
-      envFrom: []
       image: airflow-worker
       imagePullPolicy: IfNotPresent
       name: base
-      ports: []
       volumeMounts:
         - mountPath: "/opt/airflow/logs"
           name: airflow-logs

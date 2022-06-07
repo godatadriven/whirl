@@ -11,6 +11,8 @@ set -e
 #     .whirl.env in environment directory
 #     .whirl.env in dag directory
 function export_environment_vars() {
+  CURRENT_ENV_PYTHON_VERSION=${PYTHON_VERSION}
+  CURRENT_ENV_AIRFLOW_VERSION=${AIRFLOW_VERSION}
   set -a
   DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
   DAG_FOLDER=$(pwd)
@@ -84,6 +86,16 @@ function export_environment_vars() {
   # in case DAG_FOLDER specifies WHIRL_ENVIRONMENT, commandline needs to overrule if set
   if [[ -n "${WHIRL_ENVIRONMENT_ARG}" ]]; then
     WHIRL_ENVIRONMENT=${WHIRL_ENVIRONMENT_ARG}
+  fi
+
+  if [[ -n "${CURRENT_ENV_PYTHON_VERSION}" ]]; then
+    echo "PYTHON_VERSION ${CURRENT_ENV_PYTHON_VERSION} was specified in env prior to execution. Overriding the one specified in .env files"
+    PYTHON_VERSION=${CURRENT_ENV_PYTHON_VERSION}
+  fi
+
+  if [[ -n "${CURRENT_ENV_AIRFLOW_VERSION}" ]]; then
+    echo "AIRFLOW_VERSION ${CURRENT_ENV_AIRFLOW_VERSION} was specified in env prior to execution. Overriding the one specified in .env files"
+    AIRFLOW_VERSION=${CURRENT_ENV_AIRFLOW_VERSION}
   fi
   set +a
 }
