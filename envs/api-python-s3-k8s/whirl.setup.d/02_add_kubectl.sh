@@ -16,12 +16,20 @@ echo "===================="
 echo "$(<kubectl.sha256)  kubectl" | sha256sum --check
 
 
-echo "===================="
+echo "====================="
 echo "== Install kubectl =="
-echo "===================="
+echo "====================="
 chmod +x kubectl
 
 echo "=========================="
 echo "== Patch kubectl config =="
 echo "=========================="
+sleep 10
 cat /opt/airflow/.kubeconfig/kubeconfig-k3s.yaml | sed -e 's/127\.\0\.0\.1/k3s-server/g' > /opt/airflow/.kubeconfig/k3s.yaml
+
+echo "========================="
+echo "== Show kubectl config =="
+echo "========================="
+ls -la /opt/airflow
+ls -l /opt/airflow/.kubeconfig/
+cat /opt/airflow/.kubeconfig/k3s.yaml
