@@ -16,18 +16,18 @@ echo -e "data:\n  NodeHosts: |\n$(echo -e "$(for host in mockserver postgresdb s
 echo "=========================================="
 echo "== Patch coredns NodeHosts in configmap =="
 echo "=========================================="
-/opt/airflow/kubectl --kubeconfig=/etc/airflow/whirl.setup.d/config.d/k3s.yaml -n kube-system patch cm coredns --patch-file ${PATCH_FILE}
+/opt/airflow/kubectl --kubeconfig=/opt/airflow/.kubeconfig/k3s.yaml -n kube-system patch cm coredns --patch-file ${PATCH_FILE}
 
 echo "====================="
 echo "== Restart coredns =="
 echo "====================="
-/opt/airflow/kubectl --kubeconfig=/etc/airflow/whirl.setup.d/config.d/k3s.yaml --wait=false -n kube-system delete pod -l k8s-app=kube-dns
+/opt/airflow/kubectl --kubeconfig=/opt/airflow/.kubeconfig/k3s.yaml --wait=false -n kube-system delete pod -l k8s-app=kube-dns
 
 
 echo "==========================="
 echo " Prepare persistent volume "
 echo "==========================="
-cat <<EOFPV | /opt/airflow/kubectl --kubeconfig=/etc/airflow/whirl.setup.d/config.d/k3s.yaml create -f -
+cat <<EOFPV | /opt/airflow/kubectl --kubeconfig=/opt/airflow/.kubeconfig/k3s.yaml create -f -
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -56,7 +56,7 @@ EOFPV
 echo "================================"
 echo " Prepare persistent volumeclaim "
 echo "================================"
-cat <<EOFPVC | /opt/airflow/kubectl --kubeconfig=/etc/airflow/whirl.setup.d/config.d/k3s.yaml create -f -
+cat <<EOFPVC | /opt/airflow/kubectl --kubeconfig=/opt/airflow/.kubeconfig/k3s.yaml create -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

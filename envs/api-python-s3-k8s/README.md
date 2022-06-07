@@ -65,7 +65,7 @@ AIRFLOW__CORE__EXECUTOR=KubernetesExecutor
 
 AIRFLOW__KUBERNETES__IN_CLUSTER=False
 AIRFLOW__KUBERNETES__NAMESPACE=default
-AIRFLOW__KUBERNETES__CONFIG_FILE=/etc/airflow/whirl.setup.d/config.d/k3s.yaml
+AIRFLOW__KUBERNETES__CONFIG_FILE=/opt/airflow/.kubeconfig/k3s.yaml
 AIRFLOW__KUBERNETES__DELETE_WORKER_PODS=False
 AIRFLOW__KUBERNETES__VERIFY_SSL=True
 AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY=registry:5000/airflow-worker
@@ -86,5 +86,5 @@ To be able to connect to the docker images running S3, Mockserver and the postgr
 ## Kubectl from the Airflow docker container
 
 ```bash
-/opt/airflow/kubectl  --kubeconfig=/etc/airflow/whirl.setup.d/config.d/k3s.yaml get pods
+/opt/airflow/kubectl  --kubeconfig=/opt/airflow/.kubeconfig/k3s.yaml get pods
 ```

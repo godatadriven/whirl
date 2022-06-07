@@ -12,7 +12,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/env.d"
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/dag.d"
-RUN mkdir -p "${WHIRL_SETUP_FOLDER}/config.d"
 
 RUN chown -R airflow:root "${WHIRL_SETUP_FOLDER}"
 

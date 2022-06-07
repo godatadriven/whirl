@@ -24,12 +24,12 @@ chmod +x kubectl
 echo "=========================="
 echo "== Patch kubectl config =="
 echo "=========================="
-sleep 10
-cat /etc/airflow/whirl.setup.d/config.d/kubeconfig-k3s.yaml | sed -e 's/127\.\0\.0\.1/k3s-server/g' > /etc/airflow/whirl.setup.d/config.d/k3s.yaml
+mkdir -p /opt/airflow/.kubeconfig
+cat /etc/airflow/whirl.setup.d/config.d/kubeconfig-k3s.yaml | sed -e 's/127\.\0\.0\.1/k3s-server/g' > /opt/airflow/.kubeconfig/k3s.yaml
 
 echo "========================="
 echo "== Show kubectl config =="
 echo "========================="
-ls -la /etc/airflow/whirl.setup.d/config.d/
-ls -l /etc/airflow/whirl.setup.d/config.d/
-cat /etc/airflow/whirl.setup.d/config.d/k3s.yaml
+ls -la /opt/airflow/
+ls -l /opt/airflow/.kubeconfig
+cat /opt/airflow/.kubeconfig/k3s.yaml

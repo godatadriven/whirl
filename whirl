@@ -201,6 +201,14 @@ start() {
             stop
             exit 1
           fi
+        else
+          echo "Dag '${DAG_ID}' neither success nor failed!!!"
+          # output dagrun result
+          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+          if [ "$STOP_ON_FAILURE" = true ]; then
+            stop
+            exit 2
+          fi
         fi
       fi
     fi

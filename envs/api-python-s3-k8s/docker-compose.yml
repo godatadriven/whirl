@@ -15,7 +15,7 @@ services:
       - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
-      - ${ENVIRONMENT_FOLDER}/.kubeconfig:/etc/airflow/whirl.setup.d/config.d
+      - ${ENVIRONMENT_FOLDER}/.kubeconfig:/etc/airflow/whirl.setup.d/config.d:ro
     depends_on:
       - postgresdb
       - mockserver
