@@ -2,17 +2,18 @@ name: execute whirl ci for examples
 on:
   push:
     branches:
-  pull_request:
-    branches:
       - master
+  pull_request:
+
 jobs:
   directories: # Job that list subdirectories of ./examples
     runs-on: ubuntu-latest
     outputs:
-      dir: ${{ steps.set-dirs.outputs.dir }} # generate output name dir by using inner step output
+      # generate output name dir by using inner step output
+      dir: ${{ steps.setdirs.outputs.dir }}
     steps:
       - uses: actions/checkout@v2
-      - id: set-dirs # Give it an id to handle to get step outputs in the outputs key above
+      - id: setdirs # Give it an id to handle to get step outputs in the outputs key above
         run: echo "::set-output name=dir::$(ls -d ./examples/* | jq -R -s -c 'split("\n")[:-1]')"
         # Define step output named dir base on ls command transformed to JSON thanks to jq
 
@@ -20,9 +21,12 @@ jobs:
     needs: [directories]
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 2
+      fail-fast: false
+      max-parallel: 4
       matrix:
-        example: ${{fromJson(needs.directories.outputs.dir)}}
+        example: ${{ fromJson(needs.directories.outputs.dir) }}
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.3.2"]
         exclude:
           # Needs more memory than available on the runner
           - example: ./examples/dbt-spark-example
@@ -30,6 +34,9 @@ jobs:
           - example: ./examples/spark-s3-to-hive
           # Exclude failing dbt runs
           - example: ./examples/dbt-example
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
     steps:
       - uses: actions/checkout@v2
       - name: Run whirl CI ${{ matrix.example }}
@@ -50,7 +57,16 @@ jobs:
           ../../whirl ci -e postgres-s3-spark
 
   whirl-ci-extra-env-api-to-s3:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.3.2"]
     runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
     steps:
       - uses: actions/checkout@v2
       - name: Run whirl CI api-to-s3 on k8s executor
@@ -60,7 +76,16 @@ jobs:
           ../../whirl ci -e api-python-s3-k8s
 
   whirl-ci-extra-env-ha-scheduler:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.3.2"]
     runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
     steps:
       - uses: actions/checkout@v2
       - name: Run whirl CI ha-scheduler env

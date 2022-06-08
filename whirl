@@ -10,7 +10,10 @@ set -e
 #     .whirl.env in whirl repository directory
 #     .whirl.env in environment directory
 #     .whirl.env in dag directory
+#     already set PYTHON/AIRFLOW version env vars take precedence over everything else
 function export_environment_vars() {
+  CURRENT_ENV_PYTHON_VERSION=${PYTHON_VERSION}
+  CURRENT_ENV_AIRFLOW_VERSION=${AIRFLOW_VERSION}
   set -a
   DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
   DAG_FOLDER=$(pwd)
@@ -85,6 +88,16 @@ function export_environment_vars() {
   if [[ -n "${WHIRL_ENVIRONMENT_ARG}" ]]; then
     WHIRL_ENVIRONMENT=${WHIRL_ENVIRONMENT_ARG}
   fi
+
+  if [[ -n "${CURRENT_ENV_PYTHON_VERSION}" ]]; then
+    echo "PYTHON_VERSION ${CURRENT_ENV_PYTHON_VERSION} was specified in env prior to execution. Overriding the one specified in .env files"
+    PYTHON_VERSION=${CURRENT_ENV_PYTHON_VERSION}
+  fi
+
+  if [[ -n "${CURRENT_ENV_AIRFLOW_VERSION}" ]]; then
+    echo "AIRFLOW_VERSION ${CURRENT_ENV_AIRFLOW_VERSION} was specified in env prior to execution. Overriding the one specified in .env files"
+    AIRFLOW_VERSION=${CURRENT_ENV_AIRFLOW_VERSION}
+  fi
   set +a
 }
 
@@ -107,6 +120,15 @@ test_dag_state() {
   else
     echo "$result"
   fi
+}
+
+debug_log_airflow() {
+  echo "Available dags:"
+  curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags" || true
+  echo "Docker containers running:"
+  docker ps
+  echo "Airflow container logs:"
+  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs airflow
 }
 
 run_compose_setup_scripts() {
@@ -136,6 +158,8 @@ start() {
         if [ -z "${DAG_ID}" ]; then
           echo "Unable to determine dag id for CI_MODE and DAG_ID not provided"
           exit 4
+        else
+          echo "Found dag_id: ${DAG_ID} in dag file."
         fi
       fi
       DAEMON="-d"
@@ -145,17 +169,30 @@ start() {
     docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build --force-recreate
 
     if [ "${CI_MODE}" == true ]; then
+      wait_period=0
       while [[ "$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
         echo "Waiting for Airflow UI to come up..."
-        sleep 10;
+        if [ $wait_period -ge 600 ]; then
+          status_code="$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT} || true)"
+          echo "Been waiting for airflow to start for 10 minutes. Aborting now..."
+          echo "Current HTTP status of http://localhost:${AIRFLOW_UI_PORT} is ${status_code}"
+          debug_log_airflow
+          stop
+          exit 3
+        else
+          wait_period=$(($wait_period+10))
+          sleep 10;
+        fi
       done
+      sleep 10;
       if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
         echo "Unable to unpause dag with id ${DAG_ID}."
         echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
         echo "Output:"
         curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
+        debug_log_airflow
         stop
-        exit 3
+        exit 5
       else
         echo "Unpaused dag with id ${DAG_ID}."
         sleep 5;
@@ -181,6 +218,15 @@ start() {
           if [ "$STOP_ON_FAILURE" = true ]; then
             stop
             exit 1
+          fi
+        else
+          echo "Dag '${DAG_ID}' neither success nor failed!!!"
+          # output dagrun result
+          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+          debug_log_airflow
+          if [ "$STOP_ON_FAILURE" = true ]; then
+            stop
+            exit 7
           fi
         fi
       fi
@@ -209,7 +255,7 @@ usage() {
   echo "  start|stop                         start or stop all"
   echo "  ci                                 runs in daemonized mode and awaits dag run completion"
   echo "  -i|--dag_id dag_id                 specify the dag_id to check (only in ci mode)"
-  exit 1
+  exit 21
 }
 
 function read_arguments() {
