@@ -124,7 +124,7 @@ test_dag_state() {
 
 debug_log_airflow() {
   echo "Available dags:"
-  curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags"
+  curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags" || true
   echo "Docker containers running:"
   docker ps
   echo "Airflow container logs:"
@@ -172,9 +172,9 @@ start() {
       wait_period=0
       while [[ "$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
         echo "Waiting for Airflow UI to come up..."
-        if [ $wait_period -ge 120 ]; then
-          status_code=$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT})
-          echo "Been waiting for airflow to start for 2 minutes. Aborting now..."
+        if [ $wait_period -ge 600 ]; then
+          status_code="$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT} || true)"
+          echo "Been waiting for airflow to start for 10 minutes. Aborting now..."
           echo "Current HTTP status of http://localhost:${AIRFLOW_UI_PORT} is ${status_code}"
           debug_log_airflow
           stop
