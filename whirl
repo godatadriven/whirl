@@ -10,6 +10,7 @@ set -e
 #     .whirl.env in whirl repository directory
 #     .whirl.env in environment directory
 #     .whirl.env in dag directory
+#     already set PYTHON/AIRFLOW version env vars take precedence over everything else
 function export_environment_vars() {
   CURRENT_ENV_PYTHON_VERSION=${PYTHON_VERSION}
   CURRENT_ENV_AIRFLOW_VERSION=${AIRFLOW_VERSION}
@@ -121,6 +122,15 @@ test_dag_state() {
   fi
 }
 
+debug_log_airflow() {
+  echo "Available dags:"
+  curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags"
+  echo "Docker containers running:"
+  docker ps
+  echo "Airflow container logs:"
+  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs airflow
+}
+
 run_compose_setup_scripts() {
   if [[ -d ${ENVIRONMENT_FOLDER}/compose.setup.d ]]; then
     echo "============================================"
@@ -163,16 +173,13 @@ start() {
         echo "Waiting for Airflow UI to come up..."
         sleep 10;
       done
-      sleep 30;
+      sleep 10;
       if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
         echo "Unable to unpause dag with id ${DAG_ID}."
         echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
         echo "Output:"
         curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
-        echo "Available dags:"
-        curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags"
-        docker ps
-        docker logs api-python-s3-k8s_airflow_1
+        debug_log_airflow
         stop
         exit 3
       else
@@ -205,6 +212,7 @@ start() {
           echo "Dag '${DAG_ID}' neither success nor failed!!!"
           # output dagrun result
           $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+          debug_log_airflow
           if [ "$STOP_ON_FAILURE" = true ]; then
             stop
             exit 2

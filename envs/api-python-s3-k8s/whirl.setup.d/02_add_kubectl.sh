@@ -30,6 +30,4 @@ cat /etc/airflow/whirl.setup.d/config.d/kubeconfig-k3s.yaml | sed -e 's/127\.\0\
 echo "========================="
 echo "== Show kubectl config =="
 echo "========================="
-ls -la /opt/airflow/
-ls -l /opt/airflow/.kubeconfig
 cat /opt/airflow/.kubeconfig/k3s.yaml
