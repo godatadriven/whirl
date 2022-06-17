@@ -122,9 +122,25 @@ test_dag_state() {
   fi
 }
 
+test_dag_errors() {
+  local DAG_ID=$1
+  local SHOW_RESULT=${2:-false}
+  echo "Checking dag ${DAG_ID} for errors." >&2
+  result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq ".total_entries")
+  echo "Result of checking dag errors for ${DAG_ID} is ${result}" >&2
+  if [ "${SHOW_RESULT}" == true ]; then
+    output=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq )
+    echo "ImportErrors: $output" >&2
+  else
+    echo "$result"
+  fi
+}
+
 debug_log_airflow() {
   echo "Available dags:"
   curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags" || true
+  echo "Dag Import Errors:"
+  curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" || true
   echo "Docker containers running:"
   docker ps
   echo "Airflow container logs:"
@@ -185,48 +201,64 @@ start() {
         fi
       done
       sleep 10;
-      if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
-        echo "Unable to unpause dag with id ${DAG_ID}."
-        echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
-        echo "Output:"
-        curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
-        debug_log_airflow
-        stop
-        exit 5
-      else
-        echo "Unpaused dag with id ${DAG_ID}."
-        sleep 5;
-        while [ "$(test_dag_state "${DAG_ID}" "running")" -gt 0 ]; do
-          echo "Dag '${DAG_ID}' is (still) running..."
-          sleep 5;
-        done
-        SUCCES_STATE="success"
-        FAILURE_STATE="failed"
-        if [ "${WHIRL_CI_EXPECT_FAILURE}" == true ]; then
-          SUCCES_STATE="failed"
-          FAILURE_STATE="success"
-        fi
-        if [ "$(test_dag_state "${DAG_ID}" "${SUCCES_STATE}")" -ge 1 ]; then
-          echo "Dag '${DAG_ID}' run(s) successfully finished"
+      if [ "${WHIRL_CI_EXPECT_IMPORTERRORS}" == true ]; then
+        echo "Checking dag ${DAG_ID} for expected errors."
+        result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq ".total_entries")
+        echo "Result of checking dag state(${STATE}) for ${DAG_ID} is ${result}" >&2
+        if [ "$(test_dag_errors "${DAG_ID}")" -gt 0 ]; then
+          echo "Dag ${DAG_ID} has expected errors. Stopping..."
           stop
           exit 0
-        fi
-        if [ "$(test_dag_state "${DAG_ID}" "${FAILURE_STATE}")" -ge 1 ]; then
-          echo "Dag '${DAG_ID}' run(s) failed"
-          # output dagrun result
-          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
-          if [ "$STOP_ON_FAILURE" = true ]; then
-            stop
-            exit 1
-          fi
         else
-          echo "Dag '${DAG_ID}' neither success nor failed!!!"
-          # output dagrun result
-          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+          echo "Dag ${DAG_ID} did not have expected errors."
+          $(test_dag_errors "${DAG_ID}" true)
+          stop
+          exit 8
+        fi
+      else
+        if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
+          echo "Unable to unpause dag with id ${DAG_ID}."
+          echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
+          echo "Output:"
+          curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
           debug_log_airflow
-          if [ "$STOP_ON_FAILURE" = true ]; then
+          stop
+          exit 5
+        else
+          echo "Unpaused dag with id ${DAG_ID}."
+          sleep 5;
+          while [ "$(test_dag_state "${DAG_ID}" "running")" -gt 0 ]; do
+            echo "Dag '${DAG_ID}' is (still) running..."
+            sleep 5;
+          done
+          SUCCES_STATE="success"
+          FAILURE_STATE="failed"
+          if [ "${WHIRL_CI_EXPECT_FAILURE}" == true ]; then
+            SUCCES_STATE="failed"
+            FAILURE_STATE="success"
+          fi
+          if [ "$(test_dag_state "${DAG_ID}" "${SUCCES_STATE}")" -ge 1 ]; then
+            echo "Dag '${DAG_ID}' run(s) successfully finished"
             stop
-            exit 7
+            exit 0
+          fi
+          if [ "$(test_dag_state "${DAG_ID}" "${FAILURE_STATE}")" -ge 1 ]; then
+            echo "Dag '${DAG_ID}' run(s) failed"
+            # output dagrun result
+            $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+            if [ "$STOP_ON_FAILURE" = true ]; then
+              stop
+              exit 1
+            fi
+          else
+            echo "Dag '${DAG_ID}' neither success nor failed!!!"
+            # output dagrun result
+            $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+            debug_log_airflow
+            if [ "$STOP_ON_FAILURE" = true ]; then
+              stop
+              exit 7
+            fi
           fi
         fi
       fi
