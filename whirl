@@ -15,16 +15,24 @@ function export_environment_vars() {
   CURRENT_ENV_PYTHON_VERSION=${PYTHON_VERSION}
   CURRENT_ENV_AIRFLOW_VERSION=${AIRFLOW_VERSION}
   set -a
+  # shellcheck disable=SC2034
   DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
+  # shellcheck disable=SC2034
   DAG_FOLDER=$(pwd)
+  # shellcheck disable=SC2034
   PROJECTNAME=$(basename "${DAG_FOLDER}")
+  # shellcheck disable=SC2034
   WHIRL_INITIATOR=$(whoami)
+  # shellcheck disable=SC2034
   WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
+  # shellcheck source=${HOME}/.whirl.env
+  # shellcheck disable=SC1091
   if [ -f ~/.whirl.env ]; then
     echo "Reading configuration from ~/.whirl.env"
     . ~/.whirl.env
   fi
+  # shellcheck source=./.whirl.env
   if [ -f "${SCRIPT_DIR}/.whirl.env" ]; then
     echo "Reading configuration from ${SCRIPT_DIR}/.whirl.env"
     . "${SCRIPT_DIR}/.whirl.env"
@@ -105,6 +113,26 @@ detect_potential_dag() {
   test "$(find . -type f -name '*.py' -o -name '*.zip' | wc -l)" -gt 0
 }
 
+check_next_dagrun_scheduled_today() {
+  local DAG_ID=$1
+  echo "Checking next dagrun for ${DAG_ID}" >&2
+  result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}" | jq '.next_dagrun | split("T") | .[0] | strptime("%Y-%m-%d") | strftime("%Y%m%d") | tonumber - (now | strftime("%Y%m%d") | tonumber)')
+  echo "Result of checking next dagrun for ${DAG_ID} is ${result} (days from now)" >&2
+  if [ "${result}" -eq 0 ]; then
+    true
+  else
+    false
+  fi
+}
+
+trigger_dagrun() {
+  local DAG_ID=$1
+  echo "Manually triggering dagrun for ${DAG_ID}" >&2
+  result=$(curl -s -X POST -H "Content-Type: application/json" -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}/dagRuns" -d "{}" | jq)
+  echo "Result of triggering dagrun for ${DAG_ID} is ${result}" >&2
+  sleep 5;
+}
+
 test_dag_state() {
   local DAG_ID=$1
   local STATE=$2
@@ -154,6 +182,7 @@ run_compose_setup_scripts() {
     echo "============================================"
     for filename in "${ENVIRONMENT_FOLDER}"/compose.setup.d/*.sh; do
       echo "Executing compose prepare script: $filename"
+      # shellcheck disable=SC1090
       . "$filename"
     done
   fi
@@ -196,7 +225,7 @@ start() {
           stop
           exit 3
         else
-          wait_period=$(($wait_period+10))
+          wait_period=$((wait_period+10))
           sleep 10;
         fi
       done
@@ -211,7 +240,7 @@ start() {
           exit 0
         else
           echo "Dag ${DAG_ID} did not have expected errors."
-          $(test_dag_errors "${DAG_ID}" true)
+          test_dag_errors "${DAG_ID}" true
           stop
           exit 8
         fi
@@ -227,6 +256,10 @@ start() {
         else
           echo "Unpaused dag with id ${DAG_ID}."
           sleep 5;
+          if ! check_next_dagrun_scheduled_today "${DAG_ID}"; then
+              echo "Need to trigger the dag ${DAG_ID} since first scheduled time is later than today and unpause is not enough to start running"
+              trigger_dagrun "${DAG_ID}"
+          fi
           while [ "$(test_dag_state "${DAG_ID}" "running")" -gt 0 ]; do
             echo "Dag '${DAG_ID}' is (still) running..."
             sleep 5;
@@ -245,7 +278,7 @@ start() {
           if [ "$(test_dag_state "${DAG_ID}" "${FAILURE_STATE}")" -ge 1 ]; then
             echo "Dag '${DAG_ID}' run(s) failed"
             # output dagrun result
-            $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+            test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true
             if [ "$STOP_ON_FAILURE" = true ]; then
               stop
               exit 1
@@ -253,7 +286,7 @@ start() {
           else
             echo "Dag '${DAG_ID}' neither success nor failed!!!"
             # output dagrun result
-            $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+            test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true
             debug_log_airflow
             if [ "$STOP_ON_FAILURE" = true ]; then
               stop
