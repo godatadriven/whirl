@@ -118,7 +118,7 @@ check_next_dagrun_scheduled_today() {
   echo "Checking next dagrun for ${DAG_ID}" >&2
   result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}" | jq '.next_dagrun // (now | todate) | split("T") | .[0] | strptime("%Y-%m-%d") | strftime("%Y%m%d") | tonumber - (now | strftime("%Y%m%d") | tonumber)')
   echo "Result of checking next dagrun for ${DAG_ID} is ${result} (days from now)" >&2
-  if [ "${result}" -eq 0 ]; then
+  if [ "${result}" -le 0 ]; then
     true
   else
     false
@@ -272,7 +272,7 @@ start() {
       if [ "${WHIRL_CI_EXPECT_IMPORTERRORS}" == true ]; then
         echo "Checking dag ${DAG_ID} for expected errors."
         result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq ".total_entries")
-        echo "Result of checking dag state(${STATE}) for ${DAG_ID} is ${result}" >&2
+        echo "Result of checking dag ${DAG_ID} for expected errors is ${result}" >&2
         if [ "$(test_dag_errors "${DAG_ID}")" -gt 0 ]; then
           echo "Dag ${DAG_ID} has expected errors. Stopping..."
           stop
