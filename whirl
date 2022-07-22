@@ -227,8 +227,22 @@ check_dagrun_result() {
   fi
 }
 
+function version_lt() {
+  local VER1="${1}"
+  local VER2="${2}"
+  test "$(echo "${VER1} ${VER2}" | tr " " "\n" | sort -rV | head -n 1)" != "${VER1}";
+}
+
 start() {
     echo "Starting airflow local run for environment ${WHIRL_ENVIRONMENT}"
+
+    if [ "${CI_MODE}" == true ]; then
+      if version_lt "${AIRFLOW_VERSION}" "${MINIMAL_AIRFLOW_VERSION}"; then
+        echo "${AIRFLOW_VERSION} less then minimal version ${MINIMAL_AIRFLOW_VERSION}";
+        echo "Skipping running in CI MODE....";
+        exit 0;
+      fi
+    fi
 
     # Possible cleanup before starting
     run_compose_setup_scripts
