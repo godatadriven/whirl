@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
+#
 from builtins import range
 from datetime import timedelta
 
 from airflow.models import DAG
-from airflow.operators.bash import BashOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.bash_operator import BashOperator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.dates import days_ago
 
 args = {
@@ -18,6 +18,7 @@ dag = DAG(
     default_args=args,
     schedule_interval='0 0 * * *',
     dagrun_timeout=timedelta(minutes=60),
+
 )
 
 run_this_last = DummyOperator(

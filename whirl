@@ -15,16 +15,24 @@ function export_environment_vars() {
   CURRENT_ENV_PYTHON_VERSION=${PYTHON_VERSION}
   CURRENT_ENV_AIRFLOW_VERSION=${AIRFLOW_VERSION}
   set -a
+  # shellcheck disable=SC2034
   DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
+  # shellcheck disable=SC2034
   DAG_FOLDER=$(pwd)
+  # shellcheck disable=SC2034
   PROJECTNAME=$(basename "${DAG_FOLDER}")
+  # shellcheck disable=SC2034
   WHIRL_INITIATOR=$(whoami)
+  # shellcheck disable=SC2034
   WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
+  # shellcheck source=${HOME}/.whirl.env
+  # shellcheck disable=SC1091
   if [ -f ~/.whirl.env ]; then
     echo "Reading configuration from ~/.whirl.env"
     . ~/.whirl.env
   fi
+  # shellcheck source=./.whirl.env
   if [ -f "${SCRIPT_DIR}/.whirl.env" ]; then
     echo "Reading configuration from ${SCRIPT_DIR}/.whirl.env"
     . "${SCRIPT_DIR}/.whirl.env"
@@ -105,6 +113,26 @@ detect_potential_dag() {
   test "$(find . -type f -name '*.py' -o -name '*.zip' | wc -l)" -gt 0
 }
 
+check_next_dagrun_scheduled_today() {
+  local DAG_ID=$1
+  echo "Checking next dagrun for ${DAG_ID}" >&2
+  result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}" | jq '.next_dagrun // (now | todate) | split("T") | .[0] | strptime("%Y-%m-%d") | strftime("%Y%m%d") | tonumber - (now | strftime("%Y%m%d") | tonumber)')
+  echo "Result of checking next dagrun for ${DAG_ID} is ${result} (days from now)" >&2
+  if [ "${result}" -le 0 ]; then
+    true
+  else
+    false
+  fi
+}
+
+trigger_dagrun() {
+  local DAG_ID=$1
+  echo "Manually triggering dagrun for ${DAG_ID}" >&2
+  result=$(curl -s -X POST -H "Content-Type: application/json" -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}/dagRuns" -d "{}" | jq)
+  echo "Result of triggering dagrun for ${DAG_ID} is ${result}" >&2
+  sleep 5;
+}
+
 test_dag_state() {
   local DAG_ID=$1
   local STATE=$2
@@ -122,9 +150,25 @@ test_dag_state() {
   fi
 }
 
+test_dag_errors() {
+  local DAG_ID=$1
+  local SHOW_RESULT=${2:-false}
+  echo "Checking dag ${DAG_ID} for errors." >&2
+  result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq ".total_entries")
+  echo "Result of checking dag errors for ${DAG_ID} is ${result}" >&2
+  if [ "${SHOW_RESULT}" == true ]; then
+    output=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq )
+    echo "ImportErrors: $output" >&2
+  else
+    echo "$result"
+  fi
+}
+
 debug_log_airflow() {
   echo "Available dags:"
   curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags" || true
+  echo "Dag Import Errors:"
+  curl -X GET -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" || true
   echo "Docker containers running:"
   docker ps
   echo "Airflow container logs:"
@@ -138,8 +182,48 @@ run_compose_setup_scripts() {
     echo "============================================"
     for filename in "${ENVIRONMENT_FOLDER}"/compose.setup.d/*.sh; do
       echo "Executing compose prepare script: $filename"
+      # shellcheck disable=SC1090
       . "$filename"
     done
+  fi
+}
+
+check_dagrun_result() {
+  local DAG_ID=${1}
+  local RETRY=${2:-true}
+
+  while [ "$(test_dag_state "${DAG_ID}" "running")" -gt 0 ]; do
+    echo "Dag '${DAG_ID}' is (still) running..."
+    sleep 5;
+  done
+  SUCCES_STATE="success"
+  FAILURE_STATE="failed"
+  if [ "${WHIRL_CI_EXPECT_FAILURE}" == true ]; then
+    SUCCES_STATE="failed"
+    FAILURE_STATE="success"
+  fi
+  if [ "$(test_dag_state "${DAG_ID}" "${SUCCES_STATE}")" -ge 1 ]; then
+    echo "Dag '${DAG_ID}' run(s) successfully finished"
+    stop
+    return 0
+  fi
+  if [ "$(test_dag_state "${DAG_ID}" "${FAILURE_STATE}")" -ge 1 ]; then
+    echo "Dag '${DAG_ID}' run(s) failed"
+    # output dagrun result
+    test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true
+    return 1
+  else
+    echo "Dag '${DAG_ID}' neither success nor failed!!!"
+    if ${RETRY}; then
+      echo "Maybe there was no dagrun for dag ${DAG_ID}. Retry after manual trigger"
+      trigger_dagrun "${DAG_ID}"
+      check_dagrun_result "${DAG_ID}" false
+    else
+      # output dagrun result
+      test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true
+      debug_log_airflow
+      return 7
+    fi
   fi
 }
 
@@ -180,54 +264,44 @@ start() {
           stop
           exit 3
         else
-          wait_period=$(($wait_period+10))
+          wait_period=$((wait_period+10))
           sleep 10;
         fi
       done
       sleep 10;
-      if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
-        echo "Unable to unpause dag with id ${DAG_ID}."
-        echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
-        echo "Output:"
-        curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
-        debug_log_airflow
-        stop
-        exit 5
-      else
-        echo "Unpaused dag with id ${DAG_ID}."
-        sleep 5;
-        while [ "$(test_dag_state "${DAG_ID}" "running")" -gt 0 ]; do
-          echo "Dag '${DAG_ID}' is (still) running..."
-          sleep 5;
-        done
-        SUCCES_STATE="success"
-        FAILURE_STATE="failed"
-        if [ "${WHIRL_CI_EXPECT_FAILURE}" == true ]; then
-          SUCCES_STATE="failed"
-          FAILURE_STATE="success"
-        fi
-        if [ "$(test_dag_state "${DAG_ID}" "${SUCCES_STATE}")" -ge 1 ]; then
-          echo "Dag '${DAG_ID}' run(s) successfully finished"
+      if [ "${WHIRL_CI_EXPECT_IMPORTERRORS}" == true ]; then
+        echo "Checking dag ${DAG_ID} for expected errors."
+        result=$(curl -s -u admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/importErrors" | jq ".total_entries")
+        echo "Result of checking dag ${DAG_ID} for expected errors is ${result}" >&2
+        if [ "$(test_dag_errors "${DAG_ID}")" -gt 0 ]; then
+          echo "Dag ${DAG_ID} has expected errors. Stopping..."
           stop
           exit 0
-        fi
-        if [ "$(test_dag_state "${DAG_ID}" "${FAILURE_STATE}")" -ge 1 ]; then
-          echo "Dag '${DAG_ID}' run(s) failed"
-          # output dagrun result
-          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
-          if [ "$STOP_ON_FAILURE" = true ]; then
-            stop
-            exit 1
-          fi
         else
-          echo "Dag '${DAG_ID}' neither success nor failed!!!"
-          # output dagrun result
-          $(test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true)
+          echo "Dag ${DAG_ID} did not have expected errors."
+          test_dag_errors "${DAG_ID}" true
+          stop
+          exit 8
+        fi
+      else
+        if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
+          echo "Unable to unpause dag with id ${DAG_ID}."
+          echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin \"http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
+          echo "Output:"
+          curl -X PATCH  -H 'Content-Type: application/json' --user admin:admin "http://localhost:${AIRFLOW_UI_PORT}/api/v1/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
           debug_log_airflow
-          if [ "$STOP_ON_FAILURE" = true ]; then
-            stop
-            exit 7
+          stop
+          exit 5
+        else
+          echo "Unpaused dag with id ${DAG_ID}."
+          sleep 5;
+          if ! check_next_dagrun_scheduled_today "${DAG_ID}"; then
+              echo "Need to trigger the dag ${DAG_ID} since first scheduled time is later than today and unpause is not enough to start running"
+              trigger_dagrun "${DAG_ID}"
           fi
+
+          check_dagrun_result "${DAG_ID}"
+          exit ${?}
         fi
       fi
     fi

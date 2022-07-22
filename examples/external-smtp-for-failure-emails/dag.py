@@ -1,13 +1,13 @@
 from datetime import timedelta
 
-import airflow
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.utils.dates import days_ago
 
 args = {
     'owner': 'airflow',
-    'start_date': airflow.utils.dates.days_ago(2),
+    'start_date': days_ago(2),
     'email': 'recipient@example.com',
     'email_on_failure': True,
     'email_on_retry': False,
