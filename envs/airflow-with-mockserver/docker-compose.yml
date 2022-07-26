@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  webserver:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["webserver", "-p", "5000"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - mockserver
+      - postgresdb
+
+  scheduler:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["scheduler"]
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - mockserver
+      - postgresdb
+
+  triggerer:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["triggerer"]
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - mockserver
+      - postgresdb
+
+
+  mockserver:
+    image: jamesdbloom/mockserver:mockserver-5.13.2
+    ports:
+      - 1080:1080
+      - 1081:1081
+    environment:
+      - LOG_LEVEL=ERROR
+      - SERVER_PORT=1080,1081
+
+  postgresdb:
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST=postgresdb
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+
+
