@@ -42,7 +42,7 @@ sftp = SFTPOperator(
     dag=dag
 )
 
-# lateset released version of Airflow does not do templating
+# latest released version of Airflow does not do templating
 # in the op_args. This has recently been fixed though:
 # https://github.com/apache/airflow/pull/4691
 # For now, instead of depending on the templated 'file' variable
