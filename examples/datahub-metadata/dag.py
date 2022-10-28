@@ -6,6 +6,8 @@ from airflow.hooks.http_hook import HttpHook
 from airflow.hooks.S3_hook import S3Hook
 from airflow.hooks.postgres_hook import PostgresHook
 
+from sqlalchemy import create_engine
+
 import pandas as pd
 
 import os
@@ -32,6 +34,7 @@ def _demo_api_get(conn_id, templates_dict, **context):
     response = http_hook.run('')
     df = pd.DataFrame(response.json())
     print(df.head())
+    print(df.columns)
     df.to_parquet(templates_dict['localfile'])
 
 
@@ -54,7 +57,6 @@ def _demo_s3_to_postgress(conn_id, templates_dict, **context):
     :return:
     """
     s3hook = S3Hook(conn_id)
-    # s3fs.ls()
     s3_path = f"s3://{templates_dict['s3_bucket']}/{templates_dict['s3_input_path']}"
     print(s3_path)
     df = pd.read_parquet(
@@ -64,10 +66,15 @@ def _demo_s3_to_postgress(conn_id, templates_dict, **context):
         },
     )
 
-    print(df.head())
-
-    pg_hook = PostgresHook(postgres_conn_id=templates_dict['pg_conn_id'], schema=templates_dict['target_schema']) 
-    pg_hook.insert_rows(templates_dict['target_table'], df)
+    # We could do this a bit more cleanly
+    pg_hook = PostgresHook(
+        postgres_conn_id=templates_dict['pg_conn_id'],
+        # The PostgresHook uses schema to determine database
+        schema=templates_dict['target_database'],
+    )
+    conn = pg_hook.get_connection(templates_dict['pg_conn_id'])
+    engine = create_engine(f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}')
+    df.to_sql(templates_dict['target_table'], engine)
 
 
 local_path = "/tmp/whirl-local-api-to-s3-example/demo-api.parquet"
@@ -115,7 +122,7 @@ s3_to_postgres = PythonOperator(
         "s3_bucket": s3bucket,
         "s3_input_path": output_path,
         "pg_conn_id": "local_pg",
-        "target_schema": "demo",
+        "target_database": os.environ["POSTGRES_DB"],
         "target_table": "api",
     },
     provide_context=True,
