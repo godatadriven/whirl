@@ -110,7 +110,7 @@ services:
       JWT_ISSUER: ${JWT_ISSUER:-"open-metadata.org"}
       JWT_KEY_ID: ${JWT_KEY_ID:-"Gb389a-9f76-gdjs-a92j-0242bk94356"}
       # OpenMetadata Server Airflow Configuration
-      AIRFLOW_HOST: ${AIRFLOW_HOST:-http://ingestion:8080}
+      AIRFLOW_HOST: ${AIRFLOW_HOST:-http://airflow:5000}
       SERVER_HOST_API_URL: ${SERVER_HOST_API_URL:-http://openmetadataserver:8585/api}
       AIRFLOW_AUTH_PROVIDER: ${AIRFLOW_AUTH_PROVIDER:-no-auth}
       # OpenMetadata Airflow Azure SSO Configuration

@@ -33,8 +33,20 @@ RUN mkdir -p /etc/nginx/ssl \
 COPY nginx-ssl.conf /etc/nginx/conf.d/
 
 RUN echo "airflow ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+RUN apt-get update \
+    && apt-get install -y \
+    postgresql-common \
+    libpq-dev \
+    gcc \
+    postgresql \
+    postgresql-contrib
+
 USER airflow
 EXPOSE 5000
+
+RUN pip uninstall psycopg2-binary -y && pip install psycopg2
+RUN mkdir -p /opt/airflow/dag_generated_configs
 
 COPY --chown=airflow:root entrypoint.sh /entrypoint-whirl.sh
 COPY includes /etc/airflow/functions
