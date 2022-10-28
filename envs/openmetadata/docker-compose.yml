@@ -83,8 +83,7 @@ services:
       - "9200:9200"
       - "9300:9300"
 
-  openmetadata-server:
-    container_name: openmetadata_server
+  openmetadataserver:
     restart: always
     image: openmetadata/server:0.12.2
     environment:
@@ -112,7 +111,7 @@ services:
       JWT_KEY_ID: ${JWT_KEY_ID:-"Gb389a-9f76-gdjs-a92j-0242bk94356"}
       # OpenMetadata Server Airflow Configuration
       AIRFLOW_HOST: ${AIRFLOW_HOST:-http://ingestion:8080}
-      SERVER_HOST_API_URL: ${SERVER_HOST_API_URL:-http://openmetadata-server:8585/api}
+      SERVER_HOST_API_URL: ${SERVER_HOST_API_URL:-http://openmetadataserver:8585/api}
       AIRFLOW_AUTH_PROVIDER: ${AIRFLOW_AUTH_PROVIDER:-no-auth}
       # OpenMetadata Airflow Azure SSO Configuration
       OM_AUTH_AIRFLOW_AZURE_CLIENT_SECRET: ${OM_AUTH_AIRFLOW_AZURE_CLIENT_SECRET:-""}
