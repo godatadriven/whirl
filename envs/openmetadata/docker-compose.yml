@@ -1,0 +1,176 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - mockserver
+      - s3server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  s3server:
+    image: localstack/localstack-full:0.12.8
+    ports:
+      - "4563-4584:4563-4584"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=s3
+      - EDGE_PORT=4563
+    env_file:
+      - .whirl.env
+
+  mockserver:
+    image: jamesdbloom/mockserver:mockserver-5.13.2
+    ports:
+      - 1080:1080
+      - 1081:1081
+    environment:
+      - LOG_LEVEL=ERROR
+      - SERVER_PORT=1080,1081
+
+  postgresdb:
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST=postgresdb
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+
+  postgresql:
+    container_name: openmetadata_postgresql
+    image: openmetadata/postgresql:0.12.2
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    expose:
+      - 5432
+    ports:
+      - "15432:5432"
+    # networks:
+    #   - app_net
+    healthcheck:
+      test: psql -U postgres -tAc 'select 1' -d openmetadata_db
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  elasticsearch:
+    container_name: openmetadata_elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
+    # networks:
+    #   - app_net
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  openmetadata-server:
+    container_name: openmetadata_server
+    restart: always
+    image: openmetadata/server:0.12.2
+    environment:
+      # OpenMetadata Server Authentication Configuration
+      AUTHORIZER_CLASS_NAME: ${AUTHORIZER_CLASS_NAME:-org.openmetadata.service.security.DefaultAuthorizer}
+      AUTHORIZER_REQUEST_FILTER: ${AUTHORIZER_REQUEST_FILTER:-org.openmetadata.service.security.JwtFilter}
+      AUTHORIZER_ADMIN_PRINCIPALS: ${AUTHORIZER_ADMIN_PRINCIPALS:-[admin]}
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ${AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN:-["all"]}
+      AUTHORIZER_INGESTION_PRINCIPALS: ${AUTHORIZER_INGESTION_PRINCIPALS:-[ingestion-bot]}
+      AUTHORIZER_PRINCIPAL_DOMAIN: ${AUTHORIZER_PRINCIPAL_DOMAIN:-"openmetadata.org"}
+      AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: ${AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN:-false}
+      AUTHORIZER_ENABLE_SECURE_SOCKET: ${AUTHORIZER_ENABLE_SECURE_SOCKET:-false}
+      AUTHENTICATION_PROVIDER: ${AUTHENTICATION_PROVIDER:-basic}
+      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME:-""}
+      AUTHENTICATION_PUBLIC_KEYS: ${AUTHENTICATION_PUBLIC_KEYS:-[http://localhost:8585/api/v1/config/jwks]}
+      AUTHENTICATION_AUTHORITY: ${AUTHENTICATION_AUTHORITY:-https://accounts.google.com}
+      AUTHENTICATION_CLIENT_ID: ${AUTHENTICATION_CLIENT_ID:-""}
+      AUTHENTICATION_CALLBACK_URL: ${AUTHENTICATION_CALLBACK_URL:-""}
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ${AUTHENTICATION_JWT_PRINCIPAL_CLAIMS:-[email,preferred_username,sub]}
+      AUTHENTICATION_ENABLE_SELF_SIGNUP: ${AUTHENTICATION_ENABLE_SELF_SIGNUP:-true}
+      # JWT Configuration
+      RSA_PUBLIC_KEY_FILE_PATH: ${RSA_PUBLIC_KEY_FILE_PATH:-"./conf/public_key.der"}
+      RSA_PRIVATE_KEY_FILE_PATH: ${RSA_PRIVATE_KEY_FILE_PATH:-"./conf/private_key.der"}
+      JWT_ISSUER: ${JWT_ISSUER:-"open-metadata.org"}
+      JWT_KEY_ID: ${JWT_KEY_ID:-"Gb389a-9f76-gdjs-a92j-0242bk94356"}
+      # OpenMetadata Server Airflow Configuration
+      AIRFLOW_HOST: ${AIRFLOW_HOST:-http://ingestion:8080}
+      SERVER_HOST_API_URL: ${SERVER_HOST_API_URL:-http://openmetadata-server:8585/api}
+      AIRFLOW_AUTH_PROVIDER: ${AIRFLOW_AUTH_PROVIDER:-no-auth}
+      # OpenMetadata Airflow Azure SSO Configuration
+      OM_AUTH_AIRFLOW_AZURE_CLIENT_SECRET: ${OM_AUTH_AIRFLOW_AZURE_CLIENT_SECRET:-""}
+      OM_AUTH_AIRFLOW_AZURE_AUTHORITY_URL: ${OM_AUTH_AIRFLOW_AZURE_AUTHORITY_URL:-""}
+      OM_AUTH_AIRFLOW_AZURE_SCOPES: ${OM_AUTH_AIRFLOW_AZURE_SCOPES:-[]}
+      OM_AUTH_AIRFLOW_AZURE_CLIENT_ID: ${OM_AUTH_AIRFLOW_AZURE_CLIENT_ID:-""}
+      # OpenMetadata Airflow Google SSO Configuration
+      OM_AUTH_AIRFLOW_GOOGLE_SECRET_KEY_PATH: ${OM_AUTH_AIRFLOW_GOOGLE_SECRET_KEY_PATH:- ""}
+      OM_AUTH_AIRFLOW_GOOGLE_AUDIENCE: ${OM_AUTH_AIRFLOW_GOOGLE_AUDIENCE:-"https://www.googleapis.com/oauth2/v4/token"}
+      # OpenMetadata Airflow Okta SSO Configuration
+      OM_AUTH_AIRFLOW_OKTA_CLIENT_ID: ${OM_AUTH_AIRFLOW_OKTA_CLIENT_ID:-""}
+      OM_AUTH_AIRFLOW_OKTA_ORGANIZATION_URL: ${OM_AUTH_AIRFLOW_OKTA_ORGANIZATION_URL:-""}
+      OM_AUTH_AIRFLOW_OKTA_PRIVATE_KEY: ${OM_AUTH_AIRFLOW_OKTA_PRIVATE_KEY:-""}
+      OM_AUTH_AIRFLOW_OKTA_SA_EMAIL: ${OM_AUTH_AIRFLOW_OKTA_SA_EMAIL:-""}
+      OM_AUTH_AIRFLOW_OKTA_SCOPES: ${OM_AUTH_AIRFLOW_OKTA_SCOPES:-[]}
+      # OpenMetadata Airflow Auth0 SSO Configuration
+      OM_AUTH_AIRFLOW_AUTH0_CLIENT_ID: ${OM_AUTH_AIRFLOW_AUTH0_CLIENT_ID:-""}
+      OM_AUTH_AIRFLOW_AUTH0_CLIENT_SECRET: ${OM_AUTH_AIRFLOW_AUTH0_CLIENT_SECRET:-""}
+      OM_AUTH_AIRFLOW_AUTH0_DOMAIN_URL: ${OM_AUTH_AIRFLOW_AUTH0_DOMAIN_URL:-""}
+      # OpenMetadata Airflow Custom OIDC SSO Configuration
+      OM_AUTH_AIRFLOW_CUSTOM_OIDC_CLIENT_ID: ${OM_AUTH_AIRFLOW_CUSTOM_OIDC_CLIENT_ID:-""}
+      OM_AUTH_AIRFLOW_CUSTOM_OIDC_SECRET_KEY: ${OM_AUTH_AIRFLOW_CUSTOM_OIDC_SECRET_KEY:-""}
+      OM_AUTH_AIRFLOW_CUSTOM_OIDC_TOKEN_ENDPOINT_URL: ${OM_AUTH_AIRFLOW_CUSTOM_OIDC_TOKEN_ENDPOINT_URL:-""}
+      # OpenMetadata Airflow JWT Token Configuration
+      OM_AUTH_JWT_TOKEN: ${OM_AUTH_JWT_TOKEN:-""}
+      #Database configuration for postgresql
+      DB_DRIVER_CLASS: ${DB_DRIVER_CLASS:-org.postgresql.Driver}
+      DB_SCHEME: ${DB_SCHEME:-postgresql}
+      DB_USE_SSL: ${DB_USE_SSL:-false}
+      DB_USER: ${DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${DB_USER_PASSWORD:-openmetadata_password}
+      DB_HOST: ${DB_HOST:-postgresql}
+      DB_PORT: ${DB_PORT:-5432}
+      OM_DATABASE: ${OM_DATABASE:-openmetadata_db}
+      # Airflow SSL Configurations
+      AIRFLOW_VERIFY_SSL: ${AIRFLOW_VERIFY_SSL:-"no-ssl"}
+      AIRFLOW_SSL_CERT_PATH: ${AIRFLOW_SSL_CERT_PATH:-""}
+      # ElasticSearch Configurations
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:- elasticsearch}
+      ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT:-9200}
+      ELASTICSEARCH_SCHEME: ${ELASTICSEARCH_SCHEME:-http}
+      ELASTICSEARCH_USER: ${ELASTICSEARCH_USER:-""}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-""}
+      # Heap OPTS Configurations
+      OPENMETADATA_HEAP_OPTS: ${OPENMETADATA_HEAP_OPTS:--Xmx1G -Xms1G}
+
+    expose:
+      - 8585
+      - 8586
+    ports:
+      - "8585:8585"
+      - "8586:8586"
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      postgresql:
+        condition: service_healthy
+    # networks:
+    #   - app_net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8586/healthcheck" ]
