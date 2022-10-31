@@ -1,0 +1,15 @@
+# The simplest recipe that pulls metadata from MSSQL and puts it into DataHub
+# using the Rest API.
+source:
+  type: postgres
+  config:
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    database: ${POSTGRES_DB}
+    host_port: "${POSTGRES_PORT}:${POSTGRES_PORT}"
+
+# export POSTGRES_HOST=postgresdb
+# export POSTGRES_PORT=5432
+# export POSTGRES_PASSWORD=p@ssw0rd
+# export POSTGRES_USER=postgres
+# export POSTGRES_DB=postgresdb
