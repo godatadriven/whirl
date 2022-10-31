@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.hooks.http_hook import HttpHook
 from airflow.hooks.S3_hook import S3Hook
-from airflow.hooks.postgres_hook import PostgresHook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 from sqlalchemy import create_engine
 
@@ -111,6 +111,8 @@ store_s3 = PythonOperator(
     provide_context=True,
     dag=dag
 )
+
+# todo, specify inlet and outlet datasets
 
 s3_to_postgres = PythonOperator(
     task_id="s3_to_postgres",
