@@ -195,7 +195,7 @@ services:
     ports:
       - ${DATAHUB_MAPPED_MYSQL_PORT:-3306}:3306
     volumes:
-      - ../mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysqldata:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "status", "-h", "localhost", "-u", "$MYSQL_USER", "--password=$MYSQL_PASSWORD"]
