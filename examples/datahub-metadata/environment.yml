@@ -19,6 +19,7 @@ dependencies:
   - pip:
     - acryl-datahub==0.8.45.2
     - acryl-datahub-airflow-plugin==0.9.0.4
+    - agate==1.6.3
     - aiohttp==3.8.3
     - aiosignal==1.2.0
     - alembic==1.8.1
@@ -45,6 +46,8 @@ dependencies:
     - beautifulsoup4==4.11.1
     - bleach==5.0.1
     - blinker==1.5
+    - boto3==1.26.16
+    - botocore==1.29.16
     - cached-property==1.5.2
     - cachelib==0.9.0
     - cattrs==1.10.0
@@ -54,12 +57,15 @@ dependencies:
     - click-default-group==1.2.2
     - click-spinner==0.1.10
     - clickclick==20.10.2
-    - colorama==0.4.6
+    - colorama==0.4.5
     - colorlog==6.7.0
     - commonmark==0.9.1
     - connexion==2.14.1
     - croniter==1.3.7
     - cryptography==38.0.1
+    - dbt-core==1.3.1
+    - dbt-extractor==0.4.1
+    - dbt-postgres==1.3.1
     - debugpy==1.6.3
     - decorator==5.1.1
     - defusedxml==0.7.1
@@ -84,11 +90,13 @@ dependencies:
     - flask-sqlalchemy==2.5.1
     - flask-wtf==0.14.3
     - frozenlist==1.3.1
+    - future==0.18.2
     - geoalchemy2==0.11.1
     - great-expectations==0.15.22
     - greenlet==2.0.1
     - gunicorn==20.1.0
     - h11==0.12.0
+    - hologram==0.0.15
     - httpcore==0.15.0
     - httpx==0.23.0
     - humanfriendly==10.0
@@ -101,9 +109,11 @@ dependencies:
     - ipython-genutils==0.2.0
     - ipywidgets==8.0.2
     - iso8601==1.1.0
+    - isodate==0.6.1
     - itsdangerous==1.1.0
     - jedi==0.18.2
     - jinja2==3.1.2
+    - jmespath==1.0.1
     - jsonpatch==1.32
     - jsonpointer==2.3
     - jsonschema==3.2.0
@@ -113,7 +123,9 @@ dependencies:
     - jupyterlab-pygments==0.2.2
     - jupyterlab-widgets==3.0.3
     - lazy-object-proxy==1.8.0
+    - leather==0.3.4
     - lockfile==0.12.2
+    - logbook==1.5.3
     - makefun==1.15.0
     - mako==1.2.3
     - markdown==3.4.1
@@ -122,9 +134,12 @@ dependencies:
     - marshmallow-enum==1.5.1
     - marshmallow-oneofschema==3.0.1
     - marshmallow-sqlalchemy==0.26.1
+    - mashumaro==3.0.4
     - matplotlib-inline==0.1.6
+    - minimal-snowplow-tracker==0.0.2
     - mistune==2.0.4
     - mixpanel==4.10.0
+    - msgpack==1.0.4
     - multidict==6.0.2
     - mypy-extensions==0.4.3
     - nbclassic==0.4.8
@@ -132,13 +147,16 @@ dependencies:
     - nbconvert==7.2.5
     - nbformat==5.7.0
     - nest-asyncio==1.5.6
+    - networkx==2.8.8
     - notebook==6.5.2
     - notebook-shim==0.2.2
     - numpy==1.23.5
     - packaging==21.3
     - pandas==1.5.2
     - pandocfilters==1.5.0
+    - parsedatetime==2.4
     - parso==0.8.3
+    - pathspec==0.9.0
     - pendulum==2.1.2
     - pexpect==4.8.0
     - pickleshare==0.7.5
@@ -164,6 +182,7 @@ dependencies:
     - python-slugify==4.0.1
     - python-utils==3.3.3
     - python3-openid==3.2.0
+    - pytimeparse==1.1.8
     - pytz==2022.4
     - pytz-deprecation-shim==0.1.0.post0
     - pytzdata==2020.1
@@ -176,6 +195,7 @@ dependencies:
     - rich==12.6.0
     - ruamel-yaml==0.17.17
     - ruamel-yaml-clib==0.2.7
+    - s3transfer==0.6.0
     - scipy==1.9.3
     - send2trash==1.8.0
     - setproctitle==1.3.2

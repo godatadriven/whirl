@@ -1,0 +1,12 @@
+source:
+  type: "dbt"
+  config:
+    # Coordinates
+    # To use this as-is, set the environment variable DBT_PROJECT_ROOT to the root folder of your dbt project
+    manifest_path: "${DBT_PROFILES_DIR}/target/manifest.json"
+    catalog_path: "${DBT_PROFILES_DIR}/target/catalog.json"
+    # sources_path: "${DBT_PROJECT_ROOT}/target/sources.json" # optional for freshness
+    test_results_path: "${DBT_PROFILES_DIR}/target/run_results.json" # optional for recording dbt test results after running dbt test
+
+    # Options
+    target_platform: "postgres" # e.g. bigquery/postgres/etc.

@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: car_brand_totals
+    description: |
+      # Car Brand Totals
+      This is a great view of car brand totals
+    columns:
+      - name: car_brand
+        description: "Car Brand"
+        tests:
+          - unique
+          - not_null
+      - name: n_records
+        description: "Number of records in dataset"
+        tests:
+          - not_null
