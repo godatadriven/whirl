@@ -1,0 +1,10 @@
+source:
+  type: postgres
+  config:
+    # Coordinates
+    host_port: localhost:5432
+    database: postgresdb
+
+    # Credentials
+    username: postgres
+    password: ${POSTGRES_PASSWORD}

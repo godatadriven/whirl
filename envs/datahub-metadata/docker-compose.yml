@@ -6,7 +6,7 @@ services:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
     command: ["singlemachine"]
     ports:
-      - '8005:5000'  # HTTP (Airflow Web UI)
+      - '${PORT_AIRFLOW_UI-8005}:5000'  # HTTP (Airflow Web UI)
     env_file:
       - .whirl.env
     environment:
