@@ -39,33 +39,33 @@ jobs:
         run: echo "example=$(ls -d ./examples/* | sed -r 's/\.\/examples\/(.*)/\1/g' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
         # Define step output named example based on ls command transformed to JSON thanks to jq
 
-  # whirl-ci-default-envs:
-  #   needs: [directories]
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     max-parallel: 4
-  #     matrix:
-  #       example_dir: ${{ fromJson(needs.directories.outputs.dir) }}
-  #       python_version: ["3.8", "3.9"]
-  #       airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
-  #       exclude:
-  #         # Needs more memory than available on the runner
-  #         - example_dir: ./examples/dbt-spark-example
-  #         - example_dir: ./examples/spark-delta-sharing
-  #         - example_dir: ./examples/spark-s3-to-hive
-  #         # Exclude failing dbt runs
-  #         - example_dir: ./examples/dbt-example
-  #   env:
-  #     PYTHON_VERSION: ${{ matrix.python_version }}
-  #     AIRFLOW_VERSION: ${{ matrix.airflow_version }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Run whirl CI ${{ matrix.example_dir }}
-  #       working-directory: ${{ matrix.example_dir }}
-  #       run: |
-  #         echo Run Ci from example directory ${{ matrix.example_dir }}
-  #         ../../whirl ci
+  whirl-ci-default-envs:
+    needs: [directories]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        example_dir: ${{ fromJson(needs.directories.outputs.dir) }}
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.5.0"]
+        exclude:
+          # Needs more memory than available on the runner
+          - example_dir: ./examples/dbt-spark-example
+          - example_dir: ./examples/spark-delta-sharing
+          - example_dir: ./examples/spark-s3-to-hive
+          # Exclude failing dbt runs
+          - example_dir: ./examples/dbt-example
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI ${{ matrix.example_dir }}
+        working-directory: ${{ matrix.example_dir }}
+        run: |
+          echo Run Ci from example directory ${{ matrix.example_dir }}
+          ../../whirl ci
 
   whirl-ci-default-envs-from-root-dir:
     needs: [examples]
@@ -76,7 +76,7 @@ jobs:
       matrix:
         example: ${{ fromJson(needs.examples.outputs.example) }}
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
+        airflow_version: ["2.2.5", "2.5.0"]
         exclude:
           # Needs more memory than available on the runner
           - example: dbt-spark-example
@@ -95,50 +95,50 @@ jobs:
           ./whirl -x ${{ matrix.example }} ci
 
 
-  # whirl-ci-extra-env-spark-s3-to-postgres:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Run whirl CI non-default env
-  #       working-directory: ./examples/spark-s3-to-postgres/
-  #       run: |
-  #         echo Run Ci for example spark-s3-to-postgres with non-default env
-  #         ../../whirl ci -e postgres-s3-spark
+  whirl-ci-extra-env-spark-s3-to-postgres:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI non-default env
+        working-directory: ./examples/spark-s3-to-postgres/
+        run: |
+          echo Run Ci for example spark-s3-to-postgres with non-default env
+          ../../whirl ci -e postgres-s3-spark
 
-  # whirl-ci-extra-env-api-to-s3:
-  #   strategy:
-  #     fail-fast: false
-  #     max-parallel: 4
-  #     matrix:
-  #       python_version: ["3.8", "3.9"]
-  #       airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     PYTHON_VERSION: ${{ matrix.python_version }}
-  #     AIRFLOW_VERSION: ${{ matrix.airflow_version }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Run whirl CI api-to-s3 on k8s executor
-  #       working-directory: ./examples/api-to-s3/
-  #       run: |
-  #         echo Run Ci for example api-to-s3 with k8s executor env
-  #         ../../whirl ci -e api-python-s3-k8s
+  whirl-ci-extra-env-api-to-s3:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.5.0"]
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI api-to-s3 on k8s executor
+        working-directory: ./examples/api-to-s3/
+        run: |
+          echo Run Ci for example api-to-s3 with k8s executor env
+          ../../whirl ci -e api-python-s3-k8s
 
-  # whirl-ci-extra-env-ha-scheduler:
-  #   strategy:
-  #     fail-fast: false
-  #     max-parallel: 4
-  #     matrix:
-  #       python_version: ["3.8", "3.9"]
-  #       airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     PYTHON_VERSION: ${{ matrix.python_version }}
-  #     AIRFLOW_VERSION: ${{ matrix.airflow_version }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Run whirl CI ha-scheduler env
-  #       working-directory: ./examples/external-airflow-db/
-  #       run: |
-  #         echo Run Ci for example external-airflow-db with ha-scheduler env
-  #         ../../whirl ci -e ha-scheduler
+  whirl-ci-extra-env-ha-scheduler:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.5.0"]
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI ha-scheduler env
+        working-directory: ./examples/external-airflow-db/
+        run: |
+          echo Run Ci for example external-airflow-db with ha-scheduler env
+          ../../whirl ci -e ha-scheduler
