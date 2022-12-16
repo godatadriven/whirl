@@ -25,7 +25,18 @@ jobs:
       - uses: actions/checkout@v2
       - id: setdirs # Give it an id to handle to get step outputs in the outputs key above
         run: echo "::set-output name=dir::$(ls -d ./examples/* | jq -R -s -c 'split("\n")[:-1]')"
-        # Define step output named dir base on ls command transformed to JSON thanks to jq
+        # Define step output named dir based on ls command transformed to JSON thanks to jq
+
+  examples: # Job that list subdirectories of ./examples
+    runs-on: ubuntu-latest
+    outputs:
+      # generate output name example by using inner step output
+      example: ${{ steps.setexamples.outputs.example }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: setexamples # Give it an id to handle to get step outputs in the outputs key above
+      run: echo "::set-output name=example::$(ls -d ./examples/* | sed -r 's/\.\/examples\/(.*)\//\1/g' | jq -R -s -c 'split("\n")[:-1]')"
+      # Define step output named example based on ls command transformed to JSON thanks to jq
 
   whirl-ci-default-envs:
     needs: [directories]
@@ -34,26 +45,53 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        example: ${{ fromJson(needs.directories.outputs.dir) }}
+        example_dir: ${{ fromJson(needs.directories.outputs.dir) }}
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.3.2"]
+        airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
         exclude:
           # Needs more memory than available on the runner
-          - example: ./examples/dbt-spark-example
-          - example: ./examples/spark-delta-sharing
-          - example: ./examples/spark-s3-to-hive
+          - example_dir: ./examples/dbt-spark-example
+          - example_dir: ./examples/spark-delta-sharing
+          - example_dir: ./examples/spark-s3-to-hive
           # Exclude failing dbt runs
-          - example: ./examples/dbt-example
+          - example_dir: ./examples/dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
     steps:
       - uses: actions/checkout@v2
-      - name: Run whirl CI ${{ matrix.example }}
-        working-directory: ${{ matrix.example }}
+      - name: Run whirl CI ${{ matrix.example_dir }}
+        working-directory: ${{ matrix.example_dir }}
+        run: |
+          echo Run Ci from example directory ${{ matrix.example_dir }}
+          ../../whirl ci
+
+  whirl-ci-default-envs-from-root-dir:
+    needs: [examples]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        example: ${{ fromJson(needs.examples.outputs.example) }}
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
+        exclude:
+          # Needs more memory than available on the runner
+          - example: dbt-spark-example
+          - example: spark-delta-sharing
+          - example: spark-s3-to-hive
+          # Exclude failing dbt runs
+          - example: dbt-example
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI example ${{ matrix.example }}
         run: |
           echo Run Ci for example ${{ matrix.example }}
-          ../../whirl ci
+          ./whirl -x ${{ matrix.example }} ci
 
 
   whirl-ci-extra-env-spark-s3-to-postgres:
@@ -72,7 +110,7 @@ jobs:
       max-parallel: 4
       matrix:
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.3.2"]
+        airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
@@ -91,7 +129,7 @@ jobs:
       max-parallel: 4
       matrix:
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.3.2"]
+        airflow_version: ["2.2.5", "2.3.4", "2.4.3", "2.5.0"]
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
