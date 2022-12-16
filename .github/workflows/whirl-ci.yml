@@ -35,8 +35,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: setexamples # Give it an id to handle to get step outputs in the outputs key above
-      run: echo "::set-output name=example::$(ls -d ./examples/* | sed -r 's/\.\/examples\/(.*)\//\1/g' | jq -R -s -c 'split("\n")[:-1]')"
-      # Define step output named example based on ls command transformed to JSON thanks to jq
+        run: echo "::set-output name=example::$(ls -d ./examples/* | sed -r 's/\.\/examples\/(.*)\//\1/g' | jq -R -s -c 'split("\n")[:-1]')"
+        # Define step output named example based on ls command transformed to JSON thanks to jq
 
   whirl-ci-default-envs:
     needs: [directories]
