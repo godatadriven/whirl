@@ -3,7 +3,7 @@ on:
   release:
     permissions:
       contents: write  # for actions/upload-release-asset to upload release asset
-    types: [created]
+    types: [published]
 
 jobs:
   deploy:
