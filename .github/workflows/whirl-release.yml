@@ -12,6 +12,9 @@ jobs:
       - name: Run git-archive command to create a release artifact
         run: git archive --format=tar.gz --prefix=whirl/ --output=whirl-release.tgz HEAD
 
+      - name: Test existance
+        run: ls -la
+
       - name: upload linux artifact
         uses: actions/upload-release-asset@v1
         env:
