@@ -1,6 +1,8 @@
 name: Publish minimal release archive
 on:
   release:
+    permissions:
+      contents: write  # for actions/upload-release-asset to upload release asset
     types: [created]
 
 jobs:
