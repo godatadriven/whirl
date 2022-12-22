@@ -15,7 +15,7 @@ NOTE: _whirl_ is not intended to replace proper (unit) testing of the logic you 
 
 _whirl_ relies on [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). Make sure you have it installed. If using _Docker for Mac_ or _Windows_ ensure that you have configured it with sufficient RAM (8GB or more recommended) for running all your containers.
 
-When you want to use _whirl_ in your CI pipeline (currently work in progress), you need to have `jq` installed. For example, with Homebrew:
+When you want to use _whirl_ in your CI pipeline, you need to have `jq` installed. For example, with Homebrew:
 
 ```bash
 brew install jq
@@ -28,6 +28,8 @@ As of January 2021, Whirl uses Airflow 2.x.x as the default version. A specific 
 
 ## Getting Started
 
+### Development
+
 Clone this repository:
 
 ```
@@ -37,6 +39,10 @@ For ease of use you can add the base directory to your `PATH` environment variab
 ```
 export PATH=<target directory of whirl>:${PATH}
 ```
+
+### Use the release
+
+Download the release artifact
 
 ## Usage
 
