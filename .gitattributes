@@ -3,7 +3,8 @@
 *.bat    text eol=crlf
 *.cmd    text eol=crlf
 
-.gitattributes	export-ignore
-.gitignore		export-ignore
-.github			export-ignore
-logo	 		export-ignore
+.gitattributes  export-ignore
+.gitignore      export-ignore
+.github         export-ignore
+.gitkeep        export-ignore
+logo            export-ignore
