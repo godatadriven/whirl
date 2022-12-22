@@ -8,3 +8,6 @@
 .github         export-ignore
 .gitkeep        export-ignore
 logo            export-ignore
+
+#Non finished examples
+examples/dbt**  export-ignore
