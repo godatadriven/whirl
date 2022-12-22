@@ -15,11 +15,12 @@ jobs:
         run: git archive --format=tar.gz --prefix=whirl/ --output=whirl-release.tgz HEAD
 
       - name: upload linux artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: whirl-release.tgz
-          asset_name: Whirl-release
-          asset_content_type: application/gzip
+        # uses: actions/upload-release-asset@v1
+        # env:
+        #   GITHUB_TOKEN: ${{ github.token }}
+        # with:
+        #   upload_url: ${{ github.event.release.upload_url }}
+        #   asset_path: whirl-release.tgz
+        #   asset_name: Whirl-release
+        #   asset_content_type: application/gzip
+        run: gh release upload ${{ github.event.release.tag_name }} whirl-release.tgz --clobber
