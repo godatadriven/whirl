@@ -9,5 +9,6 @@
 .gitkeep        export-ignore
 logo            export-ignore
 
-#Non finished examples
+#Non finished examples and their envs
 examples/dbt**  export-ignore
+envs/dbt**      export-ignore
