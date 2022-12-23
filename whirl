@@ -347,6 +347,7 @@ logs() {
 usage() {
   echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop|ci]"
   echo "  -h|--help                          display usage"
+  echo "  -x|--example example               specify example to run"
   echo "  -e|--environment environment       specify environment to use"
   echo "  -d|--directory environment_folder  specify the folder that contains the environments (defaults to SCRIPT_DIR)"
   echo "  -l|--logs servicename              tail the logs of the service"

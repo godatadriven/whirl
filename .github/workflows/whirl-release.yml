@@ -7,14 +7,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # for actions/upload-release-asset to upload release asset
+      contents: write  # for upload release asset
     steps:
       - uses: actions/checkout@v2
 
       - name: Run git-archive command to create a release artifact
         run: git archive --format=tar.gz --prefix=whirl/ --output=whirl-release.tar.gz HEAD
 
-      - name: upload linux artifact
+      - name: upload Whirl release artifact
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
