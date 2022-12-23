@@ -21,10 +21,6 @@ function export_environment_vars() {
   # shellcheck disable=SC2034
   DOCKER_CONTEXT_FOLDER=${SCRIPT_DIR}/docker
   # shellcheck disable=SC2034
-  DAG_FOLDER=$(pwd)
-  # shellcheck disable=SC2034
-  PROJECTNAME=$(basename "${DAG_FOLDER}")
-  # shellcheck disable=SC2034
   WHIRL_INITIATOR=$(whoami)
   # shellcheck disable=SC2034
   WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
@@ -40,6 +36,17 @@ function export_environment_vars() {
     echo "Reading configuration from ${SCRIPT_DIR}/.whirl.env"
     . "${SCRIPT_DIR}/.whirl.env"
   fi
+
+  # determine whether to use the example set at the commandline or
+  # in the current folder
+  if [ -z "${WHIRL_EXAMPLE_ARG}" ]; then
+    # shellcheck disable=SC2034
+    DAG_FOLDER=$(pwd)
+  else
+    DAG_FOLDER=${SCRIPT_DIR}/examples/${WHIRL_EXAMPLE_ARG}
+  fi
+  # shellcheck disable=SC2034
+  PROJECTNAME=$(basename "${DAG_FOLDER}")
 
   # determine whether to use the environment set at the commandline or
   # in the DAG FOLDER .whirl.env
@@ -113,7 +120,7 @@ function export_environment_vars() {
 }
 
 detect_potential_dag() {
-  test "$(find . -type f -name '*.py' -o -name '*.zip' | wc -l)" -gt 0
+  test "$(find "${DAG_FOLDER}" -type f -name '*.py' -maxdepth 1 -o -name '*.zip' | wc -l)" -gt 0
 }
 
 check_next_dagrun_scheduled_today() {
@@ -340,6 +347,7 @@ logs() {
 usage() {
   echo "usage: ${BASH_SOURCE[0]} [-h|--help] [-e|--environment env] [start|stop|ci]"
   echo "  -h|--help                          display usage"
+  echo "  -x|--example example               specify example to run"
   echo "  -e|--environment environment       specify environment to use"
   echo "  -d|--directory environment_folder  specify the folder that contains the environments (defaults to SCRIPT_DIR)"
   echo "  -l|--logs servicename              tail the logs of the service"
@@ -354,6 +362,11 @@ function read_arguments() {
   do
       key="${1}"
       case ${key} in
+      -x|--example)
+          WHIRL_EXAMPLE_ARG="${2}"
+          shift # past argument
+          shift # past value
+          ;;
       -e|--environment)
           WHIRL_ENVIRONMENT_ARG="${2}"
           shift # past argument
@@ -401,8 +414,8 @@ function read_arguments() {
 function main() {
   read_arguments "$@"
 
+  export_environment_vars
   if detect_potential_dag; then
-    export_environment_vars
 
     if [ -z "${LOGS}" ]; then
       if [ -z "${STOP}" ]; then
@@ -414,7 +427,8 @@ function main() {
       logs
     fi
   else
-    echo "No .py or .zip files found that may contain an Apache Airflow DAG"
+    echo "No .py or .zip files found in ${DAG_FOLDER} that may contain an Apache Airflow DAG"
+    echo "did you correctly specify the example directory?"
   fi
 }
 

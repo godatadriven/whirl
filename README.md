@@ -15,7 +15,7 @@ NOTE: _whirl_ is not intended to replace proper (unit) testing of the logic you 
 
 _whirl_ relies on [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). Make sure you have it installed. If using _Docker for Mac_ or _Windows_ ensure that you have configured it with sufficient RAM (8GB or more recommended) for running all your containers.
 
-When you want to use _whirl_ in your CI pipeline (currently work in progress), you need to have `jq` installed. For example, with Homebrew:
+When you want to use _whirl_ in your CI pipeline, you need to have `jq` installed. For example, with Homebrew:
 
 ```bash
 brew install jq
@@ -28,6 +28,8 @@ As of January 2021, Whirl uses Airflow 2.x.x as the default version. A specific 
 
 ## Getting Started
 
+### Development
+
 Clone this repository:
 
 ```
@@ -36,6 +38,21 @@ git clone https://github.com/godatadriven/whirl.git <target directory of whirl>
 For ease of use you can add the base directory to your `PATH` environment variable, so the command `whirl` is available.
 ```
 export PATH=<target directory of whirl>:${PATH}
+```
+
+### Use the release
+
+Download the [latest Whirl release artifact](https://github.com/godatadriven/whirl/releases/download/latest/whirl-release.tar.gz)
+
+Extract the file (for example into `/usr/local/opt`)
+
+```bash
+tar -xvzf whirl-release.tar.gz -C /usr/local/opt
+```
+
+Make sure the whirl script is available on your path
+```bash
+export PATH=/usr/local/opt/whirl:$PATH
 ```
 
 ## Usage
@@ -51,10 +68,14 @@ $ whirl --help
 
 #### Starting whirl
 
-The default action is to start the DAG in your current directory. It expects an environment to be configured. You can pass this as a command line argument or you can configure it in a `.whirl.env` file. (See [Configuring environment variables](#configuring-environment-variables).) The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
+The default action is to start the DAG in your current directory.
+
+With the `[-x example]` commandline argument you can run whirl from anywhere and tell whirl which example dag to run. The example refers to a directory with the same name in the `examples` directory located near the _whirl_ script.
+
+Whirl expects an environment to be configured. You can pass this as a command line argument `[-e environment]` or you can configure it as environment variable `WHIRL_ENVIRONMENT` in a `.whirl.env` file. (See [Configuring environment variables](#configuring-environment-variables).) The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
 
 ```bash
-$ whirl [start] [-d <directory>] [-e <environment>]
+$ whirl [-x example] [-e <environment>] [start]
 ```
 
 Specifying the `start` command line argument is a more explicit way to start _whirl_.
@@ -62,7 +83,7 @@ Specifying the `start` command line argument is a more explicit way to start _wh
 #### Stopping whirl
 
 ```bash
-$ whirl stop [-d <directory>] [-e <environment>]
+$ whirl  [-x example] [-e <environment>] stop
 ```
 Stops the configured environment.
 
@@ -134,14 +155,19 @@ Each example contains it's own README file to explain the specifics of that exam
 
 #### Generic running of examples
 
-From within the example directory the `whirl` command can be executed. 
-
 To run a example:
 
 ```bash
 $ cd ./examples/<example-dag-directory>
 # Note: here we pass the whirl environment as a command-line argument. It can also be configured with the WHIRL_ENVIRONMENT variable
 $ whirl -e <environment to use>
+```
+
+or
+```bash
+$
+# Note: here we pass the whirl environment as a command-line argument. It can also be configured with the WHIRL_ENVIRONMENT variable
+$ whirl -x <example to run> -e <environment to use>
 ```
 
 Open your browser to [http://localhost:5000](http://localhost:5000) to access the Airflow UI. Manually enable the DAG and watch the pipeline run to successful completion.

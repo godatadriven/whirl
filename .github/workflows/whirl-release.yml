@@ -1,0 +1,21 @@
+name: Publish minimal release archive
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # for upload release asset
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run git-archive command to create a release artifact
+        run: git archive --format=tar.gz --prefix=whirl/ --output=whirl-release.tar.gz HEAD
+
+      - name: upload Whirl release artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} whirl-release.tar.gz --clobber
