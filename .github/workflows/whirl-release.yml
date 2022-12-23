@@ -6,8 +6,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions: write-all
-      # contents: write  # for actions/upload-release-asset to upload release asset
+    permissions:
+      contents: write  # for actions/upload-release-asset to upload release asset
     steps:
       - uses: actions/checkout@v2
 
@@ -15,16 +15,16 @@ jobs:
         run: git archive --format=tar.gz --prefix=whirl/ --output=whirl-release.tar.gz HEAD
 
       - name: upload linux artifact
-        # uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        # with:
-        #   upload_url: ${{ github.event.release.upload_url }}
-        #   asset_path: whirl-release.tgz
-        #   asset_name: Whirl-release
-        #   asset_content_type: application/gzip
-        run: |
-          ls -la
-          gh auth status
-          gh release view ${{ github.event.release.tag_name }}
-          gh release upload ${{ github.event.release.tag_name }} whirl-release.tar.gz --clobber
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: whirl-release.tar.gz
+          asset_name: Whirl-release
+          asset_content_type: application/gzip
+        # run: |
+        #   ls -la
+        #   gh auth status
+        #   gh release view ${{ github.event.release.tag_name }}
+        #   gh release upload ${{ github.event.release.tag_name }} whirl-release.tar.gz --clobber
