@@ -1,13 +1,13 @@
 name: Publish minimal release archive
 on:
   release:
-    permissions:
-      contents: write  # for actions/upload-release-asset to upload release asset
     types: [published]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions: write-all
+      # contents: write  # for actions/upload-release-asset to upload release asset
     steps:
       - uses: actions/checkout@v2
 
