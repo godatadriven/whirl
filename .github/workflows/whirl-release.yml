@@ -15,16 +15,7 @@ jobs:
         run: git archive --format=tar.gz --prefix=whirl/ --output=whirl-release.tar.gz HEAD
 
       - name: upload linux artifact
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: whirl-release.tar.gz
-          asset_name: Whirl-release
-          asset_content_type: application/gzip
-        # run: |
-        #   ls -la
-        #   gh auth status
-        #   gh release view ${{ github.event.release.tag_name }}
-        #   gh release upload ${{ github.event.release.tag_name }} whirl-release.tar.gz --clobber
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} whirl-release.tar.gz --clobber
