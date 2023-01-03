@@ -42,7 +42,7 @@ export PATH=<target directory of whirl>:${PATH}
 
 ### Use the release
 
-Download the [latest Whirl release artifact](https://github.com/godatadriven/whirl/releases/download/latest/whirl-release.tar.gz)
+Download the [latest Whirl release artifact](https://github.com/godatadriven/whirl/releases/latest/download/whirl-release.tar.gz)
 
 Extract the file (for example into `/usr/local/opt`)
 
