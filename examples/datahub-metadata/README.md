@@ -73,12 +73,8 @@ We've created a recipe [here](./metadata_recipes/dbt.yaml), based on information
   - "View in UI"
 
 ## TODO:
-- Add more metadata like data owners, tags etc https://www.youtube.com/watch?v=aCiOZcWM1J0
-  - `meta_mapping`: `meta` config for dbt models
-  - `column_meta_mapping`: `meta` config for columns in dbt models
-  - `query_tag_mapping`: `tag`
 - Add link to dashboard
-- Use more interesting data and improve on names
-- Figure out nice way to delete metadata, like after you drop a table
 - We could definitely clean up the docker-compose file
   - There are a lot of values declared in multiple places, e.g. `MYSQL_PASSWORD`
+- Figure out nice way to delete metadata, like after you drop a table
+- Use more interesting data and improve on names

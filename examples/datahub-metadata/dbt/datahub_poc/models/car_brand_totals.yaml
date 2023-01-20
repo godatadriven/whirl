@@ -2,9 +2,16 @@ version: 2
 
 models:
   - name: car_brand_totals
+    tags:
+      - aggregated
+      - cars
     description: |
       # Car Brand Totals
       This is a great view of car brand totals
+    meta:
+      has_pii: False
+      business_owner: "Stevie van Duin"
+      technical_owner: "Diederikkie"
     columns:
       - name: car_brand
         description: "Car Brand"
