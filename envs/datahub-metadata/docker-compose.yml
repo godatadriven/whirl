@@ -211,6 +211,7 @@ services:
     volumes:
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysqldata:/var/lib/mysql
+    # This healthcheck works better than the one DataHub suggested
     healthcheck:
       test: ["CMD", "mysqladmin", "status", "-h", "localhost", "-u", "$MYSQL_USER", "--password=$MYSQL_PASSWORD"]
       timeout: 20s
