@@ -1,0 +1,11 @@
+source:
+  type: "metabase"
+  config:
+    # env:  # The environment that all assets produced by this connector belong to
+    # platform_instance_map:  # A holder for platform -> platform_instance mappings to generate correct dataset urns
+    connect_uri: "http://localhost:3001"  # Metabase host URL, from 
+    username: "timsteinkuhler@godatadriven.com"  # Metabase username for local metabase
+    password: 'CNT@ncd0xvm9nme.wur'  # Metabase password for local metabase
+    # database_alias_map: "localhost:${MB_LOCAL_PORT}"  # Database name map to use when constructing dataset URN.
+    # engine_platform_map: "localhost:${MB_LOCAL_PORT}"  # Custom mappings between metabase database engines and DataHub platforms
+    default_schema: "public"  # Default schema name to use when schema is not provided in an SQL query

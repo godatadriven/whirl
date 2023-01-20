@@ -33,6 +33,15 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
       - POSTGRES_DB
+      # To create Metabase User and db
+      - MB_DB_DBNAME
+      - MB_DB_USER
+      - MB_DB_PASS
+    volumes:
+      # Persist data even if container shuts down
+      - "${POSTGRES_DATA_PATH}:/var/lib/postgresql/data/"
+      # Load initialization SQL scripts
+      - ./services/postgres/:/docker-entrypoint-initdb.d/
 
   mockserver:
     container_name: mockserver
@@ -209,7 +218,7 @@ services:
     ports:
       - ${DATAHUB_MAPPED_MYSQL_PORT:-3306}:3306
     volumes:
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysqldata:/var/lib/mysql
     # This healthcheck works better than the one DataHub suggested
     healthcheck:
@@ -251,6 +260,26 @@ services:
       - ${DATAHUB_MAPPED_ZK_PORT:-2181}:2181
     volumes:
       - zkdata:/var/lib/zookeeper
+
+
+  metabase:
+    container_name: metabase
+    image: "metabase/metabase:$MB_VERSION"
+    depends_on:
+      - postgresdb
+    restart: always
+    environment:
+      - MB_DB_FILE=/metabase-data/metabase.db
+      - MB_DB_TYPE
+      - MB_DB_HOST=${POSTGRES_HOST}
+      - MB_DB_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER
+      - MB_DB_DBNAME
+      - MB_DB_USER
+      - MB_DB_PASS
+    ports:
+      - ${MB_LOCAL_PORT}:3000
+
 
 volumes:
   esdata: null

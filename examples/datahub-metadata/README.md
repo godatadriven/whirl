@@ -29,6 +29,7 @@ This example uses the [datahub-metadata environment](../envs/datahub-metadata/) 
 ## Creating your python env
 Use conda to create your python environment using `conda env create --file environment.yml`
 
+
 ## Adding metadata
 
 ### Postgres
@@ -66,6 +67,16 @@ We've created a recipe [here](./metadata_recipes/dbt.yaml), based on information
 5. `dbt test`, run this last, so the test results are shown in the "Validation" tab for a view / dataset
 6. `datahub ingest -c ../../metadata_recipes/dbt.yaml`
 
+
+### Metabase
+
+Used the information [here](https://datahubproject.io/docs/generated/ingestion/sources/metabase/)
+
+1. Create a chart and a dashboard using [metabase](http://localhost:3001)
+2. Fill in your username and password [here](./metadata_recipes/metabase.yaml)
+3. Ingest metadata: `datahub ingest -c ../../metadata_recipes/metabase.yaml`
+
+
 ## Looking at metadata
 - Airflow
   - See pipeline description and lineage
@@ -73,7 +84,6 @@ We've created a recipe [here](./metadata_recipes/dbt.yaml), based on information
   - "View in UI"
 
 ## TODO:
-- Add link to dashboard
 - We could definitely clean up the docker-compose file
   - There are a lot of values declared in multiple places, e.g. `MYSQL_PASSWORD`
 - Figure out nice way to delete metadata, like after you drop a table
