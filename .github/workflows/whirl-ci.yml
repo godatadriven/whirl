@@ -7,7 +7,7 @@ on:
 
 jobs:
   shellcheck: # Job that list subdirectories of ./examples
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     steps:
       - uses: actions/checkout@v2
       - name: run shellcheck
@@ -17,7 +17,7 @@ jobs:
           cli-args: "-x whirl"
 
   directories: # Job that list subdirectories of ./examples
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     outputs:
       # generate output name dir by using inner step output
       dir: ${{ steps.setdirs.outputs.dir }}
@@ -29,7 +29,7 @@ jobs:
         # Define step output named dir based on ls command transformed to JSON thanks to jq
 
   examples: # Job that list subdirectories of ./examples
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     outputs:
       # generate output name example by using inner step output
       example: ${{ steps.setexamples.outputs.example }}
@@ -41,7 +41,7 @@ jobs:
 
   whirl-ci-default-envs:
     needs: [directories]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -69,7 +69,7 @@ jobs:
 
   whirl-ci-default-envs-from-root-dir:
     needs: [examples]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -96,7 +96,7 @@ jobs:
 
 
   whirl-ci-extra-env-spark-s3-to-postgres:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     steps:
       - uses: actions/checkout@v2
       - name: Run whirl CI non-default env
@@ -112,7 +112,7 @@ jobs:
       matrix:
         python_version: ["3.8", "3.9"]
         airflow_version: ["2.2.5", "2.6.0"]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -131,7 +131,7 @@ jobs:
       matrix:
         python_version: ["3.8", "3.9"]
         airflow_version: ["2.2.5", "2.6.0"]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
