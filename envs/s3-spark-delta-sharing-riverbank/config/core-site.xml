@@ -39,7 +39,7 @@
 
 <property>
   <name>fs.s3a.endpoint</name>
-  <value>s3server:4563</value>
+  <value>s3server:4566</value>
 </property>
 
 <property>

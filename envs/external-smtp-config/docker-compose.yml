@@ -19,7 +19,7 @@ services:
       - smtp-server
 
   smtp-server:
-    image: djfarrelly/maildev
+    image: maildev/maildev:2.0.5
     command: ["bin/maildev", "--web", "1080", "--smtp", "2525", "--incoming-user", "airflow_smtp_user", "--incoming-pass", "airflow_smtp_passw0rd" ]
     hostname: smtp-server
     domainname: airflow.local.io

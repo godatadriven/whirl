@@ -18,17 +18,13 @@ services:
     depends_on:
       - s3server
     links:
-      - s3server:${DEMO_BUCKET}.s3server
+      - s3server:${S3_LOG_BUCKET}.s3server
 
   s3server:
-    image: localstack/localstack-full:0.12.8
+    image: localstack/localstack:2.1.0
     ports:
-      - "4563-4584:4563-4584"
-      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+      - "4566:4566"
     environment:
       - SERVICES=s3
-      - EDGE_PORT=4563
-      - DEMO_BUCKET
     env_file:
       - .whirl.env
-

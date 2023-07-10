@@ -2,11 +2,12 @@ version: '3'
 
 services:
   mysql:
-    image: mysql:5.7
+    image: mysql:8
     env_file:
       - mysql.env
+
   ftp-server:
-    image: atmoz/sftp
+    image: iowoi/sftp-server:latest
     ports:
         - 22:22
     env_file:

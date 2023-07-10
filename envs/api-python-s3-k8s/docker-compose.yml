@@ -36,22 +36,20 @@ services:
       - POSTGRES_DB
 
   mockserver:
-    image: jamesdbloom/mockserver:mockserver-5.11.1
+    image: mockserver/mockserver:5.15.0
     ports:
       - 1080:1080
       - 1081:1081
     environment:
       - LOG_LEVEL=ERROR
-      - SERVER_PORT="1080,1081"
+      - SERVER_PORT=1080,1081
 
   s3server:
-    image: localstack/localstack-full:0.12.8
+    image: localstack/localstack:2.1.0
     ports:
-      - "4563-4584:4563-4584"
-      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+      - "4566:4566"
     environment:
       - SERVICES=s3
-      - EDGE_PORT=4563
     env_file:
       - .whirl.env
 
