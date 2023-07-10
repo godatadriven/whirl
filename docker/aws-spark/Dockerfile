@@ -1,6 +1,5 @@
 ARG SPARK_VERSION=3.4.0
-#FROM godatadriven/spark:${SPARK_VERSION}
-FROM krisgeus/spark-arm:3.4.0
+FROM godatadriven/spark:${SPARK_VERSION}
 
 ENV SDK_AWS_VERSION=1.12.262
 ENV HADOOP_AWS_VERSION=3.3.4
