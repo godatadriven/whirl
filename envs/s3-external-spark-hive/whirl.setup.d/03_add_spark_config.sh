@@ -13,12 +13,12 @@ airflow connections add spark_default \
     --conn-host "spark://sparkmaster:7077" \
     --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
 
-SDK_AWS_VERSION=1.11.563
-HADOOP_AWS_VERSION=3.2.0
+SDK_AWS_VERSION=1.12.262
+HADOOP_AWS_VERSION=3.3.4
 
 POSTGRES_JDBC_CHECKSUM=7ffa46f8c619377cdebcd17721b6b21ecf6659850179f96fec3d1035cf5a0cdc
-SDK_AWS_CHECKSUM=b323857424e133b44c1156a184dc3a83fa152b656f2e320a71b5637a854822d5
-HADOOP_AWS_CHECKSUM=ceac8724f8bb47d2f039eaecf4ee147623b46e4bbf26ddf73a9bb8808743655e
+SDK_AWS_CHECKSUM=873fe7cf495126619997bec21c44de5d992544aea7e632fdc77adb1a0915bae5
+HADOOP_AWS_CHECKSUM=53f9ae03c681a30a50aa17524bd9790ab596b28481858e54efd989a826ed3a4a
 
 pip install pyspark==${SPARK_VERSION}
 pip install apache-airflow-providers-apache-spark

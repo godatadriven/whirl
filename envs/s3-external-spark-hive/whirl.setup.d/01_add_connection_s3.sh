@@ -21,3 +21,6 @@ done
 
 echo "creating bucket"
 aws s3api create-bucket --bucket ${DEMO_BUCKET}
+
+echo "creating hive dw bucket"
+aws s3api create-bucket --bucket ${HIVE_DW_BUCKET}
