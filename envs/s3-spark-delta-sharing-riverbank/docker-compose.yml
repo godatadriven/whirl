@@ -22,7 +22,7 @@ services:
       - s3server:${DEMO_BUCKET}.s3server
 
   s3server:
-    image: localstack/localstack:2.1.0
+    image: localstack/localstack:latest
     ports:
       - "4566:4566"
     environment:
