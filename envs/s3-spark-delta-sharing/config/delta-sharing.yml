@@ -8,12 +8,20 @@ shares:
     tables:
     - name: "table1"
       location: "s3a://demo-s3-output/output/data/demo/spark/20210614/"
+      cdfEnabled: false
+      id: "00000000-0000-0000-0000-000000000000"
     - name: "cars"
       location: "s3a://demo-s3-output/output/data/demo/spark/cars/"
+      cdfEnabled: false
+      id: "00000000-0000-0000-0000-000000000001"
     - name: "cars-all"
       location: "s3a://demo-s3-output/output/data/demo/spark/cars-all/"
+      cdfEnabled: false
+      id: "00000000-0000-0000-0000-000000000002"
     - name: "cars-python"
       location: "s3a://demo-s3-output/output/data/demo/spark/cars-python/"
+      cdfEnabled: false
+      id: "00000000-0000-0000-0000-000000000003"
 # Set the host name that the server will use
 host: "0.0.0.0"
 # Set the port that the server will listen on

@@ -23,19 +23,16 @@ services:
       - s3server:${DBT_BUCKET}.s3server
 
   s3server:
-    image: localstack/localstack-full:0.12.8
+    image: localstack/localstack:2.1.0
     ports:
-      - "4563-4584:4563-4584"
-      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+      - "4566:4566"
     environment:
       - SERVICES=s3
-      - EDGE_PORT=4563
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - DBT_BUCKET
       - AWS_SERVER
       - AWS_PORT
-      - PORT_WEB_UI
       - DEBUG=true
 
   postgresdb:

@@ -21,7 +21,7 @@ aws configure set default.s3api.endpoint_url http://${AWS_SERVER}:${AWS_PORT}
 echo "================================"
 echo "== Create S3 Bucket ==========="
 echo "================================"
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://${AWS_SERVER}:${PORT_WEB_UI})" != "200" ]]; do
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://${AWS_SERVER}:${AWS_PORT})" != "200" ]]; do
   echo "Waiting for ${AWS_SERVER} to come up..."
   sleep 2;
 done

@@ -53,7 +53,7 @@ services:
 
 
   mockserver:
-    image: jamesdbloom/mockserver:mockserver-5.13.2
+    image: mockserver/mockserver:5.15.0
     ports:
       - 1080:1080
       - 1081:1081

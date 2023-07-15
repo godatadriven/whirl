@@ -23,12 +23,13 @@ services:
 
 
   s3server:
-    image: localstack/localstack-full:0.12.15
+    # using latest with fix for pre-sign bug until 2.2 is released
+    # image: localstack/localstack:2.2.0
+    image: localstack/localstack:latest
     ports:
-      - "4563-4584:4563-4584"
+      - "4566:4566"
     environment:
       - SERVICES=s3
-      - EDGE_PORT=4563
       - DATA_DIR=/tmp/localstack/data
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
@@ -42,7 +43,9 @@ services:
       - ./.s3-mount:/tmp/localstack
 
   delta:
-    image: deltaio/delta-sharing-server:${DELTA_SHARING_VERSION}
+    # using self build arm container until new release is done
+    # image: deltaio/delta-sharing-server:${DELTA_SHARING_VERSION}
+    image: krisgeus/delta-sharing-server:1.0.0-SNAPSHOT
     command: ["--config", "/opt/docker/conf/delta-sharing.yml"]
     ports:
       - 38080:8080

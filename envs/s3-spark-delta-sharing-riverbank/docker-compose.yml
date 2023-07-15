@@ -21,14 +21,12 @@ services:
     links:
       - s3server:${DEMO_BUCKET}.s3server
 
-
   s3server:
-    image: localstack/localstack-full:0.12.15
+    image: localstack/localstack:latest
     ports:
-      - "4563-4584:4563-4584"
+      - "4566:4566"
     environment:
       - SERVICES=s3
-      - EDGE_PORT=4563
       - DATA_DIR=/tmp/localstack/data
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY

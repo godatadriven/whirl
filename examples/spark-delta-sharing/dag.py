@@ -56,14 +56,15 @@ spark_conf = {
     'spark.hadoop.fs.s3a.connection.ssl.enabled': 'false',
     'spark.hadoop.fs.s3a.path.style.access': 'true',
     'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
+    'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
     'spark.hadoop.fs.s3a.multipart.size': '104857600',
-    'spark.jars.packages': 'io.delta:delta-core_2.12:1.0.0,io.delta:delta-sharing-spark_2.12:0.1.0',
+    'spark.jars.packages': 'io.delta:delta-core_2.12:2.4.0,io.delta:delta-sharing-spark_2.12:0.7.0',
     'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
     'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
 }
 
 spark_sharing_conf = {
-    'spark.jars.packages': 'io.delta:delta-core_2.12:1.0.0,io.delta:delta-sharing-spark_2.12:0.1.0',
+    'spark.jars.packages': 'io.delta:delta-core_2.12:2.4.0,io.delta:delta-sharing-spark_2.12:0.7.0',
     'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
     'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
 }
