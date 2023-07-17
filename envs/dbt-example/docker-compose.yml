@@ -45,6 +45,8 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
       - POSTGRES_DB
+    volumes:
+      - ./.pgdata:/var/lib/postgresql/data
 
   sparkmaster:
     build:
