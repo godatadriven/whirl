@@ -54,8 +54,6 @@ jobs:
           - example_dir: ./examples/dbt-spark-example
           - example_dir: ./examples/spark-delta-sharing
           - example_dir: ./examples/spark-s3-to-hive
-          # Exclude failing dbt runs
-          - example_dir: ./examples/dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -82,8 +80,6 @@ jobs:
           - example: dbt-spark-example
           - example: spark-delta-sharing
           - example: spark-s3-to-hive
-          # Exclude failing dbt runs
-          - example: dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
