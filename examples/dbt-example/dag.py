@@ -90,6 +90,7 @@ dbt_run = DbtRunOperator(
     dir=DBT_DIRECTORY,
     profiles_dir=DBT_DIRECTORY,
     target='airflow',
+    verbose=True,
     dag=dag
 )
 
