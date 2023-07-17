@@ -116,6 +116,8 @@ services:
       - AWS_SECRET_ACCESS_KEY
       - AWS_SERVER
       - AWS_PORT
+    ports:
+      - 14040:4040
     entrypoint:
       - /usr/spark/sbin/start-thriftserver.sh
       - "--master"
