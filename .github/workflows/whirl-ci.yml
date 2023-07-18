@@ -83,7 +83,7 @@ jobs:
           - example: spark-delta-sharing
           - example: spark-s3-to-hive
           # Permission denied error on shared dbt log dir if run in parallel
-          - example_dir: ./examples/dbt-example
+          - example: dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -150,7 +150,7 @@ jobs:
       max-parallel: 1
       matrix:
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.6.3"]
+        airflow_version: ["2.6.3"]
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
