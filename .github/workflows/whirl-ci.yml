@@ -54,6 +54,8 @@ jobs:
           - example_dir: ./examples/dbt-spark-example
           - example_dir: ./examples/spark-delta-sharing
           - example_dir: ./examples/spark-s3-to-hive
+          # Permission denied error on shared dbt log dir if run in parallel
+          - example_dir: ./examples/dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -80,6 +82,8 @@ jobs:
           - example: dbt-spark-example
           - example: spark-delta-sharing
           - example: spark-s3-to-hive
+          # Permission denied error on shared dbt log dir if run in parallel
+          - example_dir: ./examples/dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -138,3 +142,23 @@ jobs:
         run: |
           echo Run Ci for example external-airflow-db with ha-scheduler env
           ../../whirl ci -e ha-scheduler
+
+  whirl-ci-dbt-example:
+    strategy:
+      fail-fast: false
+      # no parallel processing because this leads to permission denied on writing to the shared dbt log directory
+      max-parallel: 1
+      matrix:
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.6.3"]
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI dbt-example
+        working-directory: ./examples/dbt-example/
+        run: |
+          echo Run Ci for example dbt-example
+          ../../whirl ci
