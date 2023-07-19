@@ -9,8 +9,7 @@ function empty_log_dir() {
 
     if [ "$(ls -A ${DBT_LOG_DIR})" ]; then
         echo "${DBT_LOG_DIR} is not empty. Clearing NOW!!"
-        find ${DBT_LOG_DIR} -mindepth 1 -not -name "dbt.log" -delete
-        echo > ${DBT_LOG_DIR}/dbt.log
+        find ${DBT_LOG_DIR} -mindepth 1 -delete
     else
         echo "${DBT_LOG_DIR} is empty. Continue"
     fi

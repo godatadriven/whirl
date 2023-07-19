@@ -87,4 +87,3 @@ services:
       - sparkmaster
     links:
       - s3server:${DBT_BUCKET}.s3server
-
