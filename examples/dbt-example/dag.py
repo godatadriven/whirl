@@ -103,7 +103,7 @@ dbt_test = DbtTestOperator(
     dag=dag
 )
 
-debug_all = BashOperator(task_id="debugall", bash_command="whoami && ls -la /opt/airflow/dags && ls -la /opt/airflow/dags/dbt-example && ls -la /opt/airflow/dags/dbt-example/dbt && ls -la /opt/airflow/dags/dbt-example/dbt/logs && exit 42", dag=dag)
+debug_all = BashOperator(task_id="debugall", bash_command="id && whoami && ls -la /opt/airflow/dags && ls -la /opt/airflow/dags/dbt-example && ls -la /opt/airflow/dags/dbt-example/dbt && ls -la /opt/airflow/dags/dbt-example/dbt/logs && exit 42", dag=dag)
 
 get_file >> [ put_airports_file, put_flights_file, put_carriers_file ]
 put_airports_file >> load_airports
