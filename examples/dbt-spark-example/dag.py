@@ -34,7 +34,8 @@ spark_conf = {
     'spark.hadoop.fs.s3a.connection.ssl.enabled': 'false',
     'spark.hadoop.fs.s3a.path.style.access': 'true',
     'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
-    'spark.hadoop.fs.s3a.multipart.size': '104857600'
+    'spark.hadoop.fs.s3a.multipart.size': '104857600',
+    'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider'
 }
 
 dag = DAG(dag_id='whirl-dbt-spark-example',

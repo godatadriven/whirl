@@ -5,8 +5,6 @@ flights:
       method: thrift
       host: sparkthrift
       port: 10000
-      user: hive
-      password: hive
       schema: default
       connect_retries: 5
       connect_timeout: 60
