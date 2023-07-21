@@ -153,8 +153,10 @@ test_dag_state() {
   if [ "${SHOW_RESULT}" == true ]; then
     output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" | jq ".dag_runs" )
     echo "Dagruns: $output" >&2
+    sleep 5 # Wait for the task states to be up to date
     output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq ".task_instances" )
     echo "Tasks: $output" >&2
+    sleep 5 # Wait for the logs to be available
     # shellcheck disable=SC2207
     log_urls=($(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq -r '.task_instances[] | select(.state!="success" and .try_number>0) | .dag_run_id + "/taskInstances/" + .task_id + "/logs/" + (.try_number|tostring)'))
     for uri in "${log_urls[@]}"; do
