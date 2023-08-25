@@ -9,7 +9,7 @@ function show_logs() {
 
     if [ "$(ls -A ${DBT_LOG_DIR})" ]; then
         echo "${DBT_LOG_DIR} is not empty. Showing log!!"
-        cat ${DBT_LOG_DIR}/dbt.log || true
+        sudo cat ${DBT_LOG_DIR}/dbt.log || true
     fi
 }
 
