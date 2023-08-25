@@ -67,8 +67,34 @@ jobs:
           echo Run Ci from example directory ${{ matrix.example_dir }}
           ../../whirl ci
 
+  whirl-ci-default-envs-from-root-dir:
+    needs: [examples]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        example: ${{ fromJson(needs.examples.outputs.example) }}
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.6.3"]
+        exclude:
+          # Needs more memory than available on the runner
+          - example: dbt-spark-example
+          - example: spark-delta-sharing
+          - example: spark-s3-to-hive
+          # Run without parallelism separately
+          - example: dbt-example
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI example ${{ matrix.example }}
+        run: |
+          echo Run Ci for example ${{ matrix.example }}
+          ./whirl -x ${{ matrix.example }} ci
+
   whirl-ci-dbt-example:
-    needs: [directories]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -86,34 +112,6 @@ jobs:
         run: |
           echo Run Ci from dbt-example directory
           ../../whirl ci
-
-  whirl-ci-default-envs-from-root-dir:
-    needs: [examples]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        example: ${{ fromJson(needs.examples.outputs.example) }}
-        python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.6.3"]
-        exclude:
-          # Needs more memory than available on the runner
-          - example: dbt-spark-example
-          - example: spark-delta-sharing
-          - example: spark-s3-to-hive
-          # Run without parallelism separately
-          - example_dir: ./examples/dbt-example
-    env:
-      PYTHON_VERSION: ${{ matrix.python_version }}
-      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run whirl CI example ${{ matrix.example }}
-        run: |
-          echo Run Ci for example ${{ matrix.example }}
-          ./whirl -x ${{ matrix.example }} ci
-
 
   whirl-ci-extra-env-spark-s3-to-postgres:
     runs-on: ubuntu-latest
