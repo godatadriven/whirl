@@ -48,13 +48,13 @@ jobs:
       matrix:
         example_dir: ${{ fromJson(needs.directories.outputs.dir) }}
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.6.3"]
+        airflow_version: ["2.2.5", "2.7.2"]
         exclude:
           # Needs more memory than available on the runner
           - example_dir: ./examples/dbt-spark-example
           - example_dir: ./examples/spark-delta-sharing
           - example_dir: ./examples/spark-s3-to-hive
-          # Exclude failing dbt runs
+          # Run without parallelism separately
           - example_dir: ./examples/dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
@@ -76,13 +76,13 @@ jobs:
       matrix:
         example: ${{ fromJson(needs.examples.outputs.example) }}
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.6.3"]
+        airflow_version: ["2.2.5", "2.7.2"]
         exclude:
           # Needs more memory than available on the runner
           - example: dbt-spark-example
           - example: spark-delta-sharing
           - example: spark-s3-to-hive
-          # Exclude failing dbt runs
+          # Run without parallelism separately
           - example: dbt-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
@@ -94,6 +94,24 @@ jobs:
           echo Run Ci for example ${{ matrix.example }}
           ./whirl -x ${{ matrix.example }} ci
 
+  whirl-ci-dbt-example:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        python_version: ["3.8", "3.9"]
+        airflow_version: ["2.2.5", "2.7.2"]
+    env:
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      AIRFLOW_VERSION: ${{ matrix.airflow_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI dbt example
+        working-directory: ./examples/dbt-example
+        run: |
+          echo Run Ci from dbt-example directory
+          ../../whirl ci
 
   whirl-ci-extra-env-spark-s3-to-postgres:
     runs-on: ubuntu-latest
@@ -111,7 +129,7 @@ jobs:
       max-parallel: 4
       matrix:
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.6.3"]
+        airflow_version: ["2.2.5", "2.7.2"]
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
@@ -130,7 +148,7 @@ jobs:
       max-parallel: 4
       matrix:
         python_version: ["3.8", "3.9"]
-        airflow_version: ["2.2.5", "2.6.3"]
+        airflow_version: ["2.2.5", "2.7.2"]
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}

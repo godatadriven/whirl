@@ -4,7 +4,7 @@ from airflow import DAG
 
 from airflow.operators.bash_operator import BashOperator
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
-from airflow_dbt.operators.dbt_operator import DbtRunOperator, DbtTestOperator
+from airflow_dbt_python.operators.dbt import DbtRunOperator, DbtTestOperator
 
 default_args = {
     'owner': 'whirl',
@@ -29,7 +29,8 @@ spark_conf = {
     'spark.hadoop.fs.s3a.endpoint': "{}:{}".format(os.environ.get('AWS_SERVER', ''), os.environ.get('AWS_PORT', '')),
     'spark.hadoop.fs.s3a.connection.ssl.enabled': 'false',
     'spark.hadoop.fs.s3a.path.style.access': 'true',
-    'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem'
+    'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
+    'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider'
 }
 
 dag = DAG(dag_id='whirl-dbt-example',
@@ -86,7 +87,7 @@ load_flights = SparkSubmitOperator(
 
 dbt_run = DbtRunOperator(
     task_id='dbt_run',
-    dir=DBT_DIRECTORY,
+    project_dir=DBT_DIRECTORY,
     profiles_dir=DBT_DIRECTORY,
     target='airflow',
     dag=dag
@@ -95,7 +96,7 @@ dbt_run = DbtRunOperator(
 
 dbt_test = DbtTestOperator(
     task_id='dbt_test',
-    dir=DBT_DIRECTORY,
+    project_dir=DBT_DIRECTORY,
     profiles_dir=DBT_DIRECTORY,
     target='airflow',
     dag=dag

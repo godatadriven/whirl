@@ -153,8 +153,19 @@ test_dag_state() {
   if [ "${SHOW_RESULT}" == true ]; then
     output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" | jq ".dag_runs" )
     echo "Dagruns: $output" >&2
+    sleep 5 # Wait for the task states to be up to date
     output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq ".task_instances" )
     echo "Tasks: $output" >&2
+    sleep 5 # Wait for the logs to be available
+    # shellcheck disable=SC2207
+    log_urls=($(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq -r '.task_instances[] | select(.state!="success" and .try_number>0) | .dag_run_id + "/taskInstances/" + .task_id + "/logs/" + (.try_number|tostring)'))
+    for uri in "${log_urls[@]}"; do
+      output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/${uri}")
+      echo "Tasks Instance: $uri" >&2
+      echo "    Log Output: " >&2
+      echo "" >&2
+      echo "$output" >&2
+    done
   else
     echo "$result"
   fi
@@ -196,6 +207,40 @@ run_compose_setup_scripts() {
       . "$filename"
     done
   fi
+
+  if [[ -d ${DAG_FOLDER}/compose.setup.d ]]; then
+    echo "================================================"
+    echo "== Setup docker-compose dag specifics =========="
+    echo "================================================"
+    for filename in "${DAG_FOLDER}"/compose.setup.d/*.sh; do
+      echo "Executing compose dag prepare script: $filename"
+      # shellcheck disable=SC1090
+      . "$filename"
+    done
+  fi
+}
+
+run_compose_teardown_scripts() {
+  if [[ -d ${ENVIRONMENT_FOLDER}/compose.teardown.d ]]; then
+    echo "============================================"
+    echo "== Teardown docker-compose specifics ======="
+    echo "============================================"
+    for filename in "${ENVIRONMENT_FOLDER}"/compose.teardown.d/*.sh; do
+      echo "Executing compose teardown script: $filename"
+      # shellcheck disable=SC1090
+      . "$filename"
+    done
+  fi
+  if [[ -d ${DAG_FOLDER}/compose.teardown.d ]]; then
+    echo "============================================"
+    echo "== Teardown docker-compose dag specifics ==="
+    echo "============================================"
+    for filename in "${DAG_FOLDER}"/compose.teardown.d/*.sh; do
+      echo "Executing compose teardown script: $filename"
+      # shellcheck disable=SC1090
+      . "$filename"
+    done
+  fi
 }
 
 check_dagrun_result() {
@@ -221,6 +266,8 @@ check_dagrun_result() {
     echo "Dag '${DAG_ID}' run(s) failed"
     # output dagrun result
     test_dag_state "${DAG_ID}" "${FAILURE_STATE}" true
+    echo "Running teardown scripts before stopping..."
+    run_compose_teardown_scripts
     return 1
   else
     echo "Dag '${DAG_ID}' neither success nor failed!!!"
@@ -308,6 +355,7 @@ start() {
           exit 8
         fi
       else
+        sleep 10 # wait for dag to be available.
         if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
           echo "Unable to unpause dag with id ${DAG_ID}."
           echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:****** \"http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"

@@ -1,4 +1,4 @@
 .idea
 dbt_modules
-logs
 target
+.user.yml
