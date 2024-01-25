@@ -77,11 +77,11 @@ The KubernetesExecutor needs to know how to reach the cluster. This is done thro
 
 Furthermore the `AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE` is used to configure the deployment of the worker pods.
 The same remote logging config and postgres connection config is used as the Airflow container uses. 
-Specifically for the running dag also a shared persistent volume is added to the pods to share temporary files with the downstream tasks.
+Specifically for the running dag a shared persistent volume is added to the pods to share temporary files with the downstream tasks.
 
 ## K3s Kubernetes cluster configuration
 
-To be able to connect to the docker images running S3, Mockserver and the postgres database a small patch to the kubedns configmap is needed. We add the hostnames and ip's as extra NodeHosts when airlfow starts. See `whirl.setup.d/03_patch_k3s_dns.sh`
+To be able to connect to the docker images running S3, Mockserver and the postgres database we need to change the NDS configuration of the k8s cluster a bit. we do this based on the example found in: https://github.com/corneliusludmann/k3s-docker-compose-dns where a custom entrypoint script adds IP tables rules to access Docker's internal DNS 127.0.0.11 from the k8s cluster.
 
 ## Kubectl from the Airflow docker container
 
