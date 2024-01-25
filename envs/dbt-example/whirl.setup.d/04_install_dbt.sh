@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 sudo apt-get install -y libsasl2-dev build-essential
-pip install dbt-core==1.4.5 airflow-dbt-python
+pip install dbt-core==1.7.5 airflow-dbt-python
 
 #airflow-dbt-python depends on the fs_default connection
 echo "====================================="
