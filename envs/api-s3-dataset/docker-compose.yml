@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+  webserver:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["webserver", "-p", "5000"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - mockserver
+      - postgresdb
+      - s3server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  scheduler:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["scheduler"]
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - mockserver
+      - postgresdb
+      - s3server
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  triggerer:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["triggerer"]
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - postgresdb
+
+  mockserver:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - 1080:1080
+      - 1081:1081
+    environment:
+      - LOG_LEVEL=ERROR
+      - SERVER_PORT=1080,1081
+
+  postgresdb:
+    image: postgres:16
+    ports:
+      - 5432:5432
+    env_file:
+      - .whirl.env
+
+  s3server:
+    image: localstack/localstack:3.0.2
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+    env_file:
+      - .whirl.env
+

@@ -9,7 +9,7 @@ setup(
     packages=find_packages(include=['custom_plugins', 'custom_plugins.*']),
     install_requires=[
         'apache-airflow>=2.2.5',
-        'ephem==4.1.3'
+        'ephem==4.1.5'
     ],
     entry_points={
         'airflow.plugins': [

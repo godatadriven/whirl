@@ -38,7 +38,6 @@ EXPOSE 5000
 
 COPY --chown=airflow:root entrypoint.sh /entrypoint-whirl.sh
 COPY includes /etc/airflow/functions
-COPY pip.conf /home/airflow/.config/pip/pip.conf
 
 ENV PATH="${PATH}:/home/airflow/.local/bin"
 ENTRYPOINT ["/entrypoint-whirl.sh"]
