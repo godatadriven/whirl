@@ -47,9 +47,11 @@ jobs:
       max-parallel: 4
       matrix:
         example_dir: ${{ fromJson(needs.directories.outputs.dir) }}
-        python_version: ["3.8", "3.12"]
+        python_version: ["3.9", "3.12"]
         airflow_version: ["2.2.5", "2.9.1"]
         exclude:
+          - airflow_version: "2.2.5"
+            python_version: "3.12"
           # Needs more memory than available on the runner
           - example_dir: ./examples/dbt-spark-example
           - example_dir: ./examples/spark-delta-sharing
@@ -75,9 +77,11 @@ jobs:
       max-parallel: 4
       matrix:
         example: ${{ fromJson(needs.examples.outputs.example) }}
-        python_version: ["3.8", "3.12"]
+        python_version: ["3.9", "3.12"]
         airflow_version: ["2.2.5", "2.9.1"]
         exclude:
+          - airflow_version: "2.2.5"
+            python_version: "3.12"
           # Needs more memory than available on the runner
           - example: dbt-spark-example
           - example: spark-delta-sharing
@@ -100,8 +104,11 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        python_version: ["3.8", "3.12"]
+        python_version: ["3.9", "3.12"]
         airflow_version: ["2.2.5", "2.9.1"]
+        exclude:
+          - airflow_version: "2.2.5"
+            python_version: "3.12"
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -128,8 +135,11 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        python_version: ["3.8", "3.12"]
+        python_version: ["3.9", "3.12"]
         airflow_version: ["2.2.5", "2.9.1"]
+        exclude:
+          - airflow_version: "2.2.5"
+            python_version: "3.12"
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
@@ -147,8 +157,11 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        python_version: ["3.8", "3.12"]
+        python_version: ["3.9", "3.12"]
         airflow_version: ["2.2.5", "2.9.1"]
+        exclude:
+          - airflow_version: "2.2.5"
+            python_version: "3.12"
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
