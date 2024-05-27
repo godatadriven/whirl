@@ -60,6 +60,8 @@ jobs:
           - example_dir: ./examples/airflow-datasets
           # Run without parallelism separately
           - example_dir: ./examples/dbt-example
+          # Needs license
+          - example_dir: ./examples/dbt-athena-glue-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -92,6 +94,8 @@ jobs:
           - example: airflow-datasets
           # Run without parallelism separately
           - example: dbt-example
+          # Needs license
+          - example_dir: ./examples/dbt-athena-glue-example
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
