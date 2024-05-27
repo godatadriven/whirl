@@ -1,0 +1,5 @@
+.idea
+dbt_modules
+dbt_packages
+target
+.user.yml

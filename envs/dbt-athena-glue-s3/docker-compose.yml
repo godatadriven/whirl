@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__API__AUTH_BACKEND
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+    depends_on:
+      - aws
+
+  aws:
+    image: localstack/localstack-pro:3.4.0
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+      - "4510-4559:4510-4559"  # external services port range
+      - "443:443"              # LocalStack HTTPS Gateway (Pro)
+    env_file:
+      - compose.secrets.d/localstack.secrets
+    environment:
+      - SERVICES=s3,athena,glue,sts
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ENDPOINT_URL
+      - DEBUG=true
+    volumes:
+      - ".aws/s3/patch.sh:/etc/localstack/init/boot.d/patch-hive-download.sh"  # boot hook
+      - ".aws/s3/init.sh:/etc/localstack/init/ready.d/init-aws.sh"  # ready hook
+      - ".aws/terraform:/opt/code/terraform"
+      - ".aws/volume:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"

@@ -1,0 +1,21 @@
+dbt_athena_aws:
+  outputs:
+    unify:
+      database: AwsDataCatalog
+      # database: HubCatalogDataplatform
+      # database: unified
+      schema: unified
+      region_name: us-east-1
+
+      # Athena workgroup
+      # work_group: hub-athena-workgroup
+
+      # s3 athena query result bucket
+      s3_staging_dir: s3://hub-athena-queryresults-bucket
+
+      # s3 unified format table bucket
+      s3_data_dir: s3://hub-unified-source-bucket
+
+      threads: 8
+      type: athena
+  target: unify

@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: unify_yellow_nyc_taxi
+    description: "This table represents the yellow taxi trip data."
+    config:
+      persist_docs:
+        relation: true
+        columns: true
+      meta:
+        test: value
+    columns:
+      - name: vendorid
+        description: "A code indicating the TPEP provider that provided the record."
+      - name: tpep_pickup_datetime
+        description: "The date and time when the meter was engaged."
+      - name: tpep_dropoff_datetime
+        description: "The date and time when the meter was disengaged."
+      - name: passenger_count
+        description: "The number of passengers in the vehicle."
+      - name: trip_distance
+        description: "The elapsed trip distance in miles reported by the taximeter."
+        tests:
+          - not_null
+      - name: ratecodeid
+        description: "The final rate code in effect at the end of the trip."
+      - name: store_and_fwd_flag
+        description: "This flag indicates whether the trip record was held in vehicle memory before sending to the vendor."
+      - name: pulocationid
+        description: "TLC Taxi Zone in which the taximeter was engaged."
+      - name: dolocationid
+        description: "TLC Taxi Zone in which the taximeter was disengaged."
+      - name: payment_type
+        description: "A numeric code signifying how the passenger paid for the trip."
+        tests:
+          - not_null
+      - name: fare_amount
+        description: "The time-and-distance fare calculated by the meter."
+        tests:
+          - not_null
+      - name: extra
+        description: "Miscellaneous extras and surcharges."
+      - name: mta_tax
+        description: "MTA tax that is automatically triggered based on the metered rate in use."
+      - name: tip_amount
+        description: "Tip amount – This field is automatically populated for credit card tips. Cash tips are not included."
+      - name: tolls_amount
+        description: "Total amount of all tolls paid in trip."
+      - name: improvement_surcharge
+        description: "Fixed surcharge for all trips that begin, end or pass through Manhattan south of 96th Street."
+      - name: total_amount
+        description: "The total amount charged to passengers. Does not include cash tips."
+        tests:
+          - not_null
+      - name: congestion_surcharge
+        description: "Congestion surcharge for all trips that begin, end or pass through Manhattan south of 96th Street."
+      - name: airport_fee
+        description: "Fixed surcharge for trips to/from the airport."
