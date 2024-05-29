@@ -3,6 +3,8 @@ from datetime import timedelta, datetime
 from airflow import DAG
 
 from airflow.operators.bash_operator import BashOperator
+from cosmos import ProfileConfig
+from cosmos.operators.local import DbtRunLocalOperator
 
 default_args = {
     'owner': 'whirl',
@@ -14,24 +16,24 @@ default_args = {
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 DBT_DIRECTORY = THIS_DIRECTORY + 'dbt'
-BUCKET = os.environ.get('DBT_STAGING_BUCKET')
-FILE = 's3://{bucket}/input/data/dbt/{{{{ ds_nodash }}}}/flights_data.zip'.format(
-    bucket=BUCKET
-)
+# DBT_IMAGE = "localhost:3632/dbt-project:latest"
 
-with DAG(dag_id='whirl-dbt-athena-example',
+# Use cosmos to define the dag from DBT
+
+with DAG(dag_id='whirl-dbt-athena-glue',
           default_args=default_args,
-          schedule='@once',
+          schedule=None,
           dagrun_timeout=timedelta(seconds=120)):
 
-    get_file = BashOperator(task_id="get_file", bash_command="mkdir -p /tmp/flights_data && aws s3 cp {} /tmp/flights_data/ && unzip -o /tmp/flights_data/flights_data.zip -d /tmp/flights_data/extract".format(FILE))
+    dbt_raw_to_source = DbtRunLocalOperator(
+        task_id="dbt-raw-to-source",
+        project_dir=DBT_DIRECTORY,
+        profile_config=ProfileConfig(
+            profile_name="dbt_athena_aws",
+            target_name="unify",
+            profiles_yml_filepath=f"{DBT_DIRECTORY}/profiles.yml"
+        )
+    )
 
-    put_airports_file = BashOperator(task_id="put_airports_file", bash_command="aws s3 cp /tmp/flights_data/extract/flights_data/airports.csv s3://{}/csv/".format(BUCKET))
-
-    put_flights_file = BashOperator(task_id="put_flights_file", bash_command="aws s3 cp /tmp/flights_data/extract/flights_data/flights.csv s3://{}/csv/".format(BUCKET))
-
-    put_carriers_file = BashOperator(task_id="put_carriers_file", bash_command="aws s3 cp /tmp/flights_data/extract/flights_data/carriers.csv s3://{}/csv/".format(BUCKET))
-
-
-    get_file >> [ put_airports_file, put_flights_file, put_carriers_file ]
+    dbt_raw_to_source
 
