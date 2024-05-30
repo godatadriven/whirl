@@ -1,1 +1,2 @@
 compose.secrets.d/*
+.docker-registry-persistence/docker

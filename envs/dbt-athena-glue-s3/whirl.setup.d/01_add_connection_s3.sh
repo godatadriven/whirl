@@ -3,6 +3,14 @@
 echo "=================="
 echo "== Configure S3 =="
 echo "=================="
+airflow connections add \
+          localstack_conn \
+          --conn-type aws \
+          --conn-extra "{\"endpoint_url\": \"${AWS_ENDPOINT_URL}\",
+                         \"aws_secret_access_key\": \"${AWS_SECRET_ACCESS_KEY}\",
+                         \"aws_access_key_id\": \"${AWS_ACCESS_KEY_ID}\",
+                         \"region_name\": \"${AWS_REGION}\",
+                        }"
 
 pip install awscli awscli-plugin-endpoint
 

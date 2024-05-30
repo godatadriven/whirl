@@ -15,8 +15,10 @@ services:
       - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - "/var/run/docker.sock:/var/run/docker.sock"
     depends_on:
       - aws
+      - registry
 
   aws:
     image: localstack/localstack-pro:3.4.0
@@ -42,3 +44,10 @@ services:
       - ".aws/terraform:/opt/code/terraform"
       - ".aws/volume:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+
+  registry:
+    image: registry:2
+    ports:
+      - 3632:5000
+    volumes:
+      - ${ENVIRONMENT_FOLDER}/.docker-registry-persistence:/var/lib/registry
