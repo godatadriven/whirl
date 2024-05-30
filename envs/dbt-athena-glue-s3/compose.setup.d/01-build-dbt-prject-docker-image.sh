@@ -6,9 +6,9 @@ function empty_registry_data_dir() {
     echo "============================"
     echo "== Cleanup local data dir =="
     echo "============================"
-    if [ "$(ls -A ${REG_DATA_DIR})" ]; then
+    if [ "$(ls -A ${REG_DATA_DIR} | grep -v 'gitkeep')" ]; then
         echo "${REG_DATA_DIR} is not empty. Clearing NOW!!"
-        find ${REG_DATA_DIR} -mindepth 1 -delete
+        find ${REG_DATA_DIR}  -not -name '.gitkeep' -mindepth 1 -delete
     else
         echo "${REG_DATA_DIR} is empty. Continue"
     fi
