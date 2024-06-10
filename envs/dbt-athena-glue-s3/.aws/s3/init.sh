@@ -23,11 +23,7 @@ tflocal init -reconfigure
 tflocal plan
 tflocal apply -auto-approve
 
-echo "Name,Service" > data.csv
-echo "LocalStack,Athena" >> data.csv
-
-awslocal s3 cp data.csv s3://hub-raw-source-bucket/data/
-awslocal s3 cp data/yellow_tripdata_2024-01.parquet.snappy s3://hub-raw-source-bucket/yellow/
-awslocal s3 cp data/yellow_tripdata_2024-02.parquet.snappy s3://hub-raw-source-bucket/yellow/
+cd /tmp/rawdata
+awslocal s3 cp --recursive --exclude "*" --include "*.csv" . s3://hub-raw-source-bucket/
 
 awslocal glue start-crawler --name HubRawSourceCrawler

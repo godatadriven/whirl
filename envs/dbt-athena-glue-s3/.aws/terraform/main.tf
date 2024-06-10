@@ -35,8 +35,12 @@ module "raw_crawler" {
 
     name          = "HubRawSourceCrawler"
     s3_targets    = [
-        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/yellow" },
-        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/data" }
+        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/customers" },
+        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/items" },
+        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/orders" },
+        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/products" },
+        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/stores" },
+        { path = "s3://${aws_s3_bucket.hub-raw-source-bucket.bucket}/supplies" }
     ]
     role          = "AWSGlueServiceRole"
     database_name = "raw"

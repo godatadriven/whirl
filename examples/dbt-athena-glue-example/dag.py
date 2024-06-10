@@ -25,17 +25,27 @@ with DAG(dag_id='whirl-dbt-athena-glue',
 
     preprocess = EmptyOperator(task_id="some-preprocessing")
 
-    dbt_raw_to_source = DbtRunLocalOperator(
-        task_id="dbt-raw-to-source",
+    dbt_raw_to_unified = DbtRunLocalOperator(
+        task_id="dbt-raw-to-unified",
         project_dir=DBT_DIRECTORY,
         profile_config=ProfileConfig(
             profile_name="dbt_athena_aws",
-            target_name="unify",
+            target_name="staging",
+            profiles_yml_filepath=f"{DBT_DIRECTORY}/profiles.yml"
+        )
+    )
+
+    dbt_unified_to_mart = DbtRunLocalOperator(
+        task_id="dbt-unified-to-mart",
+        project_dir=DBT_DIRECTORY,
+        profile_config=ProfileConfig(
+            profile_name="dbt_athena_aws",
+            target_name="marts",
             profiles_yml_filepath=f"{DBT_DIRECTORY}/profiles.yml"
         )
     )
 
     postprocess = EmptyOperator(task_id="some-postprocessing")
 
-    preprocess >> dbt_raw_to_source >> postprocess
+    preprocess >> dbt_raw_to_unified >> dbt_unified_to_mart >> postprocess
 
