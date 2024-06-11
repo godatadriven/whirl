@@ -1,10 +1,8 @@
 dbt_athena_aws:
   outputs:
-    staging:
+    aws:
       database: AwsDataCatalog
-      # database: HubCatalogDataplatform
-      # database: unified
-      schema: unified
+      schema: raw
       region_name: us-east-1
 
       # Athena workgroup
@@ -18,22 +16,4 @@ dbt_athena_aws:
 
       threads: 8
       type: athena
-    marts:
-      database: AwsDataCatalog
-      # database: HubCatalogDataplatform
-      # database: unified
-      schema: transformation-spoke
-      region_name: us-east-1
-
-      # Athena workgroup
-      # work_group: hub-athena-workgroup
-
-      # s3 athena query result bucket
-      s3_staging_dir: s3://spoke-athena-queryresults-bucket
-
-      # s3 unified format table bucket
-      s3_data_dir: s3://spoke-transformed-bucket
-
-      threads: 8
-      type: athena
-  target: staging
+  target: aws

@@ -1,7 +1,7 @@
 # Name your package! Package names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'dbt_athena_glue'
+name: 'dbt_athena_aws'
 version: '1.0'
 
 config-version: 2
@@ -24,28 +24,33 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_modules"
 
-vars:
-  "dbt_date:time_zone": "Europe/Amsterdam"
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: [athena_utils, dbt_utils]
+  - macro_namespace: dbt_expectations
+    search_order: [athena_utils, dbt_expectations]
+  - macro_namespace: metrics
+    search_order: [athena_utils, metrics]
+# vars:
+#   "dbt_date:time_zone": "Europe/Amsterdam"
 
 # You can define configurations for models in the `source-paths` directory here.
 # Using these configurations, you can enable or disable models, change how they
 # are materialized, and more!
 models:
   dbt_athena_aws:
+    table_type: iceberg
+    format: parquet
     staging:
-      +materialized: table
-      +table_type: iceberg
-      +format: parquet
-      +schema: unified
-      +s3_staging_dir: s3://hub-athena-queryresults-bucket
-      +s3_data_dir: s3://hub-unified-source-bucket
+      materialized: table
+      schema: unified
+      s3_staging_dir: s3://hub-athena-queryresults-bucket
+      s3_data_dir: s3://hub-unified-source-bucket
     marts:
-      +materialized: table
-      +table_type: iceberg
-      +format: parquet
-      +schema: transformation-spoke
-      +s3_staging_dir: s3://spoke-athena-queryresults-bucket
-      +s3_data_dir: s3://spoke-transformed-bucket
+      materialized: table
+      schema: transformation-spoke
+      s3_staging_dir: s3://spoke-athena-queryresults-bucket
+      s3_data_dir: s3://spoke-transformed-bucket
 
 # FIXME: query-comment must be disabled for Athena to work because /* block comments are unsupported in Athena DML
 # Removing this line will result in a Runtime Error during the integration test

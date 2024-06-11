@@ -11,13 +11,9 @@
         {{ default_schema }}
 
 
-    {# specified custom schema names go to the schema name prepended with the the default schema name in prod (as this is an example project we want the schemas clearly labeled) #}
-    {% elif target.name == 'prod' %}
-        {{ default_schema }}_{{ custom_schema_name | trim }}
-
-    {# specified custom schemas go to the default target schema for non-prod targets #}
+    {# specified custom schemas go to the custom target schema #}
     {% else %}
-        {{ default_schema }}
+        {{ custom_schema_name | trim }}
     {% endif %}
 
 {% endmacro %}

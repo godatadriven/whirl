@@ -3,8 +3,13 @@ with
 
 days as (
 
-    --for BQ adapters use "DATE('01/01/2000','mm/dd/yyyy')"
-    {{ dbt_date.get_base_dates(n_dateparts=365*10, datepart="day") }}
+    {{ dbt_utils.date_spine(
+            "day",
+            "date_add('year', -10, current_date)",
+            "current_date"
+        )
+    }}
+
 
 ),
 
