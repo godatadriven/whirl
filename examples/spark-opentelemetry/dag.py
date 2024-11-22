@@ -1,8 +1,12 @@
 import os
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
+from pprint import pprint
+
 from airflow import DAG
-from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.operators.python_operator import PythonOperator
 from airflow.operators.sql import SQLCheckOperator
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.traces.tracer import Trace, span
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
@@ -22,10 +26,61 @@ FILE = 's3://{bucket}/input/data/demo/spark/{date}/'.format(
 )
 TABLE = 'demo'
 
+class OtelSparkSubmitOperator(SparkSubmitOperator):
+    """
+    This hook is a wrapper around the spark-submit operator to provide the otel parent id.
+    """
+    @span
+    def execute(self, context):
+        """
+        Call the SparkSubmitHook to run the provided spark job
+        """
+        # _conf
+        from opentelemetry import context as otel_context
+        from opentelemetry.propagators.textmap import default_setter
+        from opentelemetry.trace.propagation.tracecontext import (
+            TraceContextTextMapPropagator,
+        )
+
+        propmap = {}
+        TraceContextTextMapPropagator().inject(propmap, otel_context.get_current(), default_setter)
+        spark_extra_conf = {f"com.xebia.data.spot.{header}": value for header, value in propmap.items()}
+        pprint(propmap)
+        pprint(spark_extra_conf)
+        self.conf.update(spark_extra_conf)
+        pprint(self.conf)
+        super().execute(context)
+
+@span
+def _otel_info(**context):
+    trace_id = Trace.get_current_span().get_span_context().trace_id
+    pprint(trace_id)
+    span = Trace.get_current_span()
+    pprint(span)
+
+    from opentelemetry import context as otel_context
+    from opentelemetry.propagators.textmap import default_setter
+    from opentelemetry.trace.propagation.tracecontext import (
+        TraceContextTextMapPropagator,
+    )
+
+    propmap = {}
+    TraceContextTextMapPropagator().inject(propmap, otel_context.get_current(), default_setter)
+    spark_extra_conf = {f"com.xebia.data.spot.{header}": value for header, value in propmap.items()}
+    pprint(propmap)
+    pprint(spark_extra_conf)
+    # pprint(dir(context['ti']))
+
 dag = DAG(dag_id='spark-s3-to-postgres',
           default_args=default_args,
           schedule_interval='@daily',
           dagrun_timeout=timedelta(seconds=120))
+
+otel_info = PythonOperator(
+    task_id="otel_info",
+    dag=dag,
+    python_callable=_otel_info
+)
 
 spark_conf = {
     'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
@@ -35,10 +90,11 @@ spark_conf = {
     'spark.hadoop.fs.s3a.connection.ssl.enabled': 'false',
     'spark.hadoop.fs.s3a.path.style.access': 'true',
     'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
-    'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider'
+    'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
+     'spark.extraListeners': 'com.xebia.data.spot.TelemetrySparkListener'
 }
 
-spark = SparkSubmitOperator(
+spark = OtelSparkSubmitOperator(
     task_id='fetch_csv_from_s3_and_update_postgres',
     dag=dag,
     conf=spark_conf,
@@ -56,4 +112,4 @@ check = SQLCheckOperator(
     dag=dag
 )
 
-spark >> check
+otel_info >> spark >> check

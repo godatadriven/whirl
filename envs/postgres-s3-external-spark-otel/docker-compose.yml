@@ -1,0 +1,123 @@
+version: '3'
+
+services:
+  airflow:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["singlemachine"]
+    ports:
+      - '5000:5000'  # HTTP (Airflow Web UI)
+    env_file:
+      - .whirl.env
+    environment:
+      - AIRFLOW__API__AUTH_BACKEND
+      - OTEL_TRACES_SAMPLER
+      - OTEL_TRACES_EXPORTER
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - AIRFLOW__TRACES__OTEL_ON
+      - AIRFLOW__TRACES__OTEL_HOST
+      - AIRFLOW__TRACES__OTEL_PORT
+      - AIRFLOW__TRACES__OTEL_APPLICATION
+      - AIRFLOW__TRACES__OTEL_SSL_ACTIVE
+      - AIRFLOW__TRACES__OTEL_TASK_LOG_EVENT
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${MOCK_DATA_FOLDER}:/mock-data
+    depends_on:
+      - s3server
+      - postgresdb
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+
+  s3server:
+    image: localstack/localstack:4.0.0
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - DEMO_BUCKET
+      - AWS_SERVER
+      - AWS_PORT
+      - DEBUG=true
+
+  otel:
+    image: otel/opentelemetry-collector-contrib
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+    # volumes:
+    #   - ${DAG_FOLDER}/otel-config/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+
+  postgresdb:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST=postgresdb
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+
+  sparkmaster:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_MASTER_HOST=0.0.0.0
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+      - OTEL_TRACES_SAMPLER
+      - OTEL_TRACES_EXPORTER
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+    ports:
+      - 7077:7077
+      - 18080:8080
+    entrypoint:
+      - /usr/spark/sbin/start-master.sh
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
+  sparkworker:
+    build:
+      context: ${DOCKER_CONTEXT_FOLDER}/aws-spark
+      dockerfile: Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SERVER
+      - AWS_PORT
+      - OTEL_TRACES_SAMPLER
+      - OTEL_TRACES_EXPORTER
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+
+    ports:
+      - 18081:8081
+    entrypoint:
+      - /usr/spark/sbin/start-slave.sh
+      - spark://sparkmaster:7077
+      - "-m"
+      - "8G"
+    depends_on:
+      - sparkmaster
+    links:
+      - s3server:${DEMO_BUCKET}.s3server
+
