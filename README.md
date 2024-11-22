@@ -124,7 +124,7 @@ Inside the _whirl_ script the following environment variables are set:
 
 ## Structure
 
-This project is based on docker-compose and the notion of different environments where Airflow is a central part. The rest of the environment depends on the tools/setup of the production environment used in your situation.
+This project is based on docker compose and the notion of different environments where Airflow is a central part. The rest of the environment depends on the tools/setup of the production environment used in your situation.
 
 The _whirl_ script combines the DAG and the environment to make a fully functional setup.
 
