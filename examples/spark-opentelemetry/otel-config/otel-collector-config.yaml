@@ -1,0 +1,28 @@
+# Reference: https://opentelemetry.io/docs/collector/configuration/
+# Based on: https://github.com/open-telemetry/opentelemetry-collector-releases/
+#                   blob/8221ce55fd6a52bc72fcb24ab0b8aae2acde38dc/distributions/otelcol/config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  telemetry:
+    metrics:
+      level: none
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]

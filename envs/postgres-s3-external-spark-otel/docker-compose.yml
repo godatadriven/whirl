@@ -55,8 +55,8 @@ services:
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
-    # volumes:
-    #   - ${DAG_FOLDER}/otel-config/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    volumes:
+      - ${DAG_FOLDER}/otel-config/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
 
   postgresdb:
     image: postgres:17
