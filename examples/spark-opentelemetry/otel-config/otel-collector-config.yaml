@@ -10,6 +10,24 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
+  filter:
+    # Drop some noisy and less-useful Airflow internals.
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor
+    error_mode: ignore
+    traces:
+      span:
+        - 'name == "perform_heartbeat"'
+        - 'name == "heartbeat"'
+        - 'name == "emit_metrics"'
+        - 'name == "print_stat"'
+        - 'name == "load_triggers"'
+        - 'name == "handle_failed_triggers"'
+        - 'name == "handle_events"'
+        - 'name == "triggerer_job_loop"'
+        - 'name == "scheduler_job_loop"'
+        - 'name == "_start_queued_dagruns"'
+        - 'name == "_create_dag_runs"'
+        - 'name == "emit_pool_metrics"'
   batch:
 
 exporters:
@@ -24,5 +42,5 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, filter]
       exporters: [debug]
