@@ -1,12 +1,11 @@
 import os
 from datetime import datetime, timedelta
-from pprint import pprint
+from pprint import pformat
 
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
 from airflow.operators.sql import SQLCheckOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from airflow.traces.tracer import Trace, span
+from airflow.traces.tracer import span
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
@@ -38,49 +37,21 @@ class OtelSparkSubmitOperator(SparkSubmitOperator):
         # _conf
         from opentelemetry import context as otel_context
         from opentelemetry.propagators.textmap import default_setter
-        from opentelemetry.trace.propagation.tracecontext import (
-            TraceContextTextMapPropagator,
-        )
+        from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
         propmap = {}
-        TraceContextTextMapPropagator().inject(propmap, otel_context.get_current(), default_setter)
-        spark_extra_conf = {f"com.xebia.data.spot.{header}": value for header, value in propmap.items()}
-        pprint(propmap)
-        pprint(spark_extra_conf)
+        current_ctx = otel_context.get_current()
+        self._log.info("Current OTel context: " + pformat(current_ctx))
+        TraceContextTextMapPropagator().inject(propmap, current_ctx, default_setter)
+        spark_extra_conf = {f"spark.com.xebia.data.spot.{header}": value for header, value in propmap.items()}
+        self._log.info("Adding Spark configuration: " + pformat(spark_extra_conf))
         self.conf.update(spark_extra_conf)
-        pprint(self.conf)
         super().execute(context)
-
-@span
-def _otel_info(**context):
-    trace_id = Trace.get_current_span().get_span_context().trace_id
-    pprint(trace_id)
-    span = Trace.get_current_span()
-    pprint(span)
-
-    from opentelemetry import context as otel_context
-    from opentelemetry.propagators.textmap import default_setter
-    from opentelemetry.trace.propagation.tracecontext import (
-        TraceContextTextMapPropagator,
-    )
-
-    propmap = {}
-    TraceContextTextMapPropagator().inject(propmap, otel_context.get_current(), default_setter)
-    spark_extra_conf = {f"com.xebia.data.spot.{header}": value for header, value in propmap.items()}
-    pprint(propmap)
-    pprint(spark_extra_conf)
-    # pprint(dir(context['ti']))
 
 dag = DAG(dag_id='spark-s3-to-postgres',
           default_args=default_args,
           schedule_interval='@daily',
           dagrun_timeout=timedelta(seconds=120))
-
-otel_info = PythonOperator(
-    task_id="otel_info",
-    dag=dag,
-    python_callable=_otel_info
-)
 
 spark_conf = {
     'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
@@ -112,4 +83,4 @@ check = SQLCheckOperator(
     dag=dag
 )
 
-otel_info >> spark >> check
+spark >> check
