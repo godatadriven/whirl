@@ -10,6 +10,12 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
+  resourcedetection/docker:
+    # Populate the "resource" attributes from the Docker environment
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
+    detectors: [env, docker]
+    timeout: 2s
+    override: false
   filter:
     # Drop some noisy and less-useful Airflow internals.
     # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor
@@ -33,6 +39,10 @@ processors:
 exporters:
   debug:
     verbosity: detailed
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
 
 service:
   telemetry:
@@ -41,6 +51,12 @@ service:
 
   pipelines:
     traces:
-      receivers: [otlp]
-      processors: [batch, filter]
-      exporters: [debug]
+      receivers:
+        - otlp
+      processors:
+#        - filter
+        - resourcedetection/docker
+        - batch
+      exporters:
+        - otlp
+        - debug

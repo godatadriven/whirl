@@ -62,7 +62,8 @@ spark_conf = {
     'spark.hadoop.fs.s3a.path.style.access': 'true',
     'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
     'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
-     'spark.extraListeners': 'com.xebia.data.spot.TelemetrySparkListener'
+    'spark.extraListeners': 'com.xebia.data.spot.TelemetrySparkListener',
+    'spark.otel.service.name': 'Apache Spark',
 }
 
 spark = OtelSparkSubmitOperator(
