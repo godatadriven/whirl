@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from pprint import pformat
 
 from airflow import DAG
+from airflow.utils.context import Context as AirflowContext
 from airflow.operators.sql import SQLCheckOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from airflow.traces.tracer import span
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
@@ -25,25 +25,37 @@ FILE = 's3://{bucket}/input/data/demo/spark/{date}/'.format(
 )
 TABLE = 'demo'
 
+
+def compose_traceparent(context: AirflowContext) -> str:
+    """Obtains the Trace ID and Span ID of the ongoing Task Instance.
+
+    This function can only be called during task execution. The ongoing OpenTelemetry Context is not included in the
+    Airflow Context, but Airflow uses a deterministic function to generate the required IDs out of the DagRun and
+    TaskInstance. This function uses the same and outputs a string in the format of a W3C ``traceparent`` header.
+
+    :param context: Airflow task execution context.
+    :return: Traceparent header value.
+    """
+    from airflow.traces import NO_TRACE_ID
+    from airflow.traces.utils import gen_trace_id, gen_span_id
+    version = "00"
+    trace_id = gen_trace_id(context['dag_run'])
+    span_id = gen_span_id(context['task_instance'])
+    flags = "00" if trace_id == NO_TRACE_ID else "01"
+    return f"{version}-{trace_id}-{span_id}-{flags}"
+
+
 class OtelSparkSubmitOperator(SparkSubmitOperator):
     """
     This hook is a wrapper around the spark-submit operator to provide the otel parent id.
     """
-    @span
-    def execute(self, context):
+    def execute(self, context: AirflowContext):
         """
         Call the SparkSubmitHook to run the provided spark job
         """
-        # _conf
-        from opentelemetry import context as otel_context
-        from opentelemetry.propagators.textmap import default_setter
-        from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-
-        propmap = {}
-        current_ctx = otel_context.get_current()
-        self._log.info("Current OTel context: " + pformat(current_ctx))
-        TraceContextTextMapPropagator().inject(propmap, current_ctx, default_setter)
-        spark_extra_conf = {f"spark.com.xebia.data.spot.{header}": value for header, value in propmap.items()}
+        spark_extra_conf = {
+            "spark.com.xebia.data.spot.traceparent": compose_traceparent(context)
+        }
         self._log.info("Adding Spark configuration: " + pformat(spark_extra_conf))
         self.conf.update(spark_extra_conf)
         super().execute(context)
