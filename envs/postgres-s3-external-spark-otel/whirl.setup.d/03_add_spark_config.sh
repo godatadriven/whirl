@@ -23,7 +23,8 @@ HADOOP_AWS_CHECKSUM=53f9ae03c681a30a50aa17524bd9790ab596b28481858e54efd989a826ed
 
 uv pip install --no-cache-dir "pyspark==${SPARK_VERSION}" apache-airflow-providers-apache-spark
 
-export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
+SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
+export SPARK_HOME
 echo "-------------------------------"
 echo "SPARK_HOME set to ${SPARK_HOME}"
 echo "-------------------------------"
@@ -33,7 +34,7 @@ sudo chown $UID /mnt/spark_downloads
 add_spark_jar() {
     local DOWNLOAD_URL="$1"
     local CHECKSUM="$2"
-    local FILENAME="${3:-$(basename $1)}"
+    local FILENAME="${3:-$(basename "$1")}"
     local STAGING_DIR="${4:-/mnt/spark_downloads}"
     local DEST_DIR="${5:-${SPARK_HOME}/jars}"
     local DEST_FILE="${DEST_DIR}/${FILENAME}"

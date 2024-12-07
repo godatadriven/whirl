@@ -28,4 +28,4 @@ curl --fail \
      --url "http://${AWS_SERVER}:${AWS_PORT}"
 
 echo "Creating bucket"
-aws s3api create-bucket --bucket ${DEMO_BUCKET}
+aws s3api create-bucket --bucket "${DEMO_BUCKET}"
