@@ -3,7 +3,7 @@ volumes:
 
 services:
   airflow:
-    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-jre-${OPENJDK_VERSION}-local
     command: ["singlemachine"]
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)

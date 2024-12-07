@@ -304,7 +304,15 @@ start() {
     # Possible cleanup before starting
     run_compose_setup_scripts
 
-    docker build --build-arg PYTHON_VERSION="${PYTHON_VERSION}" --build-arg AIRFLOW_VERSION="${AIRFLOW_VERSION}" -t "docker-whirl-airflow:py-${PYTHON_VERSION}-local" "${SCRIPT_DIR}/docker/airflow-python"
+    TAG_JRE_SUFFIX=""
+    if [ -n "${OPENJDK_VERSION}" ]; then
+        TAG_JRE_SUFFIX="-jre-${OPENJDK_VERSION}"
+    fi
+    docker build --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
+                 --build-arg AIRFLOW_VERSION="${AIRFLOW_VERSION}" \
+                 --build-arg OPENJDK_VERSION="${OPENJDK_VERSION}" \
+                 --tag "docker-whirl-airflow:py-${PYTHON_VERSION}${TAG_JRE_SUFFIX}-local" \
+                 "${SCRIPT_DIR}/docker/airflow-python"
 
     DAEMON=""
     if [ "${CI_MODE}" == true ]; then

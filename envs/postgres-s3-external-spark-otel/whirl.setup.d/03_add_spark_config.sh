@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -e
 echo "============================"
-echo "======== Add java =========="
-echo "============================"
-
-sudo apt-get update && sudo apt-get install -y openjdk-17-jre
-
-echo "============================"
 echo "== Configure Spark config =="
 echo "============================"
 airflow connections add spark_default \
