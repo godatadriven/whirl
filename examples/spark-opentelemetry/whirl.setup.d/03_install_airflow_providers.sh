@@ -4,5 +4,4 @@ echo "========================================"
 echo "== Install required airflow providers =="
 echo "========================================"
 
-pip install apache-airflow-providers-apache-spark
-pip install 'apache-airflow[otel]'
+uv pip install --no-cache-dir "apache-airflow[otel]==${AIRFLOW_VERSION}"

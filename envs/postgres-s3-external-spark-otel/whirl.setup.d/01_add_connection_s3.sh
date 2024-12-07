@@ -5,7 +5,8 @@ echo "=================="
 echo "== Configure S3 =="
 echo "=================="
 
-pip install --disable-pip-version-check --progress-bar=raw --no-cache-dir awscli awscli-plugin-endpoint
+pip install --disable-pip-version-check --progress-bar=raw --no-cache-dir uv
+uv pip install --no-cache-dir awscli awscli-plugin-endpoint
 
 echo -e "$AWS_ACCESS_KEY_ID\n$AWS_SECRET_ACCESS_KEY\n\n" | aws configure
 aws configure set plugins.endpoint awscli_plugin_endpoint
