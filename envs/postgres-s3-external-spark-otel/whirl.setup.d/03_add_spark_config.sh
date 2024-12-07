@@ -29,17 +29,33 @@ echo "-------------------------------"
 echo "SPARK_HOME set to ${SPARK_HOME}"
 echo "-------------------------------"
 
-curl --progress-bar --connect-timeout 10 --fail \
-     --output ${SPARK_HOME}/jars/postgresql-42.2.5.jar \
-     --url https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
-  echo "$POSTGRES_JDBC_CHECKSUM ${SPARK_HOME}/jars/postgresql-42.2.5.jar" | sha256sum -c -
+# The /mnt/spark_downloads is a Docker volume. By staging the file there we avoid downloads on repeated runs.
+sudo chown $UID /mnt/spark_downloads
+add_spark_jar() {
+    local DOWNLOAD_URL="$1"
+    local CHECKSUM="$2"
+    local FILENAME="${3:-$(basename $1)}"
+    local STAGING_DIR="${4:-/mnt/spark_downloads}"
+    local DEST_DIR="${5:-${SPARK_HOME}/jars}"
+    local DEST_FILE="${DEST_DIR}/${FILENAME}"
+    local STAGING_FILE="${STAGING_DIR}/${FILENAME}"
+    if [ ! -f "${STAGING_FILE}" ]; then
+        echo "Downloading ${FILENAME}"
+        curl --progress-bar --connect-timeout 10 --fail \
+             --output "${STAGING_FILE}" \
+             --url "${DOWNLOAD_URL}"
+    else
+        echo "Using cached ${FILENAME}"
+    fi
+    echo "Verifying checksum of ${FILENAME}"
+    echo "${CHECKSUM} ${STAGING_FILE}" | sha256sum -c -
+    cp -f "${STAGING_FILE}" "${DEST_FILE}"
+    echo "Successfully copied ${FILENAME} to ${DEST_DIR}"
+}
 
-curl --progress-bar --connect-timeout 10 --fail \
-     --output ${SPARK_HOME}/jars/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar \
-     --url https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${SDK_AWS_VERSION}/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar && \
-  echo "$SDK_AWS_CHECKSUM ${SPARK_HOME}/jars/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar" | sha256sum -c -
-
-curl --progress-bar --connect-timeout 10 --fail \
-     --output ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_AWS_VERSION}.jar \
-     --url https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar && \
-  echo "$HADOOP_AWS_CHECKSUM ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_AWS_VERSION}.jar" | sha256sum -c -
+add_spark_jar "https://jdbc.postgresql.org/download/postgresql-42.2.5.jar" \
+              "$POSTGRES_JDBC_CHECKSUM"
+add_spark_jar "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${SDK_AWS_VERSION}/aws-java-sdk-bundle-${SDK_AWS_VERSION}.jar" \
+              "$SDK_AWS_CHECKSUM"
+add_spark_jar "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" \
+              "$HADOOP_AWS_CHECKSUM"

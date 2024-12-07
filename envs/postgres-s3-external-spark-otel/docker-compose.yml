@@ -1,4 +1,5 @@
-version: '3'
+volumes:
+  spark_downloads:
 
 services:
   airflow:
@@ -20,6 +21,7 @@ services:
       - AIRFLOW__TRACES__OTEL_SSL_ACTIVE
       - AIRFLOW__TRACES__OTEL_TASK_LOG_EVENT
     volumes:
+      - spark_downloads:/mnt/spark_downloads
       - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
