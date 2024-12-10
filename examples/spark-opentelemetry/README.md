@@ -9,8 +9,8 @@ This example relies on the Spot package: [github/godatadriven/spot][spot]. This
 must be installed before use:
 
 1. Clone the spot project
-2. Build the spot-complete jar file
-3. Copy the compatible version (Spark 3.4, Scala 2.12) into the `whirl.setup.d/` dir
+2. Build the spot-complete jar file (see below)
+3. Copy the compatible version (Spark 3.5, Scala 2.12) into the `whirl.setup.d/` dir
 4. Run whirl
 5. Access the UIs in a browser:
     - Airflow UI: [localhost:5000](http://localhost:5000/) (admin/admin)
