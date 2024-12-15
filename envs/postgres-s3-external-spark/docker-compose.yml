@@ -24,7 +24,7 @@ services:
 
 
   s3server:
-    image: localstack/localstack:2.1.0
+    image: localstack/localstack:4.0.0
     ports:
       - "4566:4566"
     environment:
@@ -37,7 +37,7 @@ services:
       - DEBUG=true
 
   postgresdb:
-    image: postgres:13
+    image: postgres:17
     ports:
       - 5432:5432
     environment:

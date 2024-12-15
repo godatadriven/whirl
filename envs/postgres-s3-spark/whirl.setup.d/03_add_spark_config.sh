@@ -20,8 +20,7 @@ POSTGRES_JDBC_CHECKSUM=7ffa46f8c619377cdebcd17721b6b21ecf6659850179f96fec3d1035c
 SDK_AWS_CHECKSUM=873fe7cf495126619997bec21c44de5d992544aea7e632fdc77adb1a0915bae5
 HADOOP_AWS_CHECKSUM=53f9ae03c681a30a50aa17524bd9790ab596b28481858e54efd989a826ed3a4a
 
-pip install pyspark==${SPARK_VERSION}
-pip install apache-airflow-providers-apache-spark
+pip install "pyspark==${SPARK_VERSION}" "apache-airflow[spark,openlineage]==${AIRFLOW_VERSION}"
 
 export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
 echo "-------------------------------"

@@ -5,6 +5,7 @@ FROM apache/airflow:${AIRFLOW_VERSION}-python${PYTHON_VERSION}
 USER root
 
 ARG AIRFLOW_VERSION=2.7.2
+ARG OPENJDK_VERSION=""
 ENV AIRFLOW_VERSION=${AIRFLOW_VERSION}
 ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
 
@@ -31,6 +32,13 @@ RUN mkdir -p /etc/nginx/ssl \
     && update-ca-certificates -f
 
 COPY nginx-ssl.conf /etc/nginx/conf.d/
+
+RUN test -n "${OPENJDK_VERSION}" && ( \
+      apt-get update && \
+      apt-get install --yes "openjdk-${OPENJDK_VERSION}-jre" \
+      && apt-get clean \
+      && rm -rf /var/lib/apt/lists/* \
+    ) || true
 
 RUN echo "airflow ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER airflow
