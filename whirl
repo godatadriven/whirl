@@ -138,7 +138,7 @@ check_next_dagrun_scheduled_today() {
 trigger_dagrun() {
   local DAG_ID=$1
   echo "Manually triggering dagrun for ${DAG_ID}" >&2
-  result=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" -d "{\"logical_date\": \"$(date -z Z +%FT%T%z)\"}" | jq)
+  result=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" -d "{\"logical_date\": \"$(date +%FT%T%z)\"}" | jq)
   echo "Result of triggering dagrun for ${DAG_ID} is ${result}" >&2
   sleep 5;
 }

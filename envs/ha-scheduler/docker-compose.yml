@@ -19,7 +19,7 @@ services:
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
     depends_on:
       - postgresdb
-      - scheduler
+      - scheduler1
       - scheduler2
 
   scheduler1:
@@ -72,7 +72,7 @@ services:
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
     depends_on:
       - postgresdb
-      - scheduler
+      - scheduler1
       - scheduler2
 
   postgresdb:
