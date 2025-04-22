@@ -1,11 +1,8 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
+
 from airflow import DAG
-
 from airflow.decorators import task
-from airflow.hooks.S3_hook import S3Hook
-
 from include.datasets import DEMO_A_DS, DEMO_B_DS, DEMO_C_DS
-
 
 default_args = {
     'owner': 'whirl',

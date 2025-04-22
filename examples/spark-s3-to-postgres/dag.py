@@ -1,12 +1,13 @@
 import os
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from airflow.operators.sql import SQLCheckOperator
+from airflow.providers.common.sql.operators.sql import SQLCheckOperator
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
-DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"
+DAGRUN_EXECUTION_DATE = "{{ logical_date.strftime('%Y%m%d') }}"
 
 default_args = {
     'owner': 'whirl',
@@ -24,7 +25,7 @@ TABLE = 'demo'
 
 dag = DAG(dag_id='spark-s3-to-postgres',
           default_args=default_args,
-          schedule_interval='@daily',
+          schedule='@daily',
           dagrun_timeout=timedelta(seconds=120))
 
 spark_conf = {

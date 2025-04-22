@@ -10,7 +10,9 @@ services:
       - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
     volumes:
       - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/

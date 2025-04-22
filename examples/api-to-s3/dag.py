@@ -1,11 +1,10 @@
-from datetime import timedelta, datetime
-from airflow import DAG
+from datetime import datetime, timedelta
 
-from airflow.operators.python_operator import PythonOperator
-from airflow.hooks.http_hook import HttpHook
-from airflow.hooks.S3_hook import S3Hook
 import pandas as pd
-
+from airflow import DAG
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.providers.http.hooks.http import HttpHook
+from airflow.providers.standard.operators.python import PythonOperator
 
 default_args = {
     'owner': 'whirl',
@@ -46,7 +45,7 @@ output_path = "api-store/{{ ds_nodash }}/demo-api.parquet"
 
 dag = DAG(dag_id='whirl-local-api-to-s3-example',
           default_args=default_args,
-          schedule_interval='@once',
+          schedule='@once',
           dagrun_timeout=timedelta(seconds=120))
 
 api_get = PythonOperator(
@@ -56,7 +55,6 @@ api_get = PythonOperator(
         "conn_id": "local_api",
     },
     templates_dict={"localfile": local_path},
-    provide_context=True,
     dag=dag,
 )
 
@@ -71,7 +69,6 @@ store_s3 = PythonOperator(
         "s3_bucket": s3bucket,
         "s3_output_path": output_path
     },
-    provide_context=True,
     dag=dag
 )
 

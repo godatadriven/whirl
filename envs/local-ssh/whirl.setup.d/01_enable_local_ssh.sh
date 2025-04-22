@@ -5,7 +5,7 @@ echo "== Configure SSH ====================="
 echo "======================================"
 
 airflow connections add local_ssh \
-    --conn-type SSH \
+    --conn-type ssh \
     --conn-host localhost \
     --conn-login airflow \
     --conn-port 22

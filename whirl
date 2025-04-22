@@ -2,7 +2,7 @@
 AIRFLOW_UI_PORT=5000
 AIRFLOW_ADMIN_USR="admin"
 AIRFLOW_ADMIN_PWD="admin"
-AIRFLOW_API_BASE_URI="api/v1"
+AIRFLOW_API_BASE_URI="api/v2"
 # https://stackoverflow.com/a/4774063
 SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
@@ -126,7 +126,7 @@ detect_potential_dag() {
 check_next_dagrun_scheduled_today() {
   local DAG_ID=$1
   echo "Checking next dagrun for ${DAG_ID}" >&2
-  result=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}" | jq '.next_dagrun // (now | todate) | split("T") | .[0] | strptime("%Y-%m-%d") | strftime("%Y%m%d") | tonumber - (now | strftime("%Y%m%d") | tonumber)')
+  result=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}" | jq '.next_dagrun // (now | todate) | split("T") | .[0] | strptime("%Y-%m-%d") | strftime("%Y%m%d") | tonumber - (now | strftime("%Y%m%d") | tonumber)')
   echo "Result of checking next dagrun for ${DAG_ID} is ${result} (days from now)" >&2
   if [ "${result}" -le 0 ]; then
     true
@@ -138,7 +138,7 @@ check_next_dagrun_scheduled_today() {
 trigger_dagrun() {
   local DAG_ID=$1
   echo "Manually triggering dagrun for ${DAG_ID}" >&2
-  result=$(curl -s -X POST -H "Content-Type: application/json" -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" -d "{}" | jq)
+  result=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" -d "{\"logical_date\": \"$(date -z Z +%FT%T%z)\"}" | jq)
   echo "Result of triggering dagrun for ${DAG_ID} is ${result}" >&2
   sleep 5;
 }
@@ -148,19 +148,19 @@ test_dag_state() {
   local STATE=$2
   local SHOW_RESULT=${3:-false}
   echo "Checking dag state(${STATE}) for ${DAG_ID}" >&2
-  result=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" | jq ".dag_runs | map(select(.state == \"${STATE}\")) | length")
+  result=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" | jq ".dag_runs | map(select(.state == \"${STATE}\")) | length")
   echo "Result of checking dag state(${STATE}) for ${DAG_ID} is ${result}" >&2
   if [ "${SHOW_RESULT}" == true ]; then
-    output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" | jq ".dag_runs" )
+    output=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns" | jq ".dag_runs" )
     echo "Dagruns: $output" >&2
     sleep 5 # Wait for the task states to be up to date
-    output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq ".task_instances" )
+    output=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq ".task_instances" )
     echo "Tasks: $output" >&2
     sleep 5 # Wait for the logs to be available
     # shellcheck disable=SC2207
-    log_urls=($(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq -r '.task_instances[] | select(.state!="success" and .try_number>0) | .dag_run_id + "/taskInstances/" + .task_id + "/logs/" + (.try_number|tostring)'))
+    log_urls=($(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/~/taskInstances" | jq -r '.task_instances[] | select(.state!="success" and .try_number>0) | .dag_run_id + "/taskInstances/" + .task_id + "/logs/" + (.try_number|tostring)'))
     for uri in "${log_urls[@]}"; do
-      output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/${uri}")
+      output=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}/dagRuns/${uri}")
       echo "Tasks Instance: $uri" >&2
       echo "    Log Output: " >&2
       echo "" >&2
@@ -175,10 +175,10 @@ test_dag_errors() {
   local DAG_ID=$1
   local SHOW_RESULT=${2:-false}
   echo "Checking dag ${DAG_ID} for errors." >&2
-  result=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" | jq ".total_entries")
+  result=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" | jq ".total_entries")
   echo "Result of checking dag errors for ${DAG_ID} is ${result}" >&2
   if [ "${SHOW_RESULT}" == true ]; then
-    output=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" | jq )
+    output=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" | jq )
     echo "ImportErrors: $output" >&2
   else
     echo "$result"
@@ -187,9 +187,9 @@ test_dag_errors() {
 
 debug_log_airflow() {
   echo "Available dags:"
-  curl -X GET -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags" || true
+  curl -X GET -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags" || true
   echo "Dag Import Errors:"
-  curl -X GET -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" || true
+  curl -X GET -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" || true
   echo "Docker containers running:"
   docker ps
   echo "Airflow container logs:"
@@ -326,14 +326,14 @@ start() {
         fi
       fi
       DAEMON="-d"
-      export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+      export AIRFLOW__FAB__AUTH_BACKENDS=airflow.api.auth.backend.basic_auth
     fi
 
     docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build --force-recreate
 
     if [ "${CI_MODE}" == true ]; then
       wait_period=0
-      while [[ "$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT})" != "302" ]]; do
+      while [[ "$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT})" != "200" ]]; do
         echo "Waiting for Airflow UI to come up..."
         if [ $wait_period -ge 600 ]; then
           status_code="$(curl -s -o /dev/null -w %\{http_code\} http://localhost:${AIRFLOW_UI_PORT} || true)"
@@ -348,9 +348,10 @@ start() {
         fi
       done
       sleep 10;
+      AIRFLOW_API_TOKEN=$(curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" "http://localhost:${AIRFLOW_UI_PORT}/auth/token" -d "{\"username\": \"${AIRFLOW_ADMIN_USR}\", \"password\": \"${AIRFLOW_ADMIN_PWD}\"}"  | jq -r ".access_token")
       if [ "${WHIRL_CI_EXPECT_IMPORTERRORS}" == true ]; then
         echo "Checking dag ${DAG_ID} for expected errors."
-        result=$(curl -s -u ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" | jq ".total_entries")
+        result=$(curl -s -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/importErrors" | jq ".total_entries")
         echo "Result of checking dag ${DAG_ID} for expected errors is ${result}" >&2
         if [ "$(test_dag_errors "${DAG_ID}")" -gt 0 ]; then
           echo "Dag ${DAG_ID} has expected errors. Stopping..."
@@ -364,11 +365,11 @@ start() {
         fi
       else
         sleep 10 # wait for dag to be available.
-        if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
+        if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
           echo "Unable to unpause dag with id ${DAG_ID}."
-          echo "Command: curl -X PATCH  -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:****** \"http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
+          echo "Command: curl -X PATCH  -H 'Content-Type: application/json' -H \"Authorization: Bearer *****\"  \"http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
           echo "Output:"
-          curl -X PATCH  -H 'Content-Type: application/json' --user ${AIRFLOW_ADMIN_USR}:${AIRFLOW_ADMIN_PWD} "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
+          curl -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
           debug_log_airflow
           stop
           exit 5
