@@ -11,7 +11,7 @@ spec:
         # Hard Coded Airflow Envs
         - name: AIRFLOW__CORE__FERNET_KEY
           value: W5gmA+dp84hkZEzpxPw4LTmhbXA1uVxKZsgIfay8wno=
-        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
           value: postgresql://airflow:pAssw0rd@postgresdb:5432/airflow
         - name: AIRFLOW__LOGGING__REMOTE_LOGGING
           value: True
@@ -21,6 +21,16 @@ spec:
           value: local_s3
         - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
           value: False
+        - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
+          value: False
+        - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
+          value: False
+        # - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
+        #   value: False
+        - name: AIRFLOW__WEBSERVER__SECRET_KEY
+          value: webser_secret_key
+        - name: AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+          value: http://airflow:5000/execution/
       image: airflow-worker
       imagePullPolicy: IfNotPresent
       name: base

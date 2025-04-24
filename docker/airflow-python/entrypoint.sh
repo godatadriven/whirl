@@ -40,9 +40,9 @@ done
 
 if [[ ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
   nohup /entrypoint scheduler -D &
-  nohup /entrypoint triggerer -D &
   nohup /entrypoint dag-processor &
-  /entrypoint api-server -p 5000
+  nohup /entrypoint api-server -p 5000 &
+  /entrypoint triggerer
 else
   /entrypoint "${@}"
 fi

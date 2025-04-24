@@ -2,7 +2,6 @@ ARG AIRFLOW_VERSION=3.0.0
 ARG PYTHON_VERSION=3.12
 FROM apache/airflow:${AIRFLOW_VERSION}-python${PYTHON_VERSION}
 
-ARG DAG_SUBDIR
 RUN pip install pandas pyarrow
 
-COPY . /opt/airflow/dags/${DAG_SUBDIR}/
+COPY . /opt/airflow/dags/
