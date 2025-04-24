@@ -5,8 +5,8 @@ defers and doesn't occupy a worker slot while it waits
 
 from datetime import datetime, timedelta
 
-from airflow import DAG
-from airflow.operators.empty import EmptyOperator
+from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.sdk import DAG
 from custom.operators.api_check_operator import WaitForStartedStatusSensor
 
 with DAG(

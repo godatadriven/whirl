@@ -3,8 +3,8 @@
 from datetime import timedelta
 
 import pendulum
-from airflow.models import DAG
 from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import DAG
 from custom_plugins.timetable.fullmoon import FullMoonTimetable
 
 args = {

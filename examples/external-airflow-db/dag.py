@@ -4,9 +4,9 @@ from builtins import range
 from datetime import timedelta
 
 import pendulum
-from airflow.models import DAG
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.sdk import DAG
 
 args = {
     'owner': 'airflow',

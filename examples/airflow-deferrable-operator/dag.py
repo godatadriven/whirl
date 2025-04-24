@@ -5,9 +5,9 @@ defers and doesn't occupy a worker slot while it waits
 
 from datetime import datetime, timedelta
 
-from airflow import DAG
-from airflow.operators.empty import EmptyOperator
-from airflow.sensors.time_delta import TimeDeltaSensorAsync
+from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.providers.standard.time.sensors.time_delta import TimeDeltaSensorAsync
+from airflow.sdk import DAG
 
 with DAG(
     dag_id="example_time_delta_sensor_async",

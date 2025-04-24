@@ -1,9 +1,9 @@
 from datetime import timedelta
 
 import pendulum
-from airflow.models import DAG
 from airflow.providers.standard.operators.empty import EmptyOperator
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk import DAG
 
 args = {
     'owner': 'airflow',
