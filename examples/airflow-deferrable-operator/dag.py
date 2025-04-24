@@ -6,7 +6,7 @@ defers and doesn't occupy a worker slot while it waits
 from datetime import datetime, timedelta
 
 from airflow.providers.standard.operators.empty import EmptyOperator
-from airflow.providers.standard.time.sensors.time_delta import TimeDeltaSensorAsync
+from airflow.providers.standard.sensors.time_delta import TimeDeltaSensorAsync
 from airflow.sdk import DAG
 
 with DAG(
