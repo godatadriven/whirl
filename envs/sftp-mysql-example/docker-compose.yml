@@ -9,7 +9,7 @@ services:
   ftp-server:
     image: iowoi/sftp-server:latest
     ports:
-        - 22:22
+        - "22"  # Bind on an ephemeral port, user `docker ps` to find out where it landed.
     env_file:
       - sftp.env
 
@@ -30,6 +30,6 @@ services:
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
       - ${MOCK_DATA_FOLDER}:/mock-data
-    depends_on:
+    links:
       - ftp-server
       - mysql

@@ -30,3 +30,5 @@ The environment to be used is set in the `.whirl.env` in the DAG directory. In t
 The DAG contains 2 tasks that use:
 - The SFTPOperator to copy the file from the FTPserver to the local directory
 - The Python operator using the MySQL Hook to load the csv data into the database.
+
+The SFTP server is exposed to the host on an ephemeral port. Run `docker ps` to find out the local port number.

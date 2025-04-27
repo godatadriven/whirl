@@ -48,7 +48,7 @@ jobs:
       matrix:
         example_dir: ${{ fromJson(needs.directories.outputs.dir) }}
         python_version: ["3.9", "3.12"]
-        airflow_version: ["2.2.5", "2.9.1"]
+        airflow_version: ["2.2.5", "2.10.5"]
         exclude:
           - airflow_version: "2.2.5"
             python_version: "3.12"
@@ -62,6 +62,8 @@ jobs:
           - example_dir: ./examples/dbt-example
           # Needs license
           - example_dir: ./examples/dbt-athena-glue-example
+          # Requires artifact downloaded from github.com/godatadriven/spot, which doesn't publish artifacts yet (2024-12-11)
+          - example_dir: ./examples/spark-opentelemetry
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -82,7 +84,7 @@ jobs:
       matrix:
         example: ${{ fromJson(needs.examples.outputs.example) }}
         python_version: ["3.9", "3.12"]
-        airflow_version: ["2.2.5", "2.9.1"]
+        airflow_version: ["2.2.5", "2.10.5"]
         exclude:
           - airflow_version: "2.2.5"
             python_version: "3.12"
@@ -96,6 +98,8 @@ jobs:
           - example: dbt-example
           # Needs license
           - example_dir: ./examples/dbt-athena-glue-example
+          # Requires artifact downloaded from github.com/godatadriven/spot, which doesn't publish artifacts yet (2024-12-11)
+          - example: spark-opentelemetry
     env:
       PYTHON_VERSION: ${{ matrix.python_version }}
       AIRFLOW_VERSION: ${{ matrix.airflow_version }}
@@ -113,7 +117,7 @@ jobs:
       max-parallel: 1
       matrix:
         python_version: ["3.9", "3.12"]
-        airflow_version: ["2.2.5", "2.9.1"]
+        airflow_version: ["2.2.5", "2.10.5"]
         exclude:
           - airflow_version: "2.2.5"
             python_version: "3.12"
@@ -126,6 +130,20 @@ jobs:
         working-directory: ./examples/dbt-example
         run: |
           echo Run Ci from dbt-example directory
+          ../../whirl ci
+
+  whirl-ci-opentelemetry-example:
+    if: false  # Disabled until github.com/godatadriven/spot has public Releases (need a stable download URL)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run whirl CI opentelemetry example
+        working-directory: ./examples/spark-opentelemetry/
+        run: |
+          curl -fLSs \
+               -o ./whirl.setup.d/spot-complete.jar \
+               --url "https://github.com/godatadriven/spot/releases/..." # TODO spot-complete-3.5_2.21.jar
+          echo Run Ci from spark-opentelemetry directory
           ../../whirl ci
 
   whirl-ci-extra-env-spark-s3-to-postgres:
@@ -144,7 +162,7 @@ jobs:
       max-parallel: 4
       matrix:
         python_version: ["3.9", "3.12"]
-        airflow_version: ["2.2.5", "2.9.1"]
+        airflow_version: ["2.2.5", "2.10.5"]
         exclude:
           - airflow_version: "2.2.5"
             python_version: "3.12"
@@ -166,7 +184,7 @@ jobs:
       max-parallel: 4
       matrix:
         python_version: ["3.9", "3.12"]
-        airflow_version: ["2.2.5", "2.9.1"]
+        airflow_version: ["2.2.5", "2.10.5"]
         exclude:
           - airflow_version: "2.2.5"
             python_version: "3.12"

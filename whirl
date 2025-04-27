@@ -193,13 +193,13 @@ debug_log_airflow() {
   echo "Docker containers running:"
   docker ps
   echo "Airflow container logs:"
-  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs airflow
+  docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs airflow
 }
 
 run_compose_setup_scripts() {
   if [[ -d ${ENVIRONMENT_FOLDER}/compose.setup.d ]]; then
     echo "============================================"
-    echo "== Setup docker-compose specifics =========="
+    echo "== Setup docker compose specifics =========="
     echo "============================================"
     for filename in "${ENVIRONMENT_FOLDER}"/compose.setup.d/*.sh; do
       echo "Executing compose prepare script: $filename"
@@ -210,7 +210,7 @@ run_compose_setup_scripts() {
 
   if [[ -d ${DAG_FOLDER}/compose.setup.d ]]; then
     echo "================================================"
-    echo "== Setup docker-compose dag specifics =========="
+    echo "== Setup docker compose dag specifics =========="
     echo "================================================"
     for filename in "${DAG_FOLDER}"/compose.setup.d/*.sh; do
       echo "Executing compose dag prepare script: $filename"
@@ -223,7 +223,7 @@ run_compose_setup_scripts() {
 run_compose_teardown_scripts() {
   if [[ -d ${ENVIRONMENT_FOLDER}/compose.teardown.d ]]; then
     echo "============================================"
-    echo "== Teardown docker-compose specifics ======="
+    echo "== Teardown docker compose specifics ======="
     echo "============================================"
     for filename in "${ENVIRONMENT_FOLDER}"/compose.teardown.d/*.sh; do
       echo "Executing compose teardown script: $filename"
@@ -233,7 +233,7 @@ run_compose_teardown_scripts() {
   fi
   if [[ -d ${DAG_FOLDER}/compose.teardown.d ]]; then
     echo "============================================"
-    echo "== Teardown docker-compose dag specifics ==="
+    echo "== Teardown docker compose dag specifics ==="
     echo "============================================"
     for filename in "${DAG_FOLDER}"/compose.teardown.d/*.sh; do
       echo "Executing compose teardown script: $filename"
@@ -304,7 +304,15 @@ start() {
     # Possible cleanup before starting
     run_compose_setup_scripts
 
-    docker build --build-arg PYTHON_VERSION="${PYTHON_VERSION}" --build-arg AIRFLOW_VERSION="${AIRFLOW_VERSION}" -t "docker-whirl-airflow:py-${PYTHON_VERSION}-local" "${SCRIPT_DIR}/docker/airflow-python"
+    TAG_JRE_SUFFIX=""
+    if [ -n "${OPENJDK_VERSION}" ]; then
+        TAG_JRE_SUFFIX="-jre-${OPENJDK_VERSION}"
+    fi
+    docker build --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
+                 --build-arg AIRFLOW_VERSION="${AIRFLOW_VERSION}" \
+                 --build-arg OPENJDK_VERSION="${OPENJDK_VERSION}" \
+                 --tag "docker-whirl-airflow:py-${PYTHON_VERSION}${TAG_JRE_SUFFIX}-local" \
+                 "${SCRIPT_DIR}/docker/airflow-python"
 
     DAEMON=""
     if [ "${CI_MODE}" == true ]; then
@@ -321,7 +329,7 @@ start() {
       export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
     fi
 
-    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build --force-recreate
+    docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" up ${DAEMON} --build --force-recreate
 
     if [ "${CI_MODE}" == true ]; then
       wait_period=0
@@ -379,17 +387,17 @@ start() {
     fi
 
     echo "Closing down the environment"
-    docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" down
+    docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" down
 }
 
 stop() {
   echo "Stopping airflow-localrun containers..."
-  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" down --volumes --rmi local --remove-orphans
+  docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" down --volumes --rmi local --remove-orphans
 }
 
 logs() {
   echo "Showing logs of airflow-localrun service ${WHIRL_SERVICE_NAME}"
-  docker-compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs -f "${WHIRL_SERVICE_NAME}"
+  docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs -f "${WHIRL_SERVICE_NAME}"
 }
 
 usage() {
