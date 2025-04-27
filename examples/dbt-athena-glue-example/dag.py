@@ -1,9 +1,8 @@
 import os
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
+
 from airflow import DAG
-
 from airflow.operators.empty import EmptyOperator
-
 from cosmos import ProfileConfig
 from cosmos.operators.local import DbtRunLocalOperator
 

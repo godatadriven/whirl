@@ -1,6 +1,6 @@
 packages:
   - package: dbt-labs/dbt_utils
-    version: 1.2.0
+    version: 1.3.0
   - package: lalalilo/athena_utils
     version: 0.6.0
-sha1_hash: dba90e9f966cfda2a6d7fc927f94b0d563c38562
+sha1_hash: 134e640c66a78bee717fcc13fdb7901a06ce3236
