@@ -70,7 +70,7 @@ $ whirl --help
 
 The default action is to start the DAG in your current directory.
 
-With the `[-x example]` commandline argument you can run whirl from anywhere and tell whirl which example dag to run. The example refers to a directory with the same name in the `examples` directory located near the _whirl_ script.
+With the `[-x example]` command line argument you can run whirl from anywhere and tell whirl which example dag to run. The example refers to a directory with the same name in the `examples` directory located near the _whirl_ script.
 
 Whirl expects an environment to be configured. You can pass this as a command line argument `[-e environment]` or you can configure it as environment variable `WHIRL_ENVIRONMENT` in a `.whirl.env` file. (See [Configuring environment variables](#configuring-environment-variables).) The environment refers to a directory with the same name in the `envs` directory located near the _whirl_ script.
 
@@ -87,13 +87,13 @@ $ whirl  [-x example] [-e <environment>] stop
 ```
 Stops the configured environment.
 
-If you want to stop all containers from a specific environment you can add the `-e` or `--environment` commandline argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
+If you want to stop all containers from a specific environment you can add the `-e` or `--environment` command line argument with the name of the environment. This name corresponds with a directory in the `envs` directory.
 
 #### Usage in a CI Pipeline
 
 We run most of the examples from within our own CI (github actions, see for implementation details our [github workflow](.github/workflows/whirl-ci.yml).
 
-You are able to run an example in `ci` mode on your local system by useing the `whirl ci` command. This will:
+You are able to run an example in `ci` mode on your local system by using the `whirl ci` command. This will:
  
   - run the Docker containers daemonized in the background;
   - ensure the DAG(s) are unpaused; and
@@ -108,7 +108,7 @@ In case of failure (or success if failure is expected)we print out the logs of t
 Instead of using the environment option each time you run _whirl_, you can also configure your environment in a `.whirl.env` file. This can be in three places. They are applied in order:
 
 - A `.whirl.env` file in the root of this repository. This can also specify a default environment to be used when starting _whirl_. You do this by setting the `WHIRL_ENVIRONMENT` which references a directory in the [`envs`](./envs) folder. This repository contains an example you can modify. It specifies the default `PYTHON_VERSION` to be used in any environment.
-- A `.whirl.env` file in your [`envs/{your-env}`](./envs) subdirectory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the commandline. This is helpful to set environment specific variables. Of course it doesn't make much sense to set the `WHIRL_ENVIRONMENT` here.
+- A `.whirl.env` file in your [`envs/{your-env}`](./envs) subdirectory. The environment directory to use can be set by any of the other `.whirl.env` files or specified on the command line. This is helpful to set environment specific variables. Of course it doesn't make much sense to set the `WHIRL_ENVIRONMENT` here.
 - A `.whirl.env` in your DAG directory to override any environment variables. This can be useful for example to overwrite the (default) `WHIRL_ENVIRONMENT`.
 
 #### Internal environment variables
