@@ -193,7 +193,11 @@ debug_log_airflow() {
   echo "Docker containers running:"
   docker ps
   echo "Airflow container logs:"
-  docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs airflow
+  services=$(docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" config --services)
+  for svc in ${services}; do
+    echo "Showing logs of service ${svc}"
+    docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs "${svc}"
+  done
 }
 
 run_compose_setup_scripts() {
@@ -397,8 +401,12 @@ stop() {
 }
 
 logs() {
-  echo "Showing logs of airflow-localrun service ${WHIRL_SERVICE_NAME}"
-  docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs -f "${WHIRL_SERVICE_NAME}"
+  echo "Showing logs of all services"
+  services=$(docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" config --services)
+  for svc in ${services}; do
+    echo "Showing logs of airflow-localrun service ${svc}"
+    docker compose -f "${ENVIRONMENT_FOLDER}/docker-compose.yml" logs "${svc}"
+  done
 }
 
 usage() {
@@ -407,7 +415,7 @@ usage() {
   echo "  -x|--example example               specify example to run"
   echo "  -e|--environment environment       specify environment to use"
   echo "  -d|--directory environment_folder  specify the folder that contains the environments (defaults to SCRIPT_DIR)"
-  echo "  -l|--logs servicename              tail the logs of the service"
+  echo "  -l|--logs                          show the logs of all services"
   echo "  start|stop                         start or stop all"
   echo "  ci                                 runs in daemonized mode and awaits dag run completion"
   echo "  -i|--dag_id dag_id                 specify the dag_id to check (only in ci mode)"
@@ -436,9 +444,7 @@ function read_arguments() {
           ;;
       -l|--logs)
           LOGS=true
-          WHIRL_SERVICE_NAME="${2}"
           shift # past argument
-          shift # past value
           ;;
       -i|--dag_id)
           DAG_ID="${2}"
