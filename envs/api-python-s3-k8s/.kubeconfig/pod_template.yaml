@@ -27,7 +27,7 @@ spec:
           value: False
         # - name: AIRFLOW__LOGGING__ENCRYPT_S3_LOGS
         #   value: False
-        - name: AIRFLOW__WEBSERVER__SECRET_KEY
+        - name: AIRFLOW__API__SECRET_KEY
           value: webser_secret_key
         - name: AIRFLOW__CORE__EXECUTION_API_SERVER_URL
           value: http://airflow:5000/execution/
