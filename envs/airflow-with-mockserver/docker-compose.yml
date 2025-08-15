@@ -17,6 +17,9 @@ services:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -35,6 +38,9 @@ services:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -53,6 +59,9 @@ services:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -71,6 +80,9 @@ services:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -96,4 +108,6 @@ services:
       - POSTGRES_USER
       - POSTGRES_DB
 
+volumes:
+  build:
 
