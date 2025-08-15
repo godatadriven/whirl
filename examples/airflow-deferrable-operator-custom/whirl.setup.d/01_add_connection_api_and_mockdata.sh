@@ -56,6 +56,6 @@ curl -v -X PUT "http://mockserver:1080/mockserver/expectation" -d '{
 # From Airflow 3.0.2, the `dags` folder (a.k.a. the DagBundle) is no longer automatically included on the PYTHONPATH
 # This means that in order to use our custom Python modules, we need to install the custom directory. We also
 # added a small `setup.py` to make this work, as well as volume mounts in the compose override.
-sudo chmod -R ugo+rw /opt/airflow/custom/build
+sudo chmod -R ugo+rw /opt/airflow/custom
 
 pip install aiohttp /opt/airflow/custom/
