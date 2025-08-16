@@ -368,26 +368,33 @@ start() {
           exit 8
         fi
       else
-        sleep 10 # wait for dag to be available.
-        if [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; then
-          echo "Unable to unpause dag with id ${DAG_ID}."
-          echo "Command: curl -X PATCH  -H 'Content-Type: application/json' -H \"Authorization: Bearer *****\"  \"http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }'"
-          echo "Output:"
-          curl -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
-          debug_log_airflow
-          stop
-          exit 5
-        else
-          echo "Unpaused dag with id ${DAG_ID}."
-          sleep 5;
-          if ! check_next_dagrun_scheduled_today "${DAG_ID}"; then
-              echo "Need to trigger the dag ${DAG_ID} since first scheduled time is later than today and unpause is not enough to start running"
-              trigger_dagrun "${DAG_ID}"
+        sleep 10; # wait for dag to be available.
+        wait_dagparse_period=0
+        echo "Unpausing dag with id ${DAG_ID}."
+        while [[ "$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')" != "200" ]]; do
+          echo "Unpausing failed. Trying again ..."
+          if [ $wait_dagparse_period -ge 60 ]; then
+            status_code="$(curl -s -o /dev/null -w %\{http_code\} -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }')"
+            echo "Command: curl -X PATCH  -H 'Content-Type: application/json' -H \"Authorization: Bearer *****\"  \"http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused\" -d '{ \"is_paused\": false }' has status ${status_code}"
+            echo "Output:"
+            curl -X PATCH  -H 'Content-Type: application/json' -H "Authorization: Bearer ${AIRFLOW_API_TOKEN}" "http://localhost:${AIRFLOW_UI_PORT}/${AIRFLOW_API_BASE_URI}/dags/${DAG_ID}?update_mask=is_paused" -d '{ "is_paused": false }'
+            debug_log_airflow
+            stop
+            exit 5
+          else
+            wait_dagparse_period=$((wait_dagparse_period+10))
+            sleep 10;
           fi
-
-          check_dagrun_result "${DAG_ID}"
-          exit ${?}
+        done
+        echo "Unpaused dag with id ${DAG_ID}."
+        sleep 5;
+        if ! check_next_dagrun_scheduled_today "${DAG_ID}"; then
+            echo "Need to trigger the dag ${DAG_ID} since first scheduled time is later than today and unpause is not enough to start running"
+            trigger_dagrun "${DAG_ID}"
         fi
+
+        check_dagrun_result "${DAG_ID}"
+        exit ${?}
       fi
     fi
 
