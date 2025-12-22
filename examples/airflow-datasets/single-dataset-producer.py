@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 
 import pandas as pd
-from airflow import DAG
-from airflow.decorators import task
 from airflow.providers.http.hooks.http import HttpHook
+from airflow.sdk import DAG, task
 from include.datasets import DEMO_API_DS
 
 default_args = {

@@ -39,7 +39,7 @@ for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
 done
 
 if [[ ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
-  nohup /entrypoint scheduler -D &
+  nohup /entrypoint scheduler &
   nohup /entrypoint dag-processor &
   nohup /entrypoint api-server -p 5000 &
   /entrypoint triggerer

@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   airflow:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local

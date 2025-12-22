@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name='custom-plugins',
@@ -9,7 +9,7 @@ setup(
     packages=find_packages(include=['custom_plugins', 'custom_plugins.*']),
     install_requires=[
         'apache-airflow>=2.2.5',
-        'ephem==4.1.5'
+        'ephem==4.2'
     ],
     entry_points={
         'airflow.plugins': [

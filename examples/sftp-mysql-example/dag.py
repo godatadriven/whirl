@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 
 import pandas
-from airflow import DAG
 from airflow.providers.mysql.hooks.mysql import MySqlHook
 from airflow.providers.sftp.operators.sftp import SFTPOperation, SFTPOperator
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk import DAG
 
 DAGRUN_EXECUTION_DATE = "{{ ds_nodash }}"
 

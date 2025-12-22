@@ -7,5 +7,6 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=["apache-airflow~=3.0"],
-    python_requires=">=3.9",
+    setup_requires=["wheel"],
+    python_requires=">=3.10",
 )

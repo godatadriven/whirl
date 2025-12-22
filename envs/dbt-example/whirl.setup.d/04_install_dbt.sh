@@ -2,8 +2,8 @@
 sudo apt-get install -y libsasl2-dev build-essential
 pip install \
     "dbt-core==${DBT_VERSION}" \
-    "airflow-dbt-python==3.0.3" \
-    "dbt-postgres==1.9.0"
+    "airflow-dbt-python==3.2.2" \
+    "dbt-postgres==${DBT_POSTGRES_VERSION}"
 
 #airflow-dbt-python depends on the fs_default connection
 echo "====================================="

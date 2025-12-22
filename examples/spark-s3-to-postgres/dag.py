@@ -1,9 +1,9 @@
 import os
 from datetime import datetime, timedelta
 
-from airflow import DAG
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.common.sql.operators.sql import SQLCheckOperator
+from airflow.sdk import DAG
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'

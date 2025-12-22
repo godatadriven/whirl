@@ -1,10 +1,10 @@
-ARG AIRFLOW_VERSION=3.0.5rc2
-ARG PYTHON_VERSION=3.12
+ARG AIRFLOW_VERSION=3.1.5
+ARG PYTHON_VERSION=3.13
 FROM apache/airflow:${AIRFLOW_VERSION}-python${PYTHON_VERSION}
 
 USER root
 
-ARG AIRFLOW_VERSION=3.0.5rc2
+ARG AIRFLOW_VERSION=3.1.5
 ARG OPENJDK_VERSION=""
 ENV AIRFLOW_VERSION=${AIRFLOW_VERSION}
 ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
@@ -38,7 +38,7 @@ COPY nginx-ssl.conf /etc/nginx/conf.d/
 
 RUN test -n "${OPENJDK_VERSION}" && ( \
       apt-get update && \
-      apt-get install --yes "openjdk-${OPENJDK_VERSION}-jre" \
+      apt-get install --yes "temurin-${OPENJDK_VERSION}-jre" \
       && apt-get clean \
       && rm -rf /var/lib/apt/lists/* \
     ) || true

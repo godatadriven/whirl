@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 
-from airflow import DAG
-from airflow.decorators import task
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.sdk import DAG, task
 from include.datasets import DEMO_API_DS
 
 default_args = {

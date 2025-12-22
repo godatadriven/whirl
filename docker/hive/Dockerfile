@@ -1,4 +1,4 @@
-FROM openjdk:8-jre
+FROM eclipse-temurin:21-jre
 
 # Bootstrap
 RUN apt-get update \

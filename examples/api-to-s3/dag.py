@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 
 import pandas as pd
-from airflow import DAG
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.http.hooks.http import HttpHook
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk import DAG
 
 default_args = {
     'owner': 'whirl',

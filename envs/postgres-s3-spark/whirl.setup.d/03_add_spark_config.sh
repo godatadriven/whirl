@@ -3,7 +3,9 @@ echo "============================"
 echo "======== Add java =========="
 echo "============================"
 
-sudo apt-get update && sudo apt-get install -y openjdk-17-jre
+sudo mkdir -p /etc/apt/keyrings && wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo tee /etc/apt/keyrings/adoptium.asc
+echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print $2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
+sudo apt-get update && sudo apt-get install -y temurin-21-jre
 
 echo "============================"
 echo "== Configure Spark config =="
