@@ -1,8 +1,8 @@
-from airflow import Dataset
+from airflow.sdk import Asset
 
-DEMO_API_DS = Dataset("/tmp/datasets/demo-api.parquet")
-DEMO_A_DS = Dataset("/tmp/datasets/a")
-DEMO_B_DS = Dataset("/tmp/datasets/b")
-DEMO_C_DS = Dataset("/tmp/datasets/c")
-DEMO_D_DS = Dataset("/tmp/datasets/d")
-DEMO_E_DS = Dataset("/tmp/datasets/e")
+DEMO_API_DS = Asset("/tmp/datasets/demo-api.parquet")
+DEMO_A_DS = Asset("/tmp/datasets/a")
+DEMO_B_DS = Asset("/tmp/datasets/b")
+DEMO_C_DS = Asset("/tmp/datasets/c")
+DEMO_D_DS = Asset("/tmp/datasets/d")
+DEMO_E_DS = Asset("/tmp/datasets/e")

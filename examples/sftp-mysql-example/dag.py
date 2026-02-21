@@ -1,10 +1,10 @@
-from datetime import timedelta, datetime
-from airflow import DAG
-from airflow.providers.sftp.operators.sftp import SFTPOperator, SFTPOperation
-from airflow.operators.python import PythonOperator
-from airflow.providers.mysql.hooks.mysql import MySqlHook
-import pandas
+from datetime import datetime, timedelta
 
+import pandas
+from airflow.providers.mysql.hooks.mysql import MySqlHook
+from airflow.providers.sftp.operators.sftp import SFTPOperation, SFTPOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk import DAG
 
 DAGRUN_EXECUTION_DATE = "{{ ds_nodash }}"
 
@@ -30,7 +30,7 @@ def ingest_csv_into_mysql(input_csv):
 
 dag = DAG(dag_id='sftp-mock-file-to-mysql',
           default_args=default_args,
-          schedule_interval='@daily',
+          schedule='@daily',
           dagrun_timeout=timedelta(seconds=120))
 
 sftp = SFTPOperator(

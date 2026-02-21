@@ -1,11 +1,11 @@
+import logging
 import os
-from datetime import timedelta, datetime
-from airflow import DAG
-from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
-from airflow.operators.python_operator import PythonOperator
+from datetime import datetime, timedelta
 
 import delta_sharing
-import logging
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk import DAG
 
 
 def _check_sharing_pandas(templates_dict, **context):
@@ -23,7 +23,7 @@ def _check_sharing_pandas(templates_dict, **context):
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
-DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"
+DAGRUN_EXECUTION_DATE = "{{ logical_date.strftime('%Y%m%d') }}"
 
 default_args = {
     'owner': 'whirl',
@@ -45,7 +45,7 @@ DELTA_NP_TABLE = 's3://{bucket}/output/data/demo/spark/cars-all/'.format(
 
 dag = DAG(dag_id='spark-s3-to-delta-with-delta-sharing',
           default_args=default_args,
-          schedule_interval='@daily',
+          schedule='@daily',
           dagrun_timeout=timedelta(seconds=120))
  
 spark_conf = {
@@ -58,13 +58,13 @@ spark_conf = {
     'spark.hadoop.fs.s3.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
     'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
     'spark.hadoop.fs.s3a.multipart.size': '104857600',
-    'spark.jars.packages': 'io.delta:delta-core_2.12:2.4.0,io.delta:delta-sharing-spark_2.12:0.7.0',
+    'spark.jars.packages': 'io.delta:delta-spark_2.12:3.3.2,io.delta:delta-sharing-spark_2.12:3.3.2',
     'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
     'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
 }
 
 spark_sharing_conf = {
-    'spark.jars.packages': 'io.delta:delta-core_2.12:2.4.0,io.delta:delta-sharing-spark_2.12:0.7.0',
+    'spark.jars.packages': 'io.delta:delta-spark_2.12:3.3.2,io.delta:delta-sharing-spark_2.12:3.3.2',
     'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
     'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
 }
@@ -117,7 +117,6 @@ pandas_share_cars = PythonOperator(
     task_id="pandas_share_cars",
     python_callable=_check_sharing_pandas,
     templates_dict={"table": "cars"},
-    provide_context=True,
     dag=dag,
 )
 
@@ -125,9 +124,7 @@ pandas_share_cars_np = PythonOperator(
     task_id="pandas_share_cars_np",
     python_callable=_check_sharing_pandas,
     templates_dict={"table": "cars-all"},
-    provide_context=True,
     dag=dag,
 )
 
-spark >> delta >> pandas_share_cars
-spark_np >> delta_np >> pandas_share_cars_np
+spark >> delta >> pandas_share_cars >> spark_np >> delta_np >> pandas_share_cars_np

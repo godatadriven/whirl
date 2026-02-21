@@ -1,11 +1,7 @@
-from datetime import timedelta, datetime
-from airflow import DAG
+from datetime import datetime, timedelta
 
-from airflow.decorators import task
-from airflow.hooks.S3_hook import S3Hook
-
+from airflow.sdk import DAG, task
 from include.datasets import DEMO_A_DS, DEMO_B_DS, DEMO_C_DS, DEMO_D_DS
-
 
 default_args = {
     'owner': 'whirl',
@@ -23,9 +19,15 @@ with DAG(
 ):
 
     @task
-    def echo_trigger(triggering_dataset_events=None):
-        for dataset, dataset_list in triggering_dataset_events.items():
-            print(dataset, dataset_list)
-            print(dataset_list[0].source_dag_run.dag_id)
+    def echo_trigger(triggering_asset_events=None):
+        print(triggering_asset_events)
+        print(triggering_asset_events.values())
+        print(triggering_asset_events.items())
+        if triggering_asset_events:
+            for asset, asset_events in triggering_asset_events.items():
+                print(f"Asset: {asset.uri}")
+                for event in asset_events:
+                    print(f"  - Triggered by DAG run: {event.source_dag_id}")
+                    print(f"    Timestamp: {event.timestamp}")
 
     echo_trigger()

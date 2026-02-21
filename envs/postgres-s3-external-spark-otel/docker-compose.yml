@@ -10,7 +10,9 @@ services:
     env_file:
       - .whirl.env
     environment:
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
       - OTEL_TRACES_SAMPLER
       - OTEL_TRACES_EXPORTER
       - OTEL_EXPORTER_OTLP_ENDPOINT

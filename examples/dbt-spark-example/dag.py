@@ -1,9 +1,9 @@
 import os
-from datetime import timedelta, datetime
-from airflow import DAG
+from datetime import datetime, timedelta
 
-from airflow.operators.bash_operator import BashOperator
-from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import DAG
 from airflow_dbt_python.operators.dbt import DbtRunOperator, DbtTestOperator
 
 default_args = {
@@ -40,7 +40,7 @@ spark_conf = {
 
 dag = DAG(dag_id='whirl-dbt-spark-example',
           default_args=default_args,
-          schedule_interval='@once',
+          schedule='@once',
           dagrun_timeout=timedelta(seconds=120))
 
 get_file = BashOperator(task_id="get_file", bash_command="mkdir -p /tmp/flights_data && aws s3 cp {} /tmp/flights_data/ && unzip -o /tmp/flights_data/flights_data.zip -d /tmp/flights_data/extract".format(FILE), dag=dag)

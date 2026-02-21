@@ -2,7 +2,7 @@
 echo "=============================================="
 echo "== Configure Delta and Delta Sharing config =="
 echo "=============================================="
-sudo apt-get update && sudo apt-get install -y git
+sudo apt-get update && sudo apt-get install -y git gcc make
 
 pip install delta-spark==${DELTA_VERSION}
 pip install delta-sharing==${DELTA_SHARING_VERSION}

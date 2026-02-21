@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   airflow:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
@@ -9,7 +7,9 @@ services:
     env_file:
       - .whirl.env
     environment:
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
     volumes:
       - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
@@ -30,7 +30,6 @@ services:
       - "4566:4566"
     environment:
       - SERVICES=s3
-      - DATA_DIR=/tmp/localstack/data
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_SERVER
@@ -40,7 +39,6 @@ services:
       - S3_SKIP_SIGNATURE_VALIDATION=0
     volumes:
       - ./aws.setup.d:/docker-entrypoint-initaws.d
-      - ./.s3-mount:/tmp/localstack
 
   delta:
     # using self build arm container until new release is done

@@ -11,6 +11,8 @@ sed -e "s/AWS_SERVER/$AWS_SERVER/g" \
     -e "s/HIVE_DW_BUCKET/$HIVE_DW_BUCKET/g" \
     -i $HIVE_HOME/conf/core-site.xml
 
+
+export HADOOP_OPTS="-XX:+IgnoreUnrecognizedVMOptions"
 $HIVE_HOME/bin/schematool -dbType derby -initSchema
 $HIVE_HOME/hcatalog/sbin/hcat_server.sh start &
 

@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   airflow:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
@@ -10,9 +8,10 @@ services:
       - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__API_AUTH__JWT_SECRET
     volumes:
-      - ${DAG_FOLDER}:/opt/airflow/dags/$PROJECTNAME
+      - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
       - ${ENVIRONMENT_FOLDER}/.kubeconfig:/etc/airflow/whirl.setup.d/config.d:ro

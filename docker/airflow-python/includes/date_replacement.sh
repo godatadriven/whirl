@@ -33,18 +33,16 @@ function replace_date() {
   DS_NODASH_FILE=$(echo $f | sed -e "s/#ds_nodash#/$DS_NODASH/g")
   PREV_EXECUTION_FILE=$(echo $f | sed -e "s/#prev_execution#/$PREV_EXECUTION_DATE/g")
   PREV_EXECUTION_NODASH_FILE=$(echo $f | sed -e "s/#prev_execution_nodash#/$PREV_EXECUTION_DATE_NODASH/g")
-  NEXT_EXECUTION_FILE=$(echo $f | sed -e "s/#next_execution#/$NEXT_EXECUTION_DATE/g")
-  NEXT_EXECUTION_NODASH_FILE=$(echo $f | sed -e "s/#next_execution_nodash#/$NEXT_EXECUTION_DATE_NODASH/g")
 
   RENAMES="$TODAY_FILE $TODAY_NODASH_FILE $YESTERDAY_FILE $YESTERDAY_NODASH_FILE \
            $TOMORROW_FILE $TOMORROW_NODASH_FILE $DS_FILE $DS_NODASH_FILE $PREV_MONTH_FILE \
-           $PREV_MONTH_NODASH_FILE $PREV_EXECUTION_NODASH_FILE \
-           $NEXT_EXECUTION_FILE $NEXT_EXECUTION_NODASH_FILE"
+           $PREV_MONTH_NODASH_FILE $PREV_EXECUTION_NODASH_FILE"
+
 
   echo $RENAMES
 }
 
-SCHEDULE=$(grep -oP "schedule_interval=\K[^,]*" /opt/airflow/dags/*/*.py | head -n1 | sed -e "s/['\"]//g")
+SCHEDULE=$(grep -oP "schedule=\K[^,]*" /opt/airflow/dags/*/*.py | head -n1 | sed -e "s/['\"]//g")
 
 # Change Airflow schedule annotations to crontab schedule values
 if [[ ${SCHEDULE} == *"@"* ]]; then
@@ -74,12 +72,8 @@ PREV_MONTH_NODASH=$(date --date="1 month ago" +%Y%m)
 
 # Most recent execution date can be determined by getting previous iteration (previous schedule date)
 # of the most recent (previous) iteration of the cron schedule
-DS=$(python -c "$(obtain_date "${SCHEDULE}" 1 '%Y-%m-%d')")
-DS_NODASH=$(python -c "$(obtain_date "${SCHEDULE}" 1 '%Y%m%d')")
+DS=$(python -c "$(obtain_date "${SCHEDULE}" 0 '%Y-%m-%d')")
+DS_NODASH=$(python -c "$(obtain_date "${SCHEDULE}" 0 '%Y%m%d')")
 
-PREV_EXECUTION_DATE=$(python -c "$(obtain_date "${SCHEDULE}" 2 '%Y-%m-%d')")
-PREV_EXECUTION_DATE_NODASH=$(python -c "$(obtain_date "${SCHEDULE}" 2 '%Y%m%d')")
-
-# Most recent run date can be determined by getting the most recent (previous) iteration of the cron schedule
-NEXT_EXECUTION_DATE=$(python -c "$(obtain_date "${SCHEDULE}" 0 '%Y-%m-%d')")
-NEXT_EXECUTION_DATE_NODASH=$(python -c "$(obtain_date "${SCHEDULE}" 0 '%Y%m%d')")
+PREV_EXECUTION_DATE=$(python -c "$(obtain_date "${SCHEDULE}" 1 '%Y-%m-%d')")
+PREV_EXECUTION_DATE_NODASH=$(python -c "$(obtain_date "${SCHEDULE}" 1 '%Y%m%d')")

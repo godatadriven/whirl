@@ -5,7 +5,7 @@ echo "== Configure SFTP =="
 echo "===================="
 
 airflow connections add ftp_server \
-                       --conn-type SSH \
+                       --conn-type ssh \
                        --conn-host ftp-server \
                        --conn-login $SFTP_USER \
                        --conn-port 22 \

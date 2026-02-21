@@ -5,14 +5,14 @@ echo "== Configure API Connection =="
 echo "=============================="
 
 airflow connections add local_api \
-          --conn-type HTTP \
-          --conn-host "http://mockserver:1080/testapi" \
+          --conn-type http \
+          --conn-host "mockserver:1080/testapi" \
           --conn-login apitest \
           --conn-password testapi
 
 
 # Creating a expectation for our mockserver to respond to a specific api rest call with a fixed set of JSON data
-# Fro docs on creating expectations see: http://www.mock-server.com/mock_server/creating_expectations.html
+# For docs on creating expectations see: http://www.mock-server.com/mock_server/creating_expectations.html
 curl -v -X PUT "http://mockserver:1080/mockserver/expectation" -d '{
   "httpRequest": {
     "path": "/testapi",

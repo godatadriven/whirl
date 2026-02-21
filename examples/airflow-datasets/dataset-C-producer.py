@@ -1,10 +1,7 @@
-from datetime import timedelta, datetime
-from airflow import DAG
+from datetime import datetime, timedelta
 
-from airflow.decorators import task
-
+from airflow.sdk import DAG, task
 from include.datasets import DEMO_C_DS
-
 
 default_args = {
     'owner': 'whirl',

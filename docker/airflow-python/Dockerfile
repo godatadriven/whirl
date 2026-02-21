@@ -1,10 +1,10 @@
-ARG AIRFLOW_VERSION=2.10.5
-ARG PYTHON_VERSION=3.12
+ARG AIRFLOW_VERSION=3.1.7
+ARG PYTHON_VERSION=3.13
 FROM apache/airflow:${AIRFLOW_VERSION}-python${PYTHON_VERSION}
 
 USER root
 
-ARG AIRFLOW_VERSION=2.10.5
+ARG AIRFLOW_VERSION=3.1.7
 ARG OPENJDK_VERSION=""
 ENV AIRFLOW_VERSION=${AIRFLOW_VERSION}
 ENV WHIRL_SETUP_FOLDER=/etc/airflow/whirl.setup.d
@@ -13,6 +13,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/env.d"
 RUN mkdir -p "${WHIRL_SETUP_FOLDER}/dag.d"
+RUN mkdir -p "${WHIRL_SETUP_FOLDER}/auth"
+
+COPY auth.json ${WHIRL_SETUP_FOLDER}/auth/auth.json
 
 RUN chown -R airflow:root "${WHIRL_SETUP_FOLDER}"
 
@@ -35,7 +38,7 @@ COPY nginx-ssl.conf /etc/nginx/conf.d/
 
 RUN test -n "${OPENJDK_VERSION}" && ( \
       apt-get update && \
-      apt-get install --yes "openjdk-${OPENJDK_VERSION}-jre" \
+      apt-get install --yes "temurin-${OPENJDK_VERSION}-jre" \
       && apt-get clean \
       && rm -rf /var/lib/apt/lists/* \
     ) || true
@@ -47,6 +50,9 @@ EXPOSE 5000
 COPY --chown=airflow:root entrypoint.sh /entrypoint-whirl.sh
 COPY includes /etc/airflow/functions
 
+# Airflow 3 user setup
+ENV AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_FILE=${WHIRL_SETUP_FOLDER}/auth/auth.json
+ENV AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS=admin:admin
 ENV PATH="${PATH}:/home/airflow/.local/bin"
 ENTRYPOINT ["/entrypoint-whirl.sh"]
 CMD ["airflow", "--help"]

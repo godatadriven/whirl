@@ -5,7 +5,7 @@ echo "== Configure SSH ====================="
 echo "======================================"
 
 airflow connections add local_ssh \
-    --conn-type SSH \
+    --conn-type ssh \
     --conn-host localhost \
     --conn-login airflow \
     --conn-port 22
@@ -33,4 +33,4 @@ sudo sh -c 'echo "ALL: localhost" >> /etc/hosts.allow'
 sudo service ssh restart
 ssh-keyscan -H localhost >> ${HOME}/.ssh/known_hosts
 
-pip install apache-airflow-providers-ssh
+pip install "paramiko==3.5.1" apache-airflow-providers-ssh

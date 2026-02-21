@@ -1,12 +1,9 @@
-from datetime import timedelta, datetime
-from airflow import DAG
+from datetime import datetime, timedelta
 
-from airflow.decorators import task
-from airflow.hooks.http_hook import HttpHook
 import pandas as pd
-
+from airflow.providers.http.hooks.http import HttpHook
+from airflow.sdk import DAG, task
 from include.datasets import DEMO_API_DS
-
 
 default_args = {
     'owner': 'whirl',

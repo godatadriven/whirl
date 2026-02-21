@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 sudo apt-get install -y libsasl2-dev build-essential
-pip install dbt-core==1.4.5 dbt-spark[PyHive] airflow-dbt-python
+pip install "dbt-core==1.10.17" dbt-spark[PyHive] "airflow-dbt-python==3.2.2"
 
 #airflow-dbt-python depends on the fs_default connection
 echo "====================================="

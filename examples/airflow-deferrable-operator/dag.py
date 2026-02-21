@@ -3,15 +3,15 @@ Example DAG demonstrating ``TimeDeltaSensorAsync``, a drop in replacement for ``
 defers and doesn't occupy a worker slot while it waits
 """
 
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
-from airflow import DAG
-from airflow.operators.empty import EmptyOperator
-from airflow.sensors.time_delta import TimeDeltaSensorAsync
+from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.providers.standard.sensors.time_delta import TimeDeltaSensorAsync
+from airflow.sdk import DAG
 
 with DAG(
     dag_id="example_time_delta_sensor_async",
-    schedule_interval=None,
+    schedule=None,
     start_date=datetime.now() - timedelta(minutes=20),
     catchup=False
 ) as dag:

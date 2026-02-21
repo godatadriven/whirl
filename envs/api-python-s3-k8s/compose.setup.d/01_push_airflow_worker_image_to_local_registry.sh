@@ -13,7 +13,7 @@ function publish_airflow_worker_image() {
     echo "==============================================="
     echo "== Build Airflow worker image with pandas    =="
     echo "==============================================="
-    docker build --build-arg PYTHON_VERSION="${PYTHON_VERSION}" --build-arg AIRFLOW_VERSION="${AIRFLOW_VERSION}" --build-arg DAG_SUBDIR="${PROJECTNAME}" -t "airflow-worker:py-${PYTHON_VERSION}-local" -f "${ENVIRONMENT_FOLDER}/compose.setup.d/Dockerfile.worker" ${DAG_FOLDER}
+    docker build --build-arg PYTHON_VERSION="${PYTHON_VERSION}" --build-arg AIRFLOW_VERSION="${AIRFLOW_VERSION}" -t "airflow-worker:py-${PYTHON_VERSION}-local" -f "${ENVIRONMENT_FOLDER}/compose.setup.d/Dockerfile.worker" ${DAG_FOLDER}
     echo "==============================================="
     echo "== Tag Airflow worker image                  =="
     echo "==============================================="

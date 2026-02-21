@@ -1,6 +1,7 @@
-from datetime import timedelta, datetime
-from airflow import DAG
+from datetime import datetime, timedelta
+
 from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.sdk import DAG
 
 default_args = {
     'owner': 'whirl',
@@ -12,7 +13,7 @@ default_args = {
 
 dag = DAG(dag_id='whirl-local-ssh-example',
           default_args=default_args,
-          schedule_interval='@once',
+          schedule='@once',
           dagrun_timeout=timedelta(seconds=120))
 
 ssh_copy = SSHOperator(

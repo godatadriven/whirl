@@ -1,13 +1,14 @@
 import os
-from datetime import timedelta, datetime
-from airflow import DAG
-from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
-from airflow.operators.check_operator import CheckOperator
+from datetime import datetime, timedelta
 
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.sdk import DAG
+
+# from airflow.operators.check_operator import CheckOperator
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
-DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"
+DAGRUN_EXECUTION_DATE = "{{ logical_date.strftime('%Y%m%d') }}"
 
 default_args = {
     'owner': 'whirl',
@@ -26,7 +27,7 @@ TABLE = 'demo'
 
 dag = DAG(dag_id='spark-s3-to-hive',
           default_args=default_args,
-          schedule_interval='@daily',
+          schedule='@daily',
           dagrun_timeout=timedelta(seconds=120))
 
 spark_conf = {

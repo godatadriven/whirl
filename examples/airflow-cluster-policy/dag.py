@@ -3,25 +3,25 @@
 from builtins import range
 from datetime import timedelta
 
-from airflow.models import DAG
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.utils.dates import days_ago
+import pendulum
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.sdk import DAG
 
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=-2),
 }
 
 dag = DAG(
     dag_id='example_bash_operator',
     default_args=args,
-    schedule_interval='0 0 * * *',
+    schedule='0 0 * * *',
     dagrun_timeout=timedelta(minutes=60),
 
 )
 
-run_this_last = DummyOperator(
+run_this_last = EmptyOperator(
     task_id='run_this_last',
     dag=dag,
 )

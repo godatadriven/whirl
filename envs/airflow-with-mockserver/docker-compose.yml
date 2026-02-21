@@ -1,20 +1,23 @@
-version: '3'
-
 services:
-  webserver:
+  api-server:
     image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
-    command: ["webserver", "-p", "5000"]
+    command: ["api-server", "-p", "5000"]
     ports:
       - '5000:5000'  # HTTP (Airflow Web UI)
     env_file:
       - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
     volumes:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build_api:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -26,11 +29,37 @@ services:
       - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
     volumes:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build_sched:/opt/airflow/custom/build
+    depends_on:
+      - mockserver
+      - postgresdb
+
+  dagprocessor:
+    image: docker-whirl-airflow:py-${PYTHON_VERSION}-local
+    command: ["dag-processor"]
+    env_file:
+      - .whirl.env
+    environment:
+      - WHIRL_SETUP_FOLDER
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
+    volumes:
+      - ${DAG_FOLDER}:/opt/airflow/dags
+      - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
+      - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build_dag:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -42,11 +71,16 @@ services:
       - .whirl.env
     environment:
       - WHIRL_SETUP_FOLDER
-      - AIRFLOW__API__AUTH_BACKEND
+      - AIRFLOW__FAB__AUTH_BACKENDS
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+      - AIRFLOW__API_AUTH__JWT_SECRET
     volumes:
       - ${DAG_FOLDER}:/opt/airflow/dags
       - ${ENVIRONMENT_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/env.d/
       - ${DAG_FOLDER}/whirl.setup.d:${WHIRL_SETUP_FOLDER}/dag.d/
+      - ${DAG_FOLDER}/src:/opt/airflow/custom/src
+      - ${DAG_FOLDER}/setup.py:/opt/airflow/custom/setup.py
+      - build_trig:/opt/airflow/custom/build
     depends_on:
       - mockserver
       - postgresdb
@@ -72,4 +106,9 @@ services:
       - POSTGRES_USER
       - POSTGRES_DB
 
+volumes:
+  build_api:
+  build_sched:
+  build_trig:
+  build_dag:
 

@@ -2,14 +2,14 @@ import os
 from datetime import datetime, timedelta
 from pprint import pformat
 
-from airflow import DAG
-from airflow.utils.context import Context as AirflowContext
-from airflow.operators.sql import SQLCheckOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.providers.common.sql.operators.sql import SQLCheckOperator
+from airflow.sdk import DAG
+from airflow.utils.context import Context as AirflowContext
 
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__)) + '/'
 SPARK_DIRECTORY = THIS_DIRECTORY + 'spark/'
-DAGRUN_EXECUTION_DATE = "{{ next_execution_date.strftime('%Y%m%d') }}"
+DAGRUN_EXECUTION_DATE = "{{ logical_date.strftime('%Y%m%d') }}"
 
 default_args = {
     'owner': 'whirl',
@@ -37,7 +37,7 @@ def compose_traceparent(context: AirflowContext) -> str:
     :return: Traceparent header value.
     """
     from airflow.traces import NO_TRACE_ID
-    from airflow.traces.utils import gen_trace_id, gen_span_id
+    from airflow.traces.utils import gen_span_id, gen_trace_id
     version = "00"
     trace_id = gen_trace_id(context['dag_run'])
     span_id = gen_span_id(context['task_instance'])
@@ -62,7 +62,7 @@ class OtelSparkSubmitOperator(SparkSubmitOperator):
 
 dag = DAG(dag_id='spark-s3-to-postgres',
           default_args=default_args,
-          schedule_interval='@daily',
+          schedule='@daily',
           dagrun_timeout=timedelta(seconds=120))
 
 spark_conf = {
