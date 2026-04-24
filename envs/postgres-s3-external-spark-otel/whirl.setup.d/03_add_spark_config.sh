@@ -3,10 +3,6 @@ set -e
 echo "============================"
 echo "== Configure Spark config =="
 echo "============================"
-airflow connections add spark_default \
-    --conn-type spark \
-    --conn-host "spark://sparkmaster:7077" \
-    --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
 
 SDK_AWS_VERSION=1.12.262
 HADOOP_AWS_VERSION=3.3.4
@@ -16,6 +12,11 @@ SDK_AWS_CHECKSUM=873fe7cf495126619997bec21c44de5d992544aea7e632fdc77adb1a0915bae
 HADOOP_AWS_CHECKSUM=53f9ae03c681a30a50aa17524bd9790ab596b28481858e54efd989a826ed3a4a
 
 uv pip install --no-cache-dir "pyspark==${SPARK_VERSION}" "apache-airflow[spark,openlineage]==${AIRFLOW_VERSION}"
+
+airflow connections add spark_default \
+    --conn-type spark \
+    --conn-host "spark://sparkmaster:7077" \
+    --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
 
 SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
 export SPARK_HOME

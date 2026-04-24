@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 from typing import Any, Dict, Tuple
 
-from airflow.sdk import BaseTrigger, TriggerEvent
+from airflow.triggers.base import BaseTrigger, TriggerEvent
 
 class ApiCheckTrigger(BaseTrigger):
     """

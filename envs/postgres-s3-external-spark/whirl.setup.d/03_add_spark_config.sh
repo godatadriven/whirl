@@ -7,14 +7,6 @@ sudo mkdir -p /etc/apt/keyrings && wget -O - https://packages.adoptium.net/artif
 echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print $2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
 sudo apt-get update && sudo apt-get install -y temurin-21-jre
 
-echo "============================"
-echo "== Configure Spark config =="
-echo "============================"
-airflow connections add spark_default \
-    --conn-type spark \
-    --conn-host "spark://sparkmaster:7077" \
-    --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
-
 SDK_AWS_VERSION=1.12.262
 HADOOP_AWS_VERSION=3.3.4
 
@@ -24,6 +16,14 @@ HADOOP_AWS_CHECKSUM=53f9ae03c681a30a50aa17524bd9790ab596b28481858e54efd989a826ed
 
 pip install pyspark==${SPARK_VERSION}
 pip install apache-airflow-providers-apache-spark
+
+echo "============================"
+echo "== Configure Spark config =="
+echo "============================"
+airflow connections add spark_default \
+    --conn-type spark \
+    --conn-host "spark://sparkmaster:7077" \
+    --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
 
 export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
 echo "-------------------------------"
