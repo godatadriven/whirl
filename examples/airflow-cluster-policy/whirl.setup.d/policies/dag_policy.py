@@ -1,4 +1,4 @@
-from airflow.models import DAG
+from airflow.sdk import DAG
 from airflow.exceptions import AirflowClusterPolicyViolation
 
 def dag_policy(dag: DAG):

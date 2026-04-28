@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from airflow.sensors.base import BaseSensorOperator
+from airflow.sdk import BaseSensorOperator
 
 from custom.triggers.api_check_trigger import ApiCheckTrigger
 

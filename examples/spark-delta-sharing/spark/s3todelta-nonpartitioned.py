@@ -1,6 +1,5 @@
 import argparse
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_date
 
 
 def run_job(spark, input_path, output_path):
