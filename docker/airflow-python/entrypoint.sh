@@ -3,7 +3,7 @@
 AIRFLOW_COMMAND="${1}"
 if [[ ${AIRFLOW_COMMAND} == "scheduler" || ${AIRFLOW_COMMAND} == "api-server" || ${AIRFLOW_COMMAND} == "triggerer"  || ${AIRFLOW_COMMAND} == "dag-processor" ]]; then
   echo  "wait a while for the other systems to be started"
-  sleep 15
+  sleep 30
 fi
 
 if [[ ${AIRFLOW_COMMAND} == "scheduler" || ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
