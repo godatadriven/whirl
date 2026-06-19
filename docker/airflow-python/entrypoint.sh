@@ -25,6 +25,7 @@ fi
 echo "========================================="
 echo "== Setup environment specifics =========="
 echo "========================================="
+shopt -s nullglob
 for filename in ${WHIRL_SETUP_FOLDER}/env.d/*.sh; do
   echo "Executing environment prepare script: $filename"
   . "$filename"
@@ -37,6 +38,7 @@ for filename in ${WHIRL_SETUP_FOLDER}/dag.d/*.sh; do
   echo "Executing DAG prepare script: $filename"
   . "$filename"
 done
+shopt -u nullglob
 
 if [[ ${AIRFLOW_COMMAND} == "singlemachine" ]]; then
   nohup /entrypoint scheduler &
