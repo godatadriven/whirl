@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 pip install \
     "dbt-postgres==${DBT_POSTGRES_VERSION}" \
     apache-airflow-providers-apache-spark \
