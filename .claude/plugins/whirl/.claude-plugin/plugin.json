@@ -1,0 +1,8 @@
+{
+  "name": "whirl",
+  "version": "1.0.0",
+  "description": "Skills for the Whirl local Airflow development tool: scaffold new examples, create Docker Compose environments, and bump Airflow/Python versions.",
+  "author": { "name": "GoDataDriven" },
+  "license": "MIT",
+  "keywords": ["whirl", "airflow", "docker", "examples", "environments"]
+}
