@@ -21,10 +21,10 @@ When you want to use _whirl_ in your CI pipeline, you need to have `jq` installe
 brew install jq
 ```
 
-The current implementation was developed on macOS but is intended to work with any platform supported by Docker. In our experience, Linux and macOS are fine. You can run it on native Windows 10 using [WSL](https://docs.microsoft.com/en-us/windows/wsl/about). Unfortunately, Docker on Windows 10 (version 1809) is hamstrung because it relies on Windows File Sharing (CIFS) to establish the volume mounts. Airflow hammers the volume a little harder than CIFS can handle, and you'll see intermittent FileNotFound errors in the volume mount. This may improve in the future. For now, running _whirl_ inside a Linux VM in Hyper-V gives more reliable results.
+The current implementation was developed on macOS but is intended to work with any platform supported by Docker. In our experience, Linux and macOS are fine. On Windows we recommend running _whirl_ inside [WSL2](https://learn.microsoft.com/en-us/windows/wsl/about) on Windows 11 (or Windows 10) with the [Docker Desktop WSL2 backend](https://docs.docker.com/desktop/wsl/). Keeping your DAG code on the Linux filesystem inside WSL2 (rather than on a `/mnt/c` Windows mount) avoids the file-sharing/volume-mount issues that older native-Windows setups suffered from.
 
 ### Airflow Versions
-As of January 2021, Whirl uses Airflow 2.x.x as the default version. A specific tag was made for Airflow 1.10.x, which can be found [here](https://github.com/godatadriven/whirl/tree/airflow-1.10.x)
+Whirl currently uses Airflow 3.2.1 as the default version (configurable through the `AIRFLOW_VERSION` environment variable). A specific tag was made for Airflow 1.10.x, which can be found [here](https://github.com/godatadriven/whirl/tree/airflow-1.10.x)
 
 ## Getting Started
 
