@@ -44,6 +44,11 @@ function export_environment_vars() {
     DAG_FOLDER=$(pwd)
   else
     DAG_FOLDER=${SCRIPT_DIR}/examples/${WHIRL_EXAMPLE_ARG}
+    if [ ! -d "${DAG_FOLDER}" ]; then
+      echo "Example '${WHIRL_EXAMPLE_ARG}' not found: '${DAG_FOLDER}' does not exist."
+      echo "Available examples: $(find "${SCRIPT_DIR}/examples" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | tr '\n' ' ')"
+      exit 2;
+    fi
   fi
   # shellcheck disable=SC2034
   PROJECTNAME=$(basename "${DAG_FOLDER}")
@@ -85,10 +90,19 @@ function export_environment_vars() {
   if [[ -z "${WHIRL_ENVIRONMENT_DIR}" ]]; then
     WHIRL_ENVIRONMENT_DIR=${SCRIPT_DIR}/envs
   fi
+  if [[ ! -d "${WHIRL_ENVIRONMENT_DIR}" ]]; then
+    echo "Environment directory '${WHIRL_ENVIRONMENT_DIR}' does not exist."
+    exit 2;
+  fi
   ENVIRONMENT_FOLDER=${WHIRL_ENVIRONMENT_DIR}/${WHIRL_ENVIRONMENT};
 
-  if [[ -z "${WHIRL_ENVIRONMENT}" || ! -d ${ENVIRONMENT_FOLDER} ]]; then
-    echo "No valid environment '${WHIRL_ENVIRONMENT}' specified"
+  if [[ -z "${WHIRL_ENVIRONMENT}" ]]; then
+    echo "No environment specified. Set WHIRL_ENVIRONMENT, use -e/--environment, or add WHIRL_ENVIRONMENT to a .whirl.env file."
+    exit 2;
+  fi
+  if [[ ! -d "${ENVIRONMENT_FOLDER}" ]]; then
+    echo "No valid environment '${WHIRL_ENVIRONMENT}' found: '${ENVIRONMENT_FOLDER}' does not exist."
+    echo "Available environments: $(find "${WHIRL_ENVIRONMENT_DIR}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | tr '\n' ' ')"
     exit 2;
   fi
 
