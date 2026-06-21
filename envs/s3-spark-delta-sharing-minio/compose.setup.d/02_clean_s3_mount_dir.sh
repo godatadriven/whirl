@@ -4,7 +4,7 @@ function empty_s3_dir() {
     echo "================================"
     echo "== Cleanup local S3 mount dir =="
     echo "================================"
-    local SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
+    local SCRIPT_DIR; SCRIPT_DIR=$( dirname "${BASH_SOURCE[0]}" )
     S3_MOUNT_DIR="${SCRIPT_DIR}/../.s3-mount"
 
     if [ "$(ls -A ${S3_MOUNT_DIR})" ]; then

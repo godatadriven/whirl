@@ -15,6 +15,14 @@ jobs:
         with:
           # https://github.com/koalaman/shellcheck#how-to-use
           cli-args: "-x whirl"
+      - name: shellcheck setup scripts
+        # Lint every setup script (gated at warning severity; info-level quoting
+        # noise is tracked separately). The main `whirl` script is linted above.
+        run: |
+          shellcheck --severity=warning $(find envs examples -type f \
+            \( -path '*/whirl.setup.d/*.sh' \
+            -o -path '*/compose.setup.d/*.sh' \
+            -o -path '*/compose.teardown.d/*.sh' \) | sort)
 
   unit-tests: # Fast, Docker-free pytest suite (DAG parsing + setup-script checks)
     runs-on: ubuntu-latest

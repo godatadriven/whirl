@@ -4,7 +4,7 @@ function empty_log_dir() {
     echo "====================================="
     echo "== Cleanup local DBT log mount dir =="
     echo "====================================="
-    local SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
+    local SCRIPT_DIR; SCRIPT_DIR=$( dirname "${BASH_SOURCE[0]}" )
     DBT_LOG_DIR="${SCRIPT_DIR}/../dbt/logs"
 
     if [ "$(ls -A ${DBT_LOG_DIR})" ]; then
