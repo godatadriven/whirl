@@ -16,6 +16,18 @@ jobs:
           # https://github.com/koalaman/shellcheck#how-to-use
           cli-args: "-x whirl"
 
+  unit-tests: # Fast, Docker-free pytest suite (DAG parsing + setup-script checks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: astral-sh/setup-uv@v5
+      - name: Install Python 3.13
+        run: uv python install 3.13
+      - name: Sync test dependencies
+        run: uv sync --group test
+      - name: Run pytest
+        run: uv run pytest -q
+
   directories: # Job that list subdirectories of ./examples
     runs-on: ubuntu-latest
     outputs:

@@ -55,9 +55,36 @@ The main `whirl` script and the setup scripts under `whirl.setup.d/` and
 
 ## Testing
 
-There is no unit-test suite yet; verification is done by running examples
-end-to-end in CI mode, which builds the Docker image, starts the environment,
-triggers the DAG and asserts it succeeds.
+There are two complementary layers of testing.
+
+### Unit tests (fast, no Docker)
+
+A [pytest](https://docs.pytest.org/) suite under `tests/` gives quick feedback
+without booting any containers. It is managed with [uv](https://docs.astral.sh/uv/)
+and runs on Python 3.13 (the newest version Airflow 3.2.1 supports). The `test`
+dependency group installs Airflow and the providers needed to parse the example
+DAGs.
+
+```bash
+# One-time: install uv (https://docs.astral.sh/uv/getting-started/installation/)
+uv python install 3.13
+uv sync --group test    # creates .venv and installs the test toolchain
+
+# Run the suite
+uv run pytest
+
+# Run only one layer
+uv run pytest tests/test_dag_validation.py   # example DAGs parse cleanly
+uv run pytest tests/test_setup_scripts.py    # setup-script conventions
+```
+
+The same suite runs in CI as the `unit-tests` job. Add a unit test when you add
+or change behaviour that can be checked without a running Airflow.
+
+### End-to-end (CI mode, requires Docker)
+
+The deeper verification runs examples end-to-end: it builds the Docker image,
+starts the environment, triggers the DAG and asserts it succeeds.
 
 ```bash
 # Run a single example headless (requires Docker and jq)
