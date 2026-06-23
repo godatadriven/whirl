@@ -4,7 +4,7 @@ function empty_local_data_share_dir() {
     echo "=================================="
     echo "== Cleanup local data mount dir =="
     echo "=================================="
-    local SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
+    local SCRIPT_DIR; SCRIPT_DIR=$( dirname "${BASH_SOURCE[0]}" )
     DATA_MOUNT_DIR="${SCRIPT_DIR}/../.local-data-share"
 
     if [ "$(ls -A ${DATA_MOUNT_DIR})" ]; then

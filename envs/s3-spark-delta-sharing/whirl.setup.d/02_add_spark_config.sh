@@ -26,7 +26,8 @@ airflow connections add spark_default \
     --conn-host "spark://sparkmaster:7077" \
     --conn-extra "{\"queue\": \"root.default\", \"deploy-mode\": \"client\"}"
 
-export SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
+export SPARK_HOME
+SPARK_HOME=$(python ~/.local/bin/find_spark_home.py)
 echo "-------------------------------"
 echo "SPARK_HOME set to ${SPARK_HOME}"
 echo "-------------------------------"
