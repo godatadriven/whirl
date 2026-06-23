@@ -33,6 +33,11 @@ jobs:
         run: uv python install 3.13
       - name: Sync test dependencies
         run: uv sync --group test
+      - name: Install example custom packages
+        # Two examples import local packages; install them so their DAGs validate.
+        run: |
+          mkdir -p /tmp/custom_build
+          uv pip install ./examples/airflow-deferrable-operator-custom ./examples/airflow-timetable/whirl.setup.d/plugins
       - name: Run pytest
         run: uv run pytest -q
 
