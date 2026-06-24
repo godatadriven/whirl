@@ -4,7 +4,7 @@ function empty_data_dir() {
     echo "================================"
     echo "== Cleanup local PG mount dir =="
     echo "================================"
-    local SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
+    local SCRIPT_DIR; SCRIPT_DIR=$( dirname "${BASH_SOURCE[0]}" )
     PG_DATA_DIR="${SCRIPT_DIR}/../.pgdata"
 
     if [ "$(ls -A ${PG_DATA_DIR})" ]; then

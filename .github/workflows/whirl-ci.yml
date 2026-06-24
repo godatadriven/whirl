@@ -15,6 +15,31 @@ jobs:
         with:
           # https://github.com/koalaman/shellcheck#how-to-use
           cli-args: "-x whirl"
+      - name: shellcheck setup scripts
+        # Lint every setup script (gated at warning severity; info-level quoting
+        # noise is tracked separately). The main `whirl` script is linted above.
+        run: |
+          shellcheck --severity=warning $(find envs examples -type f \
+            \( -path '*/whirl.setup.d/*.sh' \
+            -o -path '*/compose.setup.d/*.sh' \
+            -o -path '*/compose.teardown.d/*.sh' \) | sort)
+
+  unit-tests: # Fast, Docker-free pytest suite (DAG parsing + setup-script checks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: astral-sh/setup-uv@v5
+      - name: Install Python 3.13
+        run: uv python install 3.13
+      - name: Sync test dependencies
+        run: uv sync --group test
+      - name: Install example custom packages
+        # Two examples import local packages; install them so their DAGs validate.
+        run: |
+          mkdir -p /tmp/custom_build
+          uv pip install ./examples/airflow-deferrable-operator-custom ./examples/airflow-timetable/whirl.setup.d/plugins
+      - name: Run pytest
+        run: uv run pytest -q
 
   directories: # Job that list subdirectories of ./examples
     runs-on: ubuntu-latest
