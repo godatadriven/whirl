@@ -17,7 +17,7 @@ dev = [
 # required to parse the "core subset" of example DAGs. See tests/ and CONTRIBUTING.md.
 test = [
     "pytest>=8",
-    "apache-airflow==3.2.1",
+    "apache-airflow==3.2.2",
     "apache-airflow-providers-standard",
     "apache-airflow-providers-amazon",
     "apache-airflow-providers-http",
