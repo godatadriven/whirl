@@ -3,9 +3,9 @@ name = "whirl"
 version = "0.1.0"
 description = "Docker-based local development and testing tool for Apache Airflow workflows"
 readme = "README.md"
-# Pinned to the 3.13 series: it matches the Docker image / CI matrix and is the
-# newest Python that Apache Airflow 3.2.1 supports. Widening this (e.g. to 3.14)
-# breaks resolution of the `test` group, which installs apache-airflow.
+# Pinned to the 3.13 series to match the Docker image / CI matrix. Apache Airflow
+# 3.3.2 also supports 3.14, but widening this requires updating the image tags and
+# CI matrix first, and re-resolving the `test` group, which installs apache-airflow.
 requires-python = ">=3.13,<3.14"
 dependencies = []
 
@@ -17,7 +17,7 @@ dev = [
 # required to parse the "core subset" of example DAGs. See tests/ and CONTRIBUTING.md.
 test = [
     "pytest>=8",
-    "apache-airflow==3.2.1",
+    "apache-airflow==3.3.2",
     "apache-airflow-providers-standard",
     "apache-airflow-providers-amazon",
     "apache-airflow-providers-http",

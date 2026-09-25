@@ -50,7 +50,7 @@ The Airflow UI is available at http://localhost:5000 (admin/admin).
 | Variable | Description |
 |----------|-------------|
 | `WHIRL_ENVIRONMENT` | Which environment to use (directory name in `envs/`) |
-| `AIRFLOW_VERSION` | Airflow version (currently 3.2.1) |
+| `AIRFLOW_VERSION` | Airflow version (currently 3.3.2) |
 | `PYTHON_VERSION` | Python version (3.10 or 3.13) |
 | `DAG_FOLDER` | Path to DAG code (mounted into container) |
 | `ENVIRONMENT_FOLDER` | Path to environment definition |
@@ -88,7 +88,7 @@ Key environments in `envs/`:
 
 ## CI/Testing
 
-The project uses GitHub Actions with shellcheck for linting. CI runs examples across Python 3.10/3.13 and Airflow 3.2.1.
+The project uses GitHub Actions with shellcheck for linting. CI runs examples across Python 3.10/3.13 and Airflow 3.3.2.
 
 To test locally:
 ```bash
