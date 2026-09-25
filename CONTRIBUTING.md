@@ -98,6 +98,27 @@ Run the examples affected by your change before opening a PR. If you use the
 Claude Code skills bundled in this repo, the `verify-ci-impact` skill maps your
 changed files to the examples that need a CI run.
 
+### Task runner (just)
+
+A [`justfile`](justfile) wraps the commands above as short recipes. Install
+[just](https://just.systems/) (`brew install just`) and run `just` to list them:
+
+```bash
+just sync                  # uv sync --group test (one-time)
+just test                  # run the full pytest suite
+just test-dag              # only the DAG-parsing layer
+just test-setup-scripts    # only the setup-script conventions
+just lint                  # ruff check
+
+just whirl api-to-s3       # start an example interactively (UI on :5000)
+just ci api-to-s3          # run an example headless in CI mode
+just stop                  # stop running containers
+just logs                  # tail logs
+```
+
+The `test`, `whirl` and `ci` recipes forward extra arguments, so
+`just test -k dag` or `just ci my-dag -e postgres-s3-spark` work as expected.
+
 ## Adding examples and environments
 
 - New examples live under `examples/<name>/` and should include a `dag.py`, a
