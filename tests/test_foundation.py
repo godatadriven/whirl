@@ -5,7 +5,7 @@ green baseline before the DAG-validation (Plan A) and setup-script (Plan B) suit
 land on top of this foundation.
 """
 
-from conftest import EXAMPLES_DIR, REPO_ROOT, example_dirs_with_python
+from conftest import EXAMPLES_DIR, REPO_ROOT, example_dirs_with_dag
 
 
 def test_repo_layout_anchors_exist():
@@ -14,7 +14,7 @@ def test_repo_layout_anchors_exist():
     assert EXAMPLES_DIR.is_dir()
 
 
-def test_examples_with_python_are_discovered():
-    examples = example_dirs_with_python()
-    # The repo ships well over a dozen examples containing DAG Python files.
+def test_examples_with_dag_are_discovered():
+    examples = example_dirs_with_dag()
+    # The repo ships well over a dozen examples that define DAGs.
     assert len(examples) >= 10

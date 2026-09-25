@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import example_dirs_with_python
+from conftest import example_dirs_with_dag
 
 # whirl's CI mode auto-detects the dag_id from dag.py with this pattern
 # (see the `whirl` script). Keep the suite honest about that contract.
@@ -37,7 +37,7 @@ CUSTOM_PKG_EXAMPLES = {
     "airflow-timetable": ("custom_plugins", "examples/airflow-timetable/whirl.setup.d/plugins"),
 }
 
-EXAMPLES = example_dirs_with_python()
+EXAMPLES = example_dirs_with_dag()
 
 
 @pytest.mark.dag_validation

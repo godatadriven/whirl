@@ -22,12 +22,13 @@ os.environ.setdefault("AIRFLOW__CORE__LOAD_EXAMPLES", "False")
 os.environ.setdefault("AIRFLOW__CORE__DAGS_FOLDER", str(EXAMPLES_DIR))
 
 
-def example_dirs_with_python():
-    """Return example directories holding at least one top-level ``.py`` file.
+def example_dirs_with_dag():
+    """Return example directories that define at least one Airflow DAG.
 
-    Most examples ship a single ``dag.py``, but some (e.g. airflow-datasets) ship
-    several differently named DAG files instead, so matching on ``dag.py`` alone
-    would silently leave them unvalidated.
+    Detected by the presence of a top-level ``.py`` file. Most examples ship a
+    single ``dag.py``, but some (e.g. airflow-datasets) ship several differently
+    named DAG files instead, so matching on ``dag.py`` alone would silently leave
+    them unvalidated.
     """
     return sorted(
         p
