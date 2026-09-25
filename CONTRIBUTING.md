@@ -61,7 +61,7 @@ There are two complementary layers of testing.
 
 A [pytest](https://docs.pytest.org/) suite under `tests/` gives quick feedback
 without booting any containers. It is managed with [uv](https://docs.astral.sh/uv/)
-and runs on Python 3.13 (the newest version Airflow 3.2.1 supports). The `test`
+and runs on Python 3.13 (matching the Docker image and CI matrix). The `test`
 dependency group installs Airflow and the providers needed to parse the example
 DAGs.
 

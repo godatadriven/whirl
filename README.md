@@ -24,7 +24,7 @@ brew install jq
 The current implementation was developed on macOS but is intended to work with any platform supported by Docker. In our experience, Linux and macOS are fine. On Windows we recommend running _whirl_ inside [WSL2](https://learn.microsoft.com/en-us/windows/wsl/about) on Windows 11 (or Windows 10) with the [Docker Desktop WSL2 backend](https://docs.docker.com/desktop/wsl/). Keeping your DAG code on the Linux filesystem inside WSL2 (rather than on a `/mnt/c` Windows mount) avoids the file-sharing/volume-mount issues that older native-Windows setups suffered from.
 
 ### Airflow Versions
-Whirl currently uses Airflow 3.2.1 as the default version (configurable through the `AIRFLOW_VERSION` environment variable). A specific tag was made for Airflow 1.10.x, which can be found [here](https://github.com/godatadriven/whirl/tree/airflow-1.10.x)
+Whirl currently uses Airflow 3.3.2 as the default version (configurable through the `AIRFLOW_VERSION` environment variable). A specific tag was made for Airflow 1.10.x, which can be found [here](https://github.com/godatadriven/whirl/tree/airflow-1.10.x)
 
 ## Getting Started
 

@@ -133,7 +133,7 @@ Add to the airflow service volumes:
 
 Standard variables always included:
 ```
-AIRFLOW_VERSION=3.2.1
+AIRFLOW_VERSION=3.3.2
 AIRFLOW__CORE__EXPOSE_CONFIG=True
 AIRFLOW__API__EXPOSE_CONFIG=True
 AIRFLOW__API__SECRET_KEY=webser_secret_key
