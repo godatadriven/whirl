@@ -1,7 +1,8 @@
-import turtle
-import canvasvg
 import sys
+import turtle
+
 import cairosvg
+import canvasvg
 
 sys.setrecursionlimit(10000)
 

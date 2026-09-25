@@ -31,6 +31,26 @@ test = [
     "ephem",
 ]
 
+[tool.ruff]
+# Matches requires-python above and the Docker image / CI matrix.
+target-version = "py313"
+line-length = 100
+# So `from conftest import ...` sorts as first-party.
+src = ["tests"]
+
+[tool.ruff.lint]
+# Ruff's default rule set (E4/E7/E9 + F) plus import sorting, pyupgrade and
+# bugbear. E501 (line-too-long) stays off: the example DAGs carry long Spark
+# config literals that read worse when wrapped.
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# Example DAGs are teaching material: they intentionally target the oldest
+# Airflow/Python the matrix supports and are written for readability over
+# idiom. Keep E/F (real errors) on them, but not the style/modernisation
+# rules -- their correctness is covered end-to-end by the `whirl ci` jobs.
+"examples/**" = ["I", "UP", "B"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [

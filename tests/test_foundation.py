@@ -16,5 +16,5 @@ def test_repo_layout_anchors_exist():
 
 def test_examples_with_dag_are_discovered():
     examples = example_dirs_with_dag()
-    # The repo ships well over a dozen examples with a dag.py.
+    # The repo ships well over a dozen examples that define DAGs.
     assert len(examples) >= 10
