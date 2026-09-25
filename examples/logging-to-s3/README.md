@@ -10,7 +10,7 @@ The docker compose of the environment that spins up an S3 server together with t
     -  adds an S3 connection to Airflow
     -  Installs awscli Python libraries and configures them to connect to the S3 server
     -  Creates a bucket (with adding a `/etc/hosts` entry to support the [virtual host style method](https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html))
-- `02_configue_logging_to_s3.sh` which:
+- `02_configure_logging_to_s3.sh` which:
     -  exports environment varibles which airflow uses to override the default config. For example: `export AIRFLOW__CORE__REMOTE_LOGGING=True`
 
 

@@ -198,3 +198,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+
+# Claude Code agent worktrees (large, disposable copies of the repo)
+.claude/worktrees/
