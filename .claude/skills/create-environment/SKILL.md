@@ -232,6 +232,27 @@ Host-side scripts executed before Docker Compose starts. Use for:
 
 For services needing separate env files (e.g., `mysql.env`, `sftp.env`).
 
+#### `README.md` (required)
+
+Every environment in `envs/` has one. Keep to the shape the existing ones use
+(see `envs/postgres-s3-external-spark/README.md` for a typical example):
+
+- **Title + one paragraph** — what this environment is for, and when to reach
+  for it rather than a neighbouring one. If a near-identical environment exists,
+  link to it and say what differs; the Spark and Delta Sharing families are all
+  distinguished this way.
+- **Services table** — service, image, published ports, purpose. Mark
+  build-only or init-only containers as such so they are not mistaken for
+  long-running services.
+- **Setup scripts** — one line each, saying what it does. Note explicitly when a
+  script runs on the *host* (`compose.setup.d/`) rather than in the container.
+- **Configuration** — the `.whirl.env` values worth knowing, and any that
+  deviate from the repo defaults (a pinned `PYTHON_VERSION`, non-default
+  Postgres credentials, an unusual port).
+- **Used by** — which examples default to this environment. If none do, give the
+  `whirl -x <example> -e <env>` command that exercises it, and say if CI runs it.
+  Note any CI exclusion and why (memory, missing upstream artifact).
+
 ### 3. Verify
 
 After creating files:

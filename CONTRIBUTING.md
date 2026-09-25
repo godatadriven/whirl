@@ -125,7 +125,9 @@ The `test`, `whirl` and `ci` recipes forward extra arguments, so
   `.whirl.env` and a `README.md` describing what the example demonstrates and
   how to run it.
 - New environments live under `envs/<name>/` and contain a `docker-compose.yml`,
-  a `.whirl.env` and any `whirl.setup.d/` scripts.
+  a `.whirl.env`, any `whirl.setup.d/` scripts and a `README.md` covering the
+  services, the setup scripts, the notable `.whirl.env` settings and which
+  examples use it. Every existing environment has one; please keep it that way.
 - The repo ships Claude Code skills (`create-example`, `create-environment`)
   that scaffold these for you — see [CLAUDE.md](CLAUDE.md).
 
