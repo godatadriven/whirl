@@ -59,7 +59,9 @@ def test_example_dag_parses(example_dir: Path, monkeypatch: pytest.MonkeyPatch):
     # Imported lazily so the airflow-free suites don't require the `test` group.
     from airflow.dag_processing.dagbag import DagBag
 
-    bag = DagBag(dag_folder=str(example_dir), include_examples=False, safe_mode=True)
+    # Airflow 3.3 dropped DagBag's `include_examples` flag; the bundled example
+    # DAGs now live in their own bundle, so pointing at the folder is enough.
+    bag = DagBag(dag_folder=str(example_dir), safe_mode=True)
     assert bag.import_errors == {}, f"import errors in {name}: {bag.import_errors}"
     assert len(bag.dags) >= 1, f"no DAGs found in {name}"
 

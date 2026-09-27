@@ -16,7 +16,7 @@ None. Everything an example needs is added from its own `whirl.setup.d/`.
 
 ## Configuration
 
-`.whirl.env` pins `AIRFLOW_VERSION=3.2.1` and disables the bundled example DAGs
+`.whirl.env` pins `AIRFLOW_VERSION=3.3.2` and disables the bundled example DAGs
 and default connections, so only your DAG folder shows up in the UI.
 
 ## Used by
