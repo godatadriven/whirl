@@ -1,0 +1,5 @@
+version: 2
+updates:
+    allow:
+      # Allow only direct dependencies.
+      - dependency-type: "direct"
