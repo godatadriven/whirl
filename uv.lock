@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.13.*"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -14,15 +14,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/9a/cb/822c56fbea97e9eee201a2e434a80437f6750ebcb1ed307ee3a0a7505b14/a2wsgi-1.10.10.tar.gz", hash = "sha256:a5bcffb52081ba39df0d5e9a884fc6f819d92e3a42389343ba77cbf809fe1f45", size = 18799, upload-time = "2025-06-18T09:00:10.843Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/02/d5/349aba3dc421e73cbd4958c0ce0a4f1aa3a738bc0d7de75d2f40ed43a535/a2wsgi-1.10.10-py3-none-any.whl", hash = "sha256:d2b21379479718539dc15fce53b876251a0efe7615352dfe49f6ad1bc507848d", size = 17389, upload-time = "2025-06-18T09:00:09.676Z" },
-]
-
-[[package]]
-name = "aiofiles"
-version = "25.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/41/c3/534eac40372d8ee36ef40df62ec129bee4fdb5ad9706e58a29be53b2c970/aiofiles-25.1.0.tar.gz", hash = "sha256:a8d728f0a29de45dc521f18f07297428d56992a742f0cd2701ba86e44d23d5b2", size = 46354, upload-time = "2025-10-09T20:51:04.358Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/8a/340a1555ae33d7354dbca4faa54948d76d89a27ceef032c8c3bc661d003e/aiofiles-25.1.0-py3-none-any.whl", hash = "sha256:abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695", size = 14668, upload-time = "2025-10-09T20:51:03.174Z" },
 ]
 
 [[package]]
@@ -374,19 +365,18 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-sftp"
-version = "5.8.1"
+version = "7.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "aiofiles" },
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-common-compat" },
     { name = "apache-airflow-providers-ssh" },
     { name = "asyncssh" },
     { name = "paramiko" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fd/de/13768912df5467eed89670acfefc206a390500585f637ead5d8650dc1ab8/apache_airflow_providers_sftp-5.8.1.tar.gz", hash = "sha256:64df30a21d15029c416cd9e8394fe1cae509e959cad355e84e4dccbf4f321d29", size = 97538, upload-time = "2026-06-07T09:44:30.464Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c4/ed/31bea346b0f70493f939218889745db77ffee1013f5aba0adf4050f6d07b/apache_airflow_providers_sftp-7.0.0.tar.gz", hash = "sha256:fca40f6462814c1bbd7baa07704dfa8215c76ffce20639b6eb561bd366b9387c", size = 113429, upload-time = "2026-10-13T11:04:06.788Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/a2/12a7bd5e2a5c0adf06c177a91c64f391d0e84ee33573649b35d6ede5aa13/apache_airflow_providers_sftp-5.8.1-py3-none-any.whl", hash = "sha256:3e9a93ef50310a120cacd502b50acfc8d714d0669d8cb1c6b41c09fe38cdd890", size = 43192, upload-time = "2026-06-07T09:43:21.191Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/21/e58f989a65cf938b34a889e7f1336b641a1c0d79b6f4cd2861741b2aaa85/apache_airflow_providers_sftp-7.0.0-py3-none-any.whl", hash = "sha256:b2ee5da8b2f8343ccc4497bd8ce54ad18df278d9c81defc885880c7fd2c7b539", size = 49523, upload-time = "2026-10-13T11:02:30.83Z" },
 ]
 
 [[package]]
@@ -405,7 +395,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-ssh"
-version = "5.0.2"
+version = "7.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -413,9 +403,9 @@ dependencies = [
     { name = "asyncssh" },
     { name = "paramiko" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/99/54/db24bdd95e6f425e2c3e8a3f201207247462fe296a9a5256162c59c319dd/apache_airflow_providers_ssh-5.0.2.tar.gz", hash = "sha256:dc1bb4f21e7e6761de32c845811f6ec60c7a248c80869d1ff04af3d48ab09ade", size = 64284, upload-time = "2026-05-23T12:32:55.703Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/ad/3a55764051e0ced0673b50e4efa9513af8bdb8564bb04b8c473e4ed270e4/apache_airflow_providers_ssh-7.0.1.tar.gz", hash = "sha256:a18ad962acb5891e96294e41a44d327c3e70ff812f1113e657c58cf3bfdbeabe", size = 83678, upload-time = "2026-10-24T18:48:58.239Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/d1/00cd35c16a05370a5d5ea9fffc9ed31fa3390207dd4f70cba84472c351df/apache_airflow_providers_ssh-5.0.2-py3-none-any.whl", hash = "sha256:926b49eb222d5ebb0b05808f6950ef3d01a2d8cd131736ca1e587be5dfaded02", size = 40014, upload-time = "2026-05-23T12:31:59.865Z" },
+    { url = "https://files.pythonhosted.org/packages/64/42/7c3b47dbbf45fba309c043bf90bdda26dd98af6fd36fe8b4169c23b2a2a3/apache_airflow_providers_ssh-7.0.1-py3-none-any.whl", hash = "sha256:42c713da4b154ba2ea40bc7a82bb809fd5cf4340ffd131b1ffa9c28e11396c51", size = 46005, upload-time = "2026-10-24T18:48:32.296Z" },
 ]
 
 [[package]]
@@ -1140,6 +1130,15 @@ wheels = [
 ]
 
 [[package]]
+name = "invoke"
+version = "3.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/f6/227c48c5fe47fa178ccf1fda8f047d16c97ba926567b661e9ce2045c600c/invoke-3.0.3.tar.gz", hash = "sha256:437b6a622223824380bfb4e64f612711a6b648c795f565efc8625af66fb57f0c", size = 343419, upload-time = "2026-04-07T15:17:48.307Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/de/bbc12563bbf979618d17625a4e753ff7a078523e28d870d3626daa97261a/invoke-3.0.3-py3-none-any.whl", hash = "sha256:f11327165e5cbb89b2ad1d88d3292b5113332c43b8553b494da435d6ec6f5053", size = 160958, upload-time = "2026-04-07T15:17:46.875Z" },
+]
+
+[[package]]
 name = "isoduration"
 version = "20.11.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1689,16 +1688,17 @@ wheels = [
 
 [[package]]
 name = "paramiko"
-version = "3.5.1"
+version = "5.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bcrypt" },
     { name = "cryptography" },
+    { name = "invoke" },
     { name = "pynacl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7d/15/ad6ce226e8138315f2451c2aeea985bf35ee910afb477bae7477dc3a8f3b/paramiko-3.5.1.tar.gz", hash = "sha256:b2c665bc45b2b215bd7d7f039901b14b067da00f3a11e6640995fd58f2664822", size = 1566110, upload-time = "2025-02-04T02:37:59.783Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/62/93/dcc25d52f49022ae6175d15e6bd751f1acc99b98bc61fc55e5155a7be2e7/paramiko-5.0.0.tar.gz", hash = "sha256:36763b5b95c2a0dcfdf1abc48e48156ee425b21efe2f0e787c2dd5a95c0e5e79", size = 1548586, upload-time = "2026-05-09T18:28:52.256Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/f8/c7bd0ef12954a81a1d3cea60a13946bd9a49a0036a5927770c461eade7ae/paramiko-3.5.1-py3-none-any.whl", hash = "sha256:43b9a0501fc2b5e70680388d9346cf252cfb7d00b0667c39e80eb43a408b8f61", size = 227298, upload-time = "2025-02-04T02:37:57.672Z" },
+    { url = "https://files.pythonhosted.org/packages/82/5b/eadf6d45de38d30ab603f49393b6cd2cbe7e233af8cf90197e32782b68a9/paramiko-5.0.0-py3-none-any.whl", hash = "sha256:b7044611c30140d9a75261653210e2002977b71a0497ff3ba0d98d7edbf62f7c", size = 208919, upload-time = "2026-05-09T18:28:50.295Z" },
 ]
 
 [[package]]
